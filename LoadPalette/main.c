@@ -19,8 +19,9 @@
   * The third param is the color which is a 16 bit word to pick one of 65,536 colours
   */
 
-#define VERTICAL_BLANKING_DETECTION 0x80000000
+#define VERTICAL_BLANKING_DETECTION 0b10000000000000000000000000000000
 #define VERTICAL_BLANKING_NO_DETECT 0
+
 #define SET_VBD_V(vbd, v) (vbd | v)
 
 int main(void)
@@ -54,8 +55,8 @@ int main(void)
         uint8_t colour_in_palette;
         //now we go through the current pallete
         for(colour_in_palette = 0; colour_in_palette < 16; colour_in_palette++){
-
-            _iocs_spalet(
+            //we set the color
+            status = _iocs_spalet(
                 SET_VBD_V(
                     VERTICAL_BLANKING_DETECTION,
                     colour_in_palette
@@ -72,7 +73,7 @@ int main(void)
 
     //if any error...
     if(status < 0){
-        _dos_c_print("Can't close the temp file\r\n");
+        _dos_c_print("Can't close the file\r\n");
         _dos_exit2(status);
     }
 

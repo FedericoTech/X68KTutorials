@@ -21,7 +21,7 @@ int main(void)
 {
     int16_t file_number, status = 0;
 
-    //We create a file and get its number to manage it.
+    //We create a file and open it so we get its number to manage it.
     file_number = _dos_create(
         "file", //file name
         0       //if 0 overwrite if exist, if 1 don't overwrite
@@ -54,7 +54,7 @@ int main(void)
 
     //if any error...
     if(status < 0){
-        _dos_c_print("Can't close in the file\r\n");
+        _dos_c_print("Can't close the file\r\n");
         _dos_exit2(status);
     }
 
@@ -98,7 +98,7 @@ int main(void)
 
     //if any error...
     if(status < 0){
-        _dos_c_print("Can't close in the file\r\n");
+        _dos_c_print("Can't close the file\r\n");
         _dos_exit2(status);
     }
 
