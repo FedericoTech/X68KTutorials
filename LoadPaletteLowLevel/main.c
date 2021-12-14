@@ -75,5 +75,10 @@ int main(void)
         _dos_exit2(status);
     }
 
+    _dos_c_print("Look into the palette window of your emulator and press a key.\r\n");
+
+    //waiting for a keystroke.
+    _dos_getchar();
+
     _dos_exit();
 }

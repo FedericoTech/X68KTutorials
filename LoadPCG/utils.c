@@ -1,8 +1,9 @@
 #include "utils.h"
 
-void loadPalette()
+int32_t loadPalette()
 {
-    int16_t file_handler, status;
+    int16_t file_handler;
+    int32_t status;
 
     //we open the palette file
     file_handler = _dos_open(
@@ -17,7 +18,7 @@ void loadPalette()
     //if any error...
     if(file_handler < 0){
         _dos_c_print("Can't open the palette file\r\n");
-        _dos_exit2(file_handler);
+        return file_handler;
     }
 
     //we will collect the palettes pallete by pallete in this array.
@@ -32,14 +33,27 @@ void loadPalette()
         //now we go through the current pallete
         for(colour_in_palette = 0; colour_in_palette < 16; colour_in_palette++){
             //we set the color
-            status = _iocs_spalet(
+            status = _iocs_spalet( //returns 32bit
                 SET_VBD_V(
                     VERTICAL_BLANKING_DETECTION,
-                    colour_in_palette
+                    colour_in_palette   //0 - 15 if higher it only takes from 0-15
                 ),
-                palette_num,
+                palette_num,            //1-15 or 0
                 colours[colour_in_palette]
             );
+
+            //if any issue...
+            if(status < 0){
+                switch(status){
+                case -1:
+                    _dos_c_print("Incorrect screen mode\r\n");
+                    break;
+                case -2:
+                    _dos_c_print("attempting to set palette in block 0\r\n");
+                    break;
+                }
+                return status;
+            }
         }
         palette_num ++;
     }
@@ -50,6 +64,6 @@ void loadPalette()
     //if any error...
     if(status < 0){
         _dos_c_print("Can't close the palette file\r\n");
-        _dos_exit2(status);
+        return status;
     }
 }

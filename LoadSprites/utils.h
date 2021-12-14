@@ -29,7 +29,7 @@
 #define SET_VBD_V(vbd, v) (vbd | v)
 
 
-void loadPalette(void);
+int32_t loadPalette(void);
 
 int8_t loadPCGs(void);
 

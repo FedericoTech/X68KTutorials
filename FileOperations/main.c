@@ -1,7 +1,6 @@
 #include <dos.h>
 #include <string.h>
 #include <stdint.h>
-#include <stdio.h>
 
 /**
  * In this example we are creating a file, then storing a message in it and finally closing the file.
@@ -29,7 +28,6 @@ const char *getErrorMessage(int8_t code);
 
 int main(void)
 {
-
     int16_t file_number, status = 0;
 
     //We create a file and open it so we get its number to manage it.

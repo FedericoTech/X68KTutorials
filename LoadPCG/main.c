@@ -35,15 +35,29 @@
 
 int main(void)
 {
-    //we load the palette
-    loadPalette();
+    int16_t file_handler;
+    int32_t status;
 
     int8_t last_mode; //in this var we will store the video that was before we ran the program
     last_mode = _iocs_crtmod(-1); //we capture the current video mode
 
-    _iocs_crtmod(8); //this mode is 512 x 512 256 colours
+    status = _iocs_crtmod(8); //this mode is 512 x 512 256 colours
 
-    int16_t file_handler, status;
+    //if any problem...
+    if(status < 0){
+        _dos_c_print("Please set modes 0-19\r\n");
+        _dos_exit2(status);
+    }
+
+
+    //we load the palette
+    status = loadPalette();
+
+    //if any problem...
+    if(status < 0){
+        _iocs_crtmod(last_mode); //we restore the video mode
+        _dos_exit2(status);
+    }
 
     //we open the palette file
     file_handler = _dos_open(
@@ -150,6 +164,11 @@ int main(void)
         _dos_c_print("Can't close the file\r\n");
         _dos_exit2(status);
     }
+
+    _dos_c_print("Look into the PCG window of your emulator and press a key.\r\n");
+
+    //waiting for a keystroke.
+    _dos_getchar();
 
     //we restore the video mode
     _iocs_crtmod(last_mode);
