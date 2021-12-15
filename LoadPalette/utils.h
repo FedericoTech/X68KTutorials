@@ -1,6 +1,9 @@
 #ifndef _UTILS_H_
 #define _UTILS_H_
 
+#include <dos.h>
+#include <stdint.h>
+
 #define ACCESS_DICTIONARY           0b10000000 //1 not for users
 #define ACCESS_NORMAL               0b00000000 //0
 
@@ -16,4 +19,12 @@
 
 #define OPENING_MODE(access, sharing, mode) (access | sharing | mode)
 
+#define SEEK_MODE_BEGINNING  0
+#define SEEK_MODE_CURRENT 1
+#define SEEK_MODE_END 2
+
+const char *getErrorMessage(int8_t code);
+
 #endif
+
+
