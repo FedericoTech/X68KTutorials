@@ -1,0 +1,41 @@
+////////////////////////////////////////////////////////////////////////////////
+//
+// X68000 GCC project wizard
+//
+////////////////////////////////////////////////////////////////////////////////
+
+function BeginWizard()
+{
+    Wizard.AddInfoPage(
+		_T("X68000GCCIntro"),
+		_T("Welcome to the new X68000 GCC project wizard!\n" +
+			"This wizard will guide you to create a new X68000 GCC project.\n\n" +
+			"When you 're ready to proceed, please click \"Next\"..."));
+
+    Wizard.AddProjectPathPage();
+    Wizard.AddCompilerPage(_T(""), _T("x68000_gcc*"), false, false);
+}
+
+function GetFilesDir()
+{
+    return _T("x68000_gcc/template");
+}
+
+function SetupProject(project)
+{
+    local target;
+    local projectname;
+
+    // Configure target
+    target = project.GetBuildTarget(_T("default"));
+    if (IsNull(target))
+        target = project.AddBuildTarget(_T("default"));
+
+    projectname = GetProjectManager().GetActiveProject().GetTitle();
+    target.SetTargetType(ttConsoleOnly);
+    target.SetTargetFilenameGenerationPolicy(tgfpPlatformDefault, tgfpNone);
+    target.SetOutputFilename(target.GetTitle() + wxFILE_SEP_PATH + projectname);
+    DebugSymbolsOn(target, Wizard.GetCompilerID());
+
+    return true;
+}
