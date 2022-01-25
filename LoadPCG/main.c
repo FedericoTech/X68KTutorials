@@ -76,36 +76,38 @@ int main(void)
         _dos_exit2(file_handler);
     }
 
-    //we will collect the palettes pallete by pallete in this array.
-    uint32_t ship_pcg[8 * 4];
+    {
+        //we will collect the palettes pallete by pallete in this array.
+        uint32_t ship_pcg[8 * 4];
 
-    //we read the PCG of the ship from the file
-    _dos_read(
-        file_handler,       //file habdler
-        (char*)&ship_pcg,   //pointer to the buffet
-        sizeof(ship_pcg)    //size
-    );
+        //we read the PCG of the ship from the file
+        _dos_read(
+            file_handler,       //file habdler
+            (char*)&ship_pcg,   //pointer to the buffet
+            sizeof(ship_pcg)    //size
+        );
 
-    //we load the ship as a 16 x 16 tile in the position 0
-    status = _iocs_sp_defcg(
-        0,          // postition in 16 x 16 tiles
-        1,          // 16 x 16 tile
-        &ship_pcg   // pointer to the data
-    );
+        //we load the ship as a 16 x 16 tile in the position 0
+        status = _iocs_sp_defcg(
+            0,          // postition in 16 x 16 tiles
+            1,          // 16 x 16 tile
+            &ship_pcg   // pointer to the data
+        );
 
-    //if any problem loading the PCG...
-    if(status < 0){
-        _iocs_crtmod(last_mode); //we restore the video mode
-        _dos_c_print("Can't load the PCG, Illegal screen mode.\r\n");
-        _dos_exit2(status);
+        //if any problem loading the PCG...
+        if(status < 0){
+            _iocs_crtmod(last_mode); //we restore the video mode
+            _dos_c_print("Can't load the PCG, Illegal screen mode.\r\n");
+            _dos_exit2(status);
+        }
+
+        //we load a second instance of the ship in position 1
+        status = _iocs_sp_defcg(
+            1,          // postition in 16 x 16 tiles
+            1,          // 16 x 16 tile
+            &ship_pcg   // pointer to the data
+        );
     }
-
-    //we load a second instance of the ship in position 1
-    status = _iocs_sp_defcg(
-        1,          // postition in 16 x 16 tiles
-        1,          // 16 x 16 tile
-        &ship_pcg   // pointer to the data
-    );
 
     //if any problem loading the PCG...
     if(status < 0){
@@ -114,45 +116,47 @@ int main(void)
         _dos_exit2(status);
     }
 
-    //PCG of bullet hardcoded
-    uint32_t bullet[] = {
-        //tile 0
-        0x00000000,
-        0x00055000,
-        0x005bb500,
-        0x005bb500,
-        0x00055000,
-        0x00055000,
-        0x00055000,
-        0x00000000,
-    };
+    {
+        //PCG of bullet hardcoded
+        uint32_t bullet[] = {
+            //tile 0
+            0x00000000,
+            0x00055000,
+            0x005bb500,
+            0x005bb500,
+            0x00055000,
+            0x00055000,
+            0x00055000,
+            0x00000000,
+        };
 
-    //we load the hardcoded bullet on top of the second instance of the ship
-    status = _iocs_sp_defcg(
-        6,          // postition in 8 x 8 tiles
-        0,          // 8 x 8 tile
-        &bullet     // pointer to the data
-    );
+        //we load the hardcoded bullet on top of the second instance of the ship
+        status = _iocs_sp_defcg(
+            6,          // postition in 8 x 8 tiles
+            0,          // 8 x 8 tile
+            &bullet     // pointer to the data
+        );
 
-    //if any problem loading the PCG...
-    if(status < 0){
-        _iocs_crtmod(last_mode); //we restore the video mode
-        _dos_c_print("Can't load the PCG of the bullet, Illegal screen mode.\r\n");
-        _dos_exit2(status);
-    }
+        //if any problem loading the PCG...
+        if(status < 0){
+            _iocs_crtmod(last_mode); //we restore the video mode
+            _dos_c_print("Can't load the PCG of the bullet, Illegal screen mode.\r\n");
+            _dos_exit2(status);
+        }
 
-    //we load a second instance of the hardcoded bullet in a free position
-    status = _iocs_sp_defcg(
-        8,          // postition in 8 x 8 tiles
-        0,          // 8 x 8 tile
-        &bullet     // pointer to the data
-    );
+        //we load a second instance of the hardcoded bullet in a free position
+        status = _iocs_sp_defcg(
+            8,          // position in 8 x 8 tiles
+            0,          // 8 x 8 tile
+            &bullet     // pointer to the data
+        );
 
-    //if any problem loading the PCG...
-    if(status < 0){
-        _iocs_crtmod(last_mode); //we restore the video mode
-        _dos_c_print("Can't load the PCG of the bullet, Illegal screen mode.\r\n");
-        _dos_exit2(status);
+        //if any problem loading the PCG...
+        if(status < 0){
+            _iocs_crtmod(last_mode); //we restore the video mode
+            _dos_c_print("Can't load the PCG of the bullet, Illegal screen mode.\r\n");
+            _dos_exit2(status);
+        }
     }
 
     //now we close the file
