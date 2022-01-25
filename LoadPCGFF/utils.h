@@ -1,7 +1,14 @@
 #ifndef _UTILS_H_
 #define _UTILS_H_
 
+#ifdef __MARIKO_CC__
 #include <doslib.h>
+#include <iocslib.h>
+#else
+#include <dos.h>
+#include <iocs.h>
+#endif
+
 #include <stdint.h>
 
 //file management
