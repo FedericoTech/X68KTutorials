@@ -52,7 +52,6 @@ int main(void)
         _dos_exit2(status);
     }
 
-
     //we load the palette
     status = loadPalette();
 
@@ -76,6 +75,7 @@ int main(void)
     if(file_handler < 0){
         _iocs_crtmod(last_mode);
         _dos_c_print("Can't open the file\r\n");
+        _dos_c_print(getErrorMessage(file_handler));
         _dos_exit2(file_handler);
     }
 
@@ -169,6 +169,7 @@ int main(void)
     if(status < 0){
         _iocs_crtmod(last_mode); //we restore the video mode
         _dos_c_print("Can't close the file\r\n");
+        _dos_c_print(getErrorMessage(status));
         _dos_exit2(status);
     }
 

@@ -30,4 +30,6 @@
 
 int32_t loadPalette(void);
 
+const char *getErrorMessage(int8_t code);
+
 #endif
