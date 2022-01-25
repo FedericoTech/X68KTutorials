@@ -1,4 +1,4 @@
-#include <dos.h>
+#include <doslib.h>
 #include <string.h>
 #include <stdint.h>
 
@@ -9,18 +9,18 @@
  */
 
 //permissions for using with _dos_open
-#define ACCESS_DICTIONARY           0b10000000 //1 not for users
-#define ACCESS_NORMAL               0b00000000 //0
+#define ACCESS_DICTIONARY           0x80    //0b10000000 //1 not for users
+#define ACCESS_NORMAL               0x00    //0b00000000 //0
 
-#define SHARING_TOTAL               0b00010000  //4 allow others to write and read
-#define SHARING_WRITE_ONLY          0b00001100  //3 allow others to write only
-#define SHARING_READ_ONLY           0b00001000  //2 allow others to read only
-#define SHARING_RESTRICTED          0b00000100  //1 don't allow others anything
-#define SHARING_COMPATIBILITY_MODE  0b00000000  //0
+#define SHARING_TOTAL               0x08    //0b00010000  //4 allow others to write and read
+#define SHARING_WRITE_ONLY          0x0C    //0b00001100  //3 allow others to write only
+#define SHARING_READ_ONLY           0x08    //0b00001000  //2 allow others to read only
+#define SHARING_RESTRICTED          0x04    //0b00000100  //1 don't allow others anything
+#define SHARING_COMPATIBILITY_MODE  0x00    //0b00000000  //0
 
-#define MODE_RW                     0b00000010  //2 open for write and read
-#define MODE_W                      0b00000001  //1 open only for writing
-#define MODE_R                      0b00000000  //0 open only for reading
+#define MODE_RW                     0x02    //0b00000010  //2 open for write and read
+#define MODE_W                      0x01    //0b00000001  //1 open only for writing
+#define MODE_R                      0x00    //0b00000000  //0 open only for reading
 
 #define OPENING_MODE(access, sharing, mode) (access | sharing | mode)
 
@@ -43,15 +43,17 @@ int main(void)
         _dos_exit2(file_number);
     }
 
-    //the message we are going to store.
-    char message[] = "Hello World!";
+    {
+        //the message we are going to store.
+        char message[] = "Hello World!";
 
-    //we write the message in the file
-    status = _dos_write (
-        file_number,    //this is like the file handler in stdio but represented by an integer
-        message,        //the message
-        sizeof(message) //the size of the message
-    );
+        //we write the message in the file
+        status = _dos_write (
+            file_number,    //this is like the file handler in stdio but represented by an integer
+            message,        //the message
+            sizeof(message) //the size of the message
+        );
+    }
 
     //if any error...
     if(status < 0){
@@ -87,25 +89,27 @@ int main(void)
         _dos_exit2(file_number);
     }
 
-    //buffer where we will store the data from the file
-    char message_in[13] = {' '};
+    {
+        //buffer where we will store the data from the file
+        char message_in[13] = {' '};
 
-    //we read the file and capture the number of characters we manage to read
-    int16_t bytes_read = _dos_read(
-        file_number,        //handler number
-        message_in,         //destination
-        sizeof(message_in)  //bytes to read
-    );
+        //we read the file and capture the number of characters we manage to read
+        int16_t bytes_read = _dos_read(
+            file_number,        //handler number
+            message_in,         //destination
+            sizeof(message_in)  //bytes to read
+        );
 
-    //if any error...
-    if(bytes_read < 0){
-        _dos_c_print("Can't read from the file\r\n");
-        _dos_c_print(getErrorMessage(file_number));
-        _dos_exit2(file_number);
+        //if any error...
+        if(bytes_read < 0){
+            _dos_c_print("Can't read from the file\r\n");
+            _dos_c_print(getErrorMessage(file_number));
+            _dos_exit2(file_number);
+        }
+
+        //we print the message
+        _dos_c_print(message_in);
     }
-
-    //we print the message
-    _dos_c_print(message_in);
 
     //we close the file with the handler number
     status = _dos_close(file_number);

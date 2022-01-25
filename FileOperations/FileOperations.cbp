@@ -4,23 +4,17 @@
 	<Project>
 		<Option title="FileOperations" />
 		<Option pch_mode="2" />
-		<Option compiler="human68k_gcc" />
+		<Option compiler="x68000_gcc_compiler" />
 		<Build>
 			<Target title="default">
 				<Option output="default/FileOperations" prefix_auto="1" extension_auto="0" />
 				<Option type="1" />
-				<Option compiler="human68k_gcc" />
+				<Option compiler="x68000_gcc_compiler" />
 				<Compiler>
 					<Add option="-g" />
 				</Compiler>
 			</Target>
 		</Build>
-		<Linker>
-			<Add option="-Wl,-q,-Map=$(TARGET_OUTPUT_FILE).map,--cref" />
-		</Linker>
-		<ExtraCommands>
-			<Add after="human68k-objcopy -O xfile $(TARGET_OUTPUT_FILE) $(TARGET_OUTPUT_FILE).X" />
-		</ExtraCommands>
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />
 		</Unit>
