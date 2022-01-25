@@ -13,6 +13,8 @@
  *
  * Now we set up a sprite with the function:
  *
+ * int_ _iocs_sp_regst (int_ mode, int_ x, int_ y, int_ code, int_ prw)
+ * or
  * int_ _iocs_sp_regst (int_ spno, int_ mode, int_ x, int_ y, int_ code, int_ prw)
  *
  * The first param, spno is the sprite number. X68k has 128 sprites.
@@ -30,10 +32,10 @@
  * you just need to keep calling this _iocs_sp_regst function to refresh then.
  */
 
-#define SPRITE_VF_ON    0b1000000000000000
+#define SPRITE_VF_ON    0x8000 //0b1000000000000000
 #define SPRITE_VF_OFF   0x0
 
-#define SPRITE_HF_ON    0b0001000000000000
+#define SPRITE_HF_ON    0x1000 //0b0001000000000000
 #define SPRITE_HF_OFF   0x0
 
 #define SPRITE_OFF 0
@@ -89,28 +91,89 @@ int main(void)
     //we activate the sprites
     _iocs_sp_on();
 
-    //we centre the sprite in the middle of the screen.
-    int16_t x = 256, y = 256;
+    {
+        //we centre the sprite in the middle of the screen.
+        int16_t x = 256, y = 256;
 
-    //we set up the sprite.
-    status = _iocs_sp_regst(
-        0,                              //int_ spno sprite number (0-127)
-        VERTICAL_BLANKING_DETECTION,    //int_ mode bit 31 0: Vertical blanking interval detection post-setting 1: Not detected
-        x,                              //int_ x X coordinates (0-1023 16 displayed on the far left
-        y,                              //int_ y Y " (" " Top ")
-        SETUP_SP(
-            SPRITE_VF_ON,               //we can flip the sprite vertically
-            SPRITE_HF_OFF,              //we can flip the sprite horizontally
-            1,                          //palette 1
-            0                           //PCG 0
-        ),                              //code pattern code
-        SPRITE_PRI_SP                   //int_ prw priority
-    );
+        #ifdef __MARIKO_CC__
+        //we set up the sprite.
+        status = _iocs_sp_regst(
+            0 | VERTICAL_BLANKING_DETECTION,//int_ spno sprite number (0-127) //int_ mode bit 31 0: Vertical blanking interval detection post-setting 1: Not detected
+            x,                              //int_ x X coordinates (0-1023 16 displayed on the far left
+            y,                              //int_ y Y " (" " Top ")
+            SETUP_SP(
+                SPRITE_VF_ON,               //we can flip the sprite vertically
+                SPRITE_HF_OFF,              //we can flip the sprite horizontally
+                1,                          //palette 1
+                0                           //PCG 0
+            ),                              //code pattern code
+            SPRITE_PRI_SP                   //int_ prw priority
+        );
+        #else
+        //we set up the sprite.
+        status = _iocs_sp_regst(
+            0,                              //int_ spno sprite number (0-127)
+            VERTICAL_BLANKING_DETECTION,    //int_ mode bit 31 0: Vertical blanking interval detection post-setting 1: Not detected
+            x,                              //int_ x X coordinates (0-1023 16 displayed on the far left
+            y,                              //int_ y Y " (" " Top ")
+            SETUP_SP(
+                SPRITE_VF_ON,               //we can flip the sprite vertically
+                SPRITE_HF_OFF,              //we can flip the sprite horizontally
+                1,                          //palette 1
+                0                           //PCG 0
+            ),                              //code pattern code
+            SPRITE_PRI_SP                   //int_ prw priority
+        );
+        #endif
 
-    //if any error...
-    if(status < 0){
-        _dos_c_print("Couldn't setup the sprite, Illegal screen mode.\r\n");
-        _dos_exit2(status);
+        {
+            /*
+             * This is for illustrating another way to set the sprite params and flags
+             */
+
+            union {
+                struct {
+                    int8_t vf:1;
+                    int8_t hf:1;
+                    int8_t :2;           //padding
+                    int8_t palette:4;
+                    int8_t pcg;
+                } flags;
+                uint16_t code;
+            } sp_register;
+
+            sp_register.flags.vf = 0;         // VF ON
+            sp_register.flags.hf = 0;         // HF OFF
+            sp_register.flags.palette = 1;    // palette number
+            sp_register.flags.pcg = 1;        // pcg number
+
+            #ifdef __MARIKO_CC__
+            //we set up the sprite.
+            status = _iocs_sp_regst(
+                1 | VERTICAL_BLANKING_DETECTION,    //int_ spno sprite number (0-127) //int_ mode bit 31 0: Vertical blanking interval detection post-setting 1: Not detected
+                x + 50,                             //int_ x X coordinates (0-1023 16 displayed on the far left
+                y,                                  //int_ y Y " (" " Top ")
+                sp_register.code,                   //code pattern code
+                SPRITE_PRI_SP                       //int_ prw priority
+            );
+            #else
+            //we set up the sprite.
+            status = _iocs_sp_regst(
+                1,                              //int_ spno sprite number (0-127)
+                VERTICAL_BLANKING_DETECTION,    //int_ mode bit 31 0: Vertical blanking interval detection post-setting 1: Not detected
+                x + 50,                         //int_ x X coordinates (0-1023 16 displayed on the far left
+                y,                              //int_ y Y " (" " Top ")
+                sp_register.code,               //code pattern code
+                SPRITE_PRI_SP                   //int_ prw priority
+            );
+            #endif
+        }
+
+        //if any error...
+        if(status < 0){
+            _dos_c_print("Couldn't setup the sprite, Illegal screen mode.\r\n");
+            _dos_exit2(status);
+        }
     }
 
     _dos_c_print("Press a key.\r\n");

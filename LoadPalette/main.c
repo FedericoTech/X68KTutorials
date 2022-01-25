@@ -10,7 +10,7 @@
 #include <stdint.h>
 
 /**
-  * In this example we are loading the palettes from the file palette.pal
+  * In this example we are loading the palettes from arrays in the file utils
   * The data is stored in binary format, in 16 bit words sequentially ordered.
   * Every palette is 32 bytes long.
   *
