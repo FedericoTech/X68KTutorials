@@ -1,13 +1,13 @@
 #include "utils.h"
 
 /**
- * In this example we are going to demonstrate how to load a PCG from a file into memory.
+ * In this example we are going to demonstrate how to load a PCG from a hardcoded array into memory.
  * We first load a palette to be able to see the PCG in the emulator. That logic is taken into
  * the library as it isn't the purpose of this tutorial.
  *
  * We need to set a video mode compatible with sprite managements otherwise we won't load the PCG
  *
- * We then open the file ship.pcg. The data is stored in the same order as X68k will store it in memory.
+ * The data is stored in the same order as X68k will store it in memory.
  * We will first load the graphic of a ship that takes a tile of 16 x 16 or
  * put in another way 2 tiles of 8 x 8 for 2 tiles of 8 x 8 like in the scheme:
  *              1, 3
@@ -32,6 +32,9 @@
  * To demonstrate the case above this example loads the ship from the file in the 16 x 16 tiles 0 and 1
  * and a hardcoded 8 x 8 bullet that will land on top of the second instance of the ship.
  */
+
+#define SP_DEFCG_8X8_TILE 0
+#define SP_DEFCG_16X16_TILE 1
 
 int main(void)
 {
@@ -104,9 +107,9 @@ int main(void)
 
         //we load the ship as a 16 x 16 tile in the position 0
         status = _iocs_sp_defcg(
-            0,          // postition in 16 x 16 tiles
-            1,          // 16 x 16 tile
-            &ship_pcg   // pointer to the data
+            0,                      // postition in 16 x 16 tiles
+            SP_DEFCG_16X16_TILE,    // 16 x 16 tile = 1
+            &ship_pcg               // pointer to the data
         );
 
         //if any problem loading the PCG...
@@ -115,6 +118,13 @@ int main(void)
             _dos_c_print("Can't load the PCG, Illegal screen mode.\r\n");
             _dos_exit2(status);
         }
+
+        //we load a second instance of the ship in position 1
+        status = _iocs_sp_defcg(
+            1,                      // postition in 16 x 16 tiles
+            SP_DEFCG_16X16_TILE,    // 16 x 16 tile = 1
+            &ship_pcg               // pointer to the data
+        );
     }
 
     /**
@@ -136,9 +146,9 @@ int main(void)
 
         //we load the hardcoded bullet on top of the second instance of the ship
         status = _iocs_sp_defcg(
-            6,          // position in 8 x 8 tiles
-            0,          // 8 x 8 tile
-            &bullet     // pointer to the data
+            6,                  // position in 8 x 8 tiles
+            SP_DEFCG_8X8_TILE,  // 8 x 8 tile = 0
+            &bullet             // pointer to the data
         );
 
         //if any problem loading the PCG...
@@ -150,9 +160,9 @@ int main(void)
 
         //we load a second instance of the hardcoded bullet in a free position
         status = _iocs_sp_defcg(
-            8,          // position in 8 x 8 tiles
-            0,          // 8 x 8 tile
-            &bullet     // pointer to the data
+            8,                  // position in 8 x 8 tiles
+            SP_DEFCG_8X8_TILE,  // 8 x 8 tile = 0
+            &bullet             // pointer to the data
         );
 
         //if any problem loading the PCG...
