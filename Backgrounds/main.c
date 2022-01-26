@@ -1,14 +1,15 @@
 #include "utils.h"
-//#include <interrupt.h>
 #include <signal.h>
 #define SP_DEFCG_8X8_TILE 0
 #define SP_DEFCG_16X16_TILE 1
 
-volatile uint32_t x1 = 0;
+volatile uint16_t x1 = 0;
 volatile uint16_t y1 = 0;
 
-volatile uint32_t x2 = 0;
-volatile uint32_t y2 = 0;
+volatile uint16_t x2 = 0;
+volatile uint16_t y2 = 0;
+
+volatile int8_t last_mode;
 
 void interrupt vsync_disp()
 {
@@ -33,8 +34,22 @@ void interrupt vsync_disp()
 
 void terminate()			/* Processing routine when pressed CTRL-C */
 {
-	VDISPST(0, 0, 0);		/* Un interrupt */
-	exit(0);
+	_iocs_vdispst(  /* Un interrupt */
+        (void *)0,
+        0,//0: vertical blanking interval 1: vertical display period
+        0
+    );
+
+    //we deactivate the sprites
+    _iocs_sp_off();
+
+    //we activate the console cursor
+    _iocs_b_curon();
+
+
+    //we restore the video mode
+    _iocs_crtmod(last_mode);
+    _dos_exit();
 }
 
 int main(void)
@@ -43,7 +58,7 @@ int main(void)
 
     int32_t status;
 
-    int8_t last_mode; //in this var we will store the video that was before we ran the program
+     //in this var we will store the video that was before we ran the program
     last_mode = _iocs_crtmod(-1); //we capture the current video mode
 
     //status = _iocs_crtmod(2); //this mode is 512 x 512 16 colours
@@ -173,14 +188,6 @@ int main(void)
         }
     }
 
-    /*
-    _iocs_bgscrlst(
-           1, //(1 << 31) | 0, // and Background specification (0/1)
-           5, //x
-           5  //y
-    );
-    */
-
     signal(SIGINT, terminate);	/* Processing routine settings when is pressed CTRL-C */
 
     _iocs_vdispst(
@@ -194,20 +201,5 @@ int main(void)
     //waiting for a keystroke.
     _dos_getchar();
 
-    _iocs_vdispst(
-        (void *)0,
-        0,//0: vertical blanking interval 1: vertical display period
-        0
-    );
-
-    //we deactivate the sprites
-    _iocs_sp_off();
-
-    //we activate the console cursor
-    _iocs_b_curon();
-
-
-    //we restore the video mode
-    _iocs_crtmod(last_mode);
-    _dos_exit();
+    terminate();
 }

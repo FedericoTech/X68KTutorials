@@ -38,7 +38,6 @@
 
 int main(void)
 {
-    int16_t file_handler;
     int32_t status;
 
     int8_t last_mode; //in this var we will store the video that was before we ran the program
