@@ -1,10 +1,11 @@
 
 #ifdef __MARIKO_CC__
-#include <doslib.h>
-#include <iocslib.h>
+    #include <doslib.h>
+    #include <iocslib.h>
 #else
-#include <dos.h>
-#include <iocs.h>
+    #include <dos.h>
+    #include <iocs.h>
+    #define interrupt __attribute__ ((interrupt_handler))
 #endif
 
 #include <stdint.h>

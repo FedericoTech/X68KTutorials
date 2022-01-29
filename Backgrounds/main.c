@@ -159,6 +159,7 @@ int main(void)
         sp_register.flags.palette = 1;    // palette number
         sp_register.flags.pcg = 0;        // pcg number
 
+        //we fill the buffer with this PGC
         status = _iocs_bgtextcl (
            0,   //Background specification (0/1)
            sp_register.code
@@ -176,6 +177,7 @@ int main(void)
         sp_register.flags.palette = 2;    // palette number
         sp_register.flags.pcg = 1;        // pcg number
 
+        //we fill the buffer with this PGC
         status = _iocs_bgtextcl (
            1,   //Background specification (0/1)
            sp_register.code

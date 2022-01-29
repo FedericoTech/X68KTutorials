@@ -1,5 +1,5 @@
 #include "utils.h"
-#include <signal.h>
+//#include <signal.h>
 
 #define reverse_bytes_32(num) ( ((num & 0xFF000000) >> 24) | ((num & 0x00FF0000) >> 8) | ((num & 0x0000FF00) << 8) | ((num & 0x000000FF) << 24) )
 #define reverse_bytes_24(num) ( ((num & 0xFF0000) >> 16) | (num & 0x00FF00) | ((num & 0x0000FF) << 16) )
@@ -14,7 +14,6 @@ volatile uint16_t x = 0;
 volatile uint16_t y = 0;
 
 volatile int8_t last_mode;
-
 
 void interrupt vsync_disp()
 {
@@ -128,7 +127,7 @@ int main(void)
         _dos_exit2(status);
     }
 
-    signal(SIGINT, terminate);	/* Processing routine settings when is pressed CTRL-C */
+    //signal(SIGINT, terminate);	/* Processing routine settings when is pressed CTRL-C */
 
     _iocs_vdispst(
         &vsync_disp,
