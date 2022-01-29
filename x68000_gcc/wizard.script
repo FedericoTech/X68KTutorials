@@ -8,12 +8,21 @@ function BeginWizard()
 {
     Wizard.AddInfoPage(
 		_T("X68000GCCIntro"),
-		_T("Welcome to the new X68000 GCC project wizard!\n" +
-			"This wizard will guide you to create a new X68000 GCC project.\n\n" +
-			"When you 're ready to proceed, please click \"Next\"..."));
+		_T(
+			"Welcome to the new X68000 GCC project wizard!\n"
+			+ "This wizard will guide you to create a new X68000 GCC project.\n\n" 
+			+ "When you 're ready to proceed, please click \"Next\"..."
+		)
+	);
 
     Wizard.AddProjectPathPage();
-    Wizard.AddCompilerPage(_T(""), _T("x68000_gcc*"), false, false);
+
+    Wizard.AddCompilerPage(
+		_T(""), 
+		_T("x68000_gcc*"), 
+		false, 
+		false
+	);
 }
 
 function GetFilesDir()
@@ -23,19 +32,60 @@ function GetFilesDir()
 
 function SetupProject(project)
 {
-    local target;
     local projectname;
+	local target_mariko;
+	local target_lydux;
+	local oc_x = ::wxString();
+    local ld_opts = ::wxString();
+	local file;
+	
+	projectname = GetProjectManager().GetActiveProject().GetTitle();
 
-    // Configure target
-    target = project.GetBuildTarget(_T("default"));
-    if (IsNull(target))
-        target = project.AddBuildTarget(_T("default"));
+    // Configure target Mariko
+	
+	//we try to capture the target
+    target_mariko = project.GetBuildTarget(_T("default"));
 
-    projectname = GetProjectManager().GetActiveProject().GetTitle();
-    target.SetTargetType(ttConsoleOnly);
-    target.SetTargetFilenameGenerationPolicy(tgfpPlatformDefault, tgfpNone);
-    target.SetOutputFilename(target.GetTitle() + wxFILE_SEP_PATH + projectname);
-    DebugSymbolsOn(target, Wizard.GetCompilerID());
+	//if the target doesn't exist...
+    if (IsNull(target_mariko)){
+		//we create the target
+        target_mariko = project.AddBuildTarget(_T("default"));
+	}
+	
+    
+    target_mariko.SetTargetType(ttConsoleOnly);
+    target_mariko.SetTargetFilenameGenerationPolicy(tgfpPlatformDefault, tgfpNone);
+    target_mariko.SetOutputFilename(target_mariko.GetTitle() + wxFILE_SEP_PATH + projectname);
+    DebugSymbolsOn(target_mariko, Wizard.GetCompilerID());
+	
+	//we try to capture the target
+    target_lydux = project.GetBuildTarget(_T("lydux"));
 
+	//if the target doesn't exist...
+    if (IsNull(target_lydux)){
+		//we create the target
+        target_lydux = project.AddBuildTarget(_T("lydux"));
+	}
+
+	// Objcopy to xfile
+	oc_x = _T("human68k-objcopy -v -O xfile $(TARGET_OUTPUT_FILE) $(TARGET_OUTPUT_FILE).X");
+    target_lydux.AddCommandsAfterBuild(oc_x);
+
+    // Setup the linker options
+	ld_opts = _T("-Wl,-q,-Map=$(TARGET_OUTPUT_FILE).map,--cref");
+    target_lydux.AddLinkerOption(ld_opts);
+
+    target_lydux.SetTargetType(ttConsoleOnly);
+    target_lydux.SetTargetFilenameGenerationPolicy(tgfpPlatformDefault, tgfpNone);
+    target_lydux.SetOutputFilename(target_lydux.GetTitle() + wxFILE_SEP_PATH + projectname);
+		
+	//we include the main.c also in this target
+	file = project.AddFile(_T("lydux"), _T("main.c"), true, true, 50);
+	file.AddBuildTarget(_T("lydux"));
+	file.compile = true;
+	
+	//we set the human68K_gcc compiler in the lydux target.
+	target_lydux.SetCompilerID(_T("human68k_gcc"))
+	
     return true;
 }
