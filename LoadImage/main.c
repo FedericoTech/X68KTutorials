@@ -1,5 +1,6 @@
 #include "utils.h"
 //#include <signal.h>
+#include <stdio.h>
 
 #define reverse_bytes_32(num) ( ((num & 0xFF000000) >> 24) | ((num & 0x00FF0000) >> 8) | ((num & 0x0000FF00) << 8) | ((num & 0x000000FF) << 24) )
 #define reverse_bytes_24(num) ( ((num & 0xFF0000) >> 16) | (num & 0x00FF00) | ((num & 0x0000FF) << 16) )
@@ -46,6 +47,8 @@ void terminate()
         0
     );
 
+    stop_timer();
+
     //we deactivate the sprites
     _iocs_sp_off();
 
@@ -63,10 +66,21 @@ int main(void)
     int32_t status;
 
     void vsync_disp();
+    void timer_interrupt();
 
     _dos_allclose();
 
     last_mode = _iocs_crtmod(-1);
+
+    //status = _iocs_crtmod(2); //this mode is 512 x 512 16 colours
+
+    //status = _iocs_crtmod(6); //this mode is 256 x 256 16 colours
+
+    //status = _iocs_crtmod(8); //this mode is 512 x 512 256 colours, it doesn't work here
+
+    //status = _iocs_crtmod(10); //this mode is 256 x 256 256 colours
+
+
     status = _iocs_crtmod(12);  //this mode is 512 x 512 65536 colours
 
     _iocs_g_clr_on();
@@ -105,15 +119,59 @@ int main(void)
 
         //we copy the address into this other pointer to not lose it.
         volatile uint16_t *va  = vram_addr;
-        uint16_t buffer;
 
-        //we set the super user mode to gain access to reserved areas of memory
-        _dos_super(0);
+        uint32_t t;
 
-        _dos_read(file_handler, (char*)va, sizeof(uint16_t) * (512 * 512));
 
-        //back to user mode
-        _dos_super(0);
+        status = start_timer();
+
+        t = millisecond();
+
+        #ifdef SUP
+            //we set the super user mode to gain access to reserved areas of memory
+            _dos_super(0);
+
+            _dos_read(file_handler, (char*)va, sizeof(uint16_t) * (512 * 512));
+
+            //back to user mode
+            _dos_super(0);
+        #else
+            {
+                uint16_t buffer[512 * 32];
+                struct _putptr putbuf;
+                uint8_t cont;
+
+                putbuf.x1 = 0;
+                putbuf.x2 = 511;
+                putbuf.buf_start = buffer;
+                putbuf.buf_end = (void *) ((int_)buffer + sizeof(buffer));
+
+                _iocs_g_clr_on();
+
+                for(cont = 0; cont < 16; cont++){
+
+                    status = _dos_read(file_handler, (char*)&buffer, sizeof(buffer));
+
+                    putbuf.y1 = 32 * cont;
+                    putbuf.y2 = putbuf.y1 + 31;
+
+                    status = _iocs_putgrm(&putbuf);
+
+                    if(status < 0){
+                        switch(status){
+                            case -1: _dos_c_print("Graphics not available. use _iocs_g_clr_on()\r\n"); break;
+                            case -2: _dos_c_print("Coordinate specification is abnormal\r\n"); break;
+                            case -3: _dos_c_print("Buffer capacity is too small\r\n"); break;
+                        }
+                    }
+                }
+            }
+        #endif
+
+        printf(
+           "time finish %d\n\n",
+           millisecond() - t
+        );
 
         //now we close the file
         status = _dos_close(file_handler);

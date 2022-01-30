@@ -41,4 +41,10 @@ union FileConf {
 
 const char *getErrorMessage(int8_t code);
 
+uint32_t start_timer();
+
+uint32_t start_stop();
+
+uint32_t millisecond();
+
 #endif

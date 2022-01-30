@@ -1,5 +1,36 @@
 #include "utils.h"
 
+static volatile uint32_t _time = 0;
+
+static void interrupt timer_interrupt()
+{
+    _time++;
+}
+
+__inline uint32_t start_timer()
+{
+    return _iocs_timerdst(
+        &timer_interrupt,
+        7,
+        16
+    );
+}
+
+__inline uint32_t stop_timer()
+{
+    return _iocs_timerdst(
+        (void *)0,
+        0,
+        0
+    );
+}
+
+__inline uint32_t millisecond()
+{
+    return _time;
+}
+
+
 const char *getErrorMessage(int8_t code)
 {
     char *message;
