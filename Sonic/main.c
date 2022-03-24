@@ -74,10 +74,6 @@ int main(void)
 
     union FileConf fconf;
 
-    volatile uint16_t *palette_addr = (uint16_t *)S_PALETTE_START;
-
-    volatile uint16_t *pcg_addr = (uint16_t *)PCG_START;
-
     last_mode = _iocs_crtmod(-1); //we capture the current video mode
 
     status = _iocs_crtmod(10); // 8 this mode is 512 x 512 256 colours
@@ -103,6 +99,7 @@ int main(void)
     s_stop[0] = loadData(NULL, "s_stop_0.spt", fconf.config);
     s_stop[1] = loadData(NULL, "s_stop_1.spt", fconf.config);
 
+    //loafing files searched with patterns
     {
         struct _filbuf sf;
 
@@ -133,7 +130,7 @@ int main(void)
     _iocs_sp_on();
 
     _dos_super(0);
-    loadData((char*)palette_addr, "sonic.pal", fconf.config);
+    loadData((char*)S_PALETTE_START, "sonic.pal", fconf.config);
     _dos_super(0);
 
     {
@@ -202,7 +199,7 @@ int main(void)
 
                 _iocs_dmamove(
                     s_walk[frame],           //buffer A, the source
-                    (uint16_t*)pcg_addr,    //buffer B, the destination
+                    (uint16_t *)PCG_START,    //buffer B, the destination
                     DMA_MODE(
                          DMA_DIR_A_TO_B,    //from A to B
                          DMA_PLUS_PLUS,     //move the pointer forward as it reads
