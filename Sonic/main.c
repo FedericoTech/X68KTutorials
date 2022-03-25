@@ -42,7 +42,9 @@ uint8_t *s_stop[2];
 
 uint8_t *s_walk[6];
 
-volatile int frame = 0;
+volatile int frame_walk = 0;
+volatile int frame_run = 0;
+volatile int frame_spin = 0;
 volatile int draw = 0;
 
 void terminate();
@@ -141,6 +143,7 @@ int main(void)
         int j = 0;
 
         int cont = 0;
+        int cont2 = 0;
 
         union {
             struct {
@@ -173,6 +176,64 @@ int main(void)
                 ++cont;
             }
         }
+
+        x = 150;
+        y = 150;
+
+        for(i = 0; i < 48; i += 16){
+            for(j = 0; j < 48; j += 16){
+
+                sp_register.flags.pcg = cont;
+
+                status = _iocs_sp_regst(
+                    sp_register.flags.pcg | VERTICAL_BLANKING_NO_DETECT,    //int_ spno sprite number (0-127) //int_ mode bit 31 0: Vertical blanking interval detection post-setting 1: Not detected
+                    j + x,                                  //int_ x X coordinates (0-1023 16 displayed on the far left
+                    i + y,                                  //int_ y Y " (" " Top ")
+                    sp_register.code,                   //code pattern code
+                    3                       //int_ prw priority
+                );
+                ++cont;
+            }
+        }
+
+        x = 100;
+        y = 200;
+
+        for(i = 0; i < 48; i += 16){
+            for(j = 0; j < 48; j += 16){
+
+                sp_register.flags.pcg = cont;
+
+                status = _iocs_sp_regst(
+                    sp_register.flags.pcg | VERTICAL_BLANKING_NO_DETECT,    //int_ spno sprite number (0-127) //int_ mode bit 31 0: Vertical blanking interval detection post-setting 1: Not detected
+                    j + x,                                  //int_ x X coordinates (0-1023 16 displayed on the far left
+                    i + y,                                  //int_ y Y " (" " Top ")
+                    sp_register.code,                   //code pattern code
+                    3                       //int_ prw priority
+                );
+                ++cont;
+            }
+        }
+
+        x = 150;
+        y = 200;
+
+        for(i = 0; i < 48; i += 16){
+            for(j = 0; j < 48; j += 16){
+
+                sp_register.flags.pcg = cont2;
+
+                status = _iocs_sp_regst(
+                    cont | VERTICAL_BLANKING_NO_DETECT,    //int_ spno sprite number (0-127) //int_ mode bit 31 0: Vertical blanking interval detection post-setting 1: Not detected
+                    j + x,                                  //int_ x X coordinates (0-1023 16 displayed on the far left
+                    i + y,                                  //int_ y Y " (" " Top ")
+                    sp_register.code,                   //code pattern code
+                    3                       //int_ prw priority
+                );
+                ++cont;
+                ++cont2;
+            }
+        }
     }
 
     signal(SIGINT, terminate);	/* Processing routine settings when is pressed CTRL-C */
@@ -198,8 +259,30 @@ int main(void)
             if(_iocs_dmamode()== DMA_STATUS_IDLE){
 
                 _iocs_dmamove(
-                    s_walk[frame],           //buffer A, the source
+                    s_walk[frame_walk],           //buffer A, the source
                     (uint16_t *)PCG_START,    //buffer B, the destination
+                    DMA_MODE(
+                         DMA_DIR_A_TO_B,    //from A to B
+                         DMA_PLUS_PLUS,     //move the pointer forward as it reads
+                         DMA_PLUS_PLUS      //move the pointer forward as it writes
+                    ),
+                    1152                    //size of the memory block we are moving
+                );
+
+                _iocs_dmamove(
+                    s_run[frame_run],           //buffer A, the source
+                    (uint16_t *)(PCG_START + 1152),    //buffer B, the destination
+                    DMA_MODE(
+                         DMA_DIR_A_TO_B,    //from A to B
+                         DMA_PLUS_PLUS,     //move the pointer forward as it reads
+                         DMA_PLUS_PLUS      //move the pointer forward as it writes
+                    ),
+                    1152                    //size of the memory block we are moving
+                );
+
+                _iocs_dmamove(
+                    s_spin[frame_spin],           //buffer A, the source
+                    (uint16_t *)(PCG_START + (1152 * 2)),    //buffer B, the destination
                     DMA_MODE(
                          DMA_DIR_A_TO_B,    //from A to B
                          DMA_PLUS_PLUS,     //move the pointer forward as it reads
@@ -313,8 +396,16 @@ void interrupt vsync_disp()
 {
     draw = 1;
 
-    if(++frame > 5){
-        frame = 0;
+    if(++frame_walk > 5){
+        frame_walk = 0;
+    }
+
+    if(++frame_run > 3){
+        frame_run = 0;
+    }
+
+    if(++frame_spin > 3){
+        frame_spin = 0;
     }
 }
 
