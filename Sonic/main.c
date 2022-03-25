@@ -136,14 +136,8 @@ int main(void)
     _dos_super(0);
 
     {
-        int x = 50;
-        int y = 50;
 
-        int i = 0;
-        int j = 0;
-
-        int cont = 0;
-        int cont2 = 0;
+        int x, y, i, j, cont = 0, cont2 = 0;
 
         union {
             struct {
@@ -161,22 +155,33 @@ int main(void)
         sp_register.flags.palette = 1;    // palette number
         sp_register.flags.pcg = 0;        // pcg number
 
-        for(i = 0; i < 48; i += 16){
-            for(j = 0; j < 48; j += 16){
+        for(y = 0; y < 240; y += 48){
+            for(x = 0; x < 240; x += 48){
 
-                sp_register.flags.pcg = cont;
+                for(i = 0; i < 48; i += 16){
+                    for(j = 0; j < 48; j += 16){
 
-                status = _iocs_sp_regst(
-                    sp_register.flags.pcg | VERTICAL_BLANKING_NO_DETECT,    //int_ spno sprite number (0-127) //int_ mode bit 31 0: Vertical blanking interval detection post-setting 1: Not detected
-                    j + x,                                  //int_ x X coordinates (0-1023 16 displayed on the far left
-                    i + y,                                  //int_ y Y " (" " Top ")
-                    sp_register.code,                   //code pattern code
-                    3                       //int_ prw priority
-                );
-                ++cont;
+                        sp_register.flags.pcg = cont2;
+
+                        status = _iocs_sp_regst(
+                            cont | VERTICAL_BLANKING_NO_DETECT,     //int_ spno sprite number (0-127) //int_ mode bit 31 0: Vertical blanking interval detection post-setting 1: Not detected
+                            16 + j + x,                             //int_ x X coordinates (0-1023 16 displayed on the far left
+                            16 + i + y,                             //int_ y Y " (" " Top ")
+                            sp_register.code,                       //code pattern code
+                            3                                       //int_ prw priority
+                        );
+                        if(++cont > 127){
+                            goto end;
+                        }
+                        if(++cont2 > 26){
+                            cont2 = 0;
+                        }
+                    }
+                }
             }
         }
-
+        end: ;
+/*
         x = 150;
         y = 150;
 
@@ -234,6 +239,7 @@ int main(void)
                 ++cont2;
             }
         }
+        */
     }
 
     signal(SIGINT, terminate);	/* Processing routine settings when is pressed CTRL-C */
