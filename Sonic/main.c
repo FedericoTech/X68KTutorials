@@ -88,7 +88,8 @@ struct _filbuf {
 
 int main(void)
 {
-    int32_t status;
+    int status;
+    int super;
 
     union FileConf fconf;
 
@@ -116,9 +117,6 @@ int main(void)
 
     s_stop[0] = loadData(NULL, "/sonic/s_stop_0.spt", fconf.config);
     s_stop[1] = loadData(NULL, "/sonic/s_stop_1.spt", fconf.config);
-
-
-
 
     //loafing files searched with patterns
     {
@@ -195,14 +193,10 @@ int main(void)
     _iocs_sp_init();
     _iocs_sp_on();
 
-    _dos_super(0);
     loadData((char*)S_PALETTE_START, "/sonic/sonic.pal", fconf.config);
-
     loadData((char*)(S_PALETTE_START + 32), "/tails/tails.pal", fconf.config);
-    _dos_super(0);
 
     {
-
         int x, y, i, j, cont = 0, cont2 = 0, cont3 = 0;
 
         union {
@@ -295,7 +289,8 @@ int main(void)
         int cont2;
         int cont3;
 
-        struct _chain sonic_animation[3];
+        struct _chain sonic_animation[2];
+
         struct _chain2 dma_tails_walk;
         struct _chain2 dma_tails_run;
         struct _chain2 dma_tails_still;
@@ -331,76 +326,50 @@ int main(void)
                 ;
             }
 
-            sonic_animation[0].addr = s_walk[frame_s_walk];
+            //DMA with _iocs_dmamove
+            _iocs_dmamove(
+                s_walk[frame_s_walk],   //buffer A, the source
+                (uint16_t *)PCG_START,  //buffer B, the destination
+                DMA_MODE(
+                     DMA_DIR_A_TO_B,    //from A to B
+                     DMA_PLUS_PLUS,     //move the pointer forward as it reads
+                     DMA_PLUS_PLUS      //move the pointer forward as it writes
+                ),
+                1152                    //size of the memory block we are moving
+            );
 
-            sonic_animation[1].addr = s_run[frame_s_run];
-
-            sonic_animation[2].addr = s_spin[frame_s_spin];
+            //DMA with _iocs_dmamov_a
+            sonic_animation[0].addr = s_run[frame_s_run];
+            sonic_animation[1].addr = s_spin[frame_s_spin];
 
             _iocs_dmamov_a(
                  sonic_animation,
-                 (char *)PCG_START,
+                 (char *)(PCG_START + 1152),
                  DMA_MODE(
                      DMA_DIR_A_TO_B,    //from A to B
                      DMA_PLUS_PLUS,     //move the pointer forward as it reads
                      DMA_PLUS_PLUS      //move the pointer forward as it writes
                 ),
-				3
+				2
             );
 
+            //DMA with _iocs_dmamov_l
             dma_tails_walk.addr = t_walk[frame_t_walk];
             dma_tails_run.addr = t_run[frame_t_run];
             dma_tails_still.addr = t_still[frame_t_still];
 
-            //printf("diff? %d %d\n\n", memcmp(still, t_still[frame_t_still], 768), frame_t_still);
-
             _iocs_dmamov_l(
                 &dma_tails_walk,
                 (char *)(PCG_START + (1152 * 3)),
+                //(char *)0xED0400,
                 DMA_MODE(
                      DMA_DIR_A_TO_B,    //from A to B
                      DMA_PLUS_PLUS,     //move the pointer forward as it reads
                      DMA_PLUS_PLUS      //move the pointer forward as it writes
                 )
             );
-            /*
 
-                _iocs_dmamove(
-                    s_walk[frame_walk],           //buffer A, the source
-                    (uint16_t *)PCG_START,    //buffer B, the destination
-                    DMA_MODE(
-                         DMA_DIR_A_TO_B,    //from A to B
-                         DMA_PLUS_PLUS,     //move the pointer forward as it reads
-                         DMA_PLUS_PLUS      //move the pointer forward as it writes
-                    ),
-                    1152                    //size of the memory block we are moving
-                );
-
-                _iocs_dmamove(
-                    s_run[frame_run],           //buffer A, the source
-                    (uint16_t *)(PCG_START + 1152),    //buffer B, the destination
-                    DMA_MODE(
-                         DMA_DIR_A_TO_B,    //from A to B
-                         DMA_PLUS_PLUS,     //move the pointer forward as it reads
-                         DMA_PLUS_PLUS      //move the pointer forward as it writes
-                    ),
-                    1152                    //size of the memory block we are moving
-                );
-
-                _iocs_dmamove(
-                    s_spin[frame_spin],           //buffer A, the source
-                    (uint16_t *)(PCG_START + (1152 * 2)),    //buffer B, the destination
-                    DMA_MODE(
-                         DMA_DIR_A_TO_B,    //from A to B
-                         DMA_PLUS_PLUS,     //move the pointer forward as it reads
-                         DMA_PLUS_PLUS      //move the pointer forward as it writes
-                    ),
-                    1152                    //size of the memory block we are moving
-                );
-            */
-            //}
-
-            draw = 1;
+            draw = 0;
 
             if(_dos_inpout(0xFF) != 0){
                 break;
@@ -441,9 +410,42 @@ void terminate()			/* Processing routine when pressed CTRL-C */
     _dos_s_mfree(s_walk[4]);
     _dos_s_mfree(s_walk[5]);
 
+    _dos_s_mfree(t_still[0]);
+    _dos_s_mfree(t_still[1]);
+    _dos_s_mfree(t_still[2]);
+    _dos_s_mfree(t_still[3]);
+
+    _dos_s_mfree(t_fly[0]);
+    _dos_s_mfree(t_fly[1]);
+
+    _dos_s_mfree(t_jump[0]);
+    _dos_s_mfree(t_jump[1]);
+
+    _dos_s_mfree(t_run[0]);
+    _dos_s_mfree(t_run[1]);
+    _dos_s_mfree(t_run[2]);
+    _dos_s_mfree(t_run[3]);
+    _dos_s_mfree(t_run[4]);
+    _dos_s_mfree(t_run[5]);
+
+    _dos_s_mfree(t_walk[0]);
+    _dos_s_mfree(t_walk[1]);
+    _dos_s_mfree(t_walk[2]);
+    _dos_s_mfree(t_walk[3]);
+    _dos_s_mfree(t_walk[4]);
+    _dos_s_mfree(t_walk[5]);
+    _dos_s_mfree(t_walk[6]);
+    _dos_s_mfree(t_walk[7]);
+
+    _iocs_vdispst(  /* uninterrupt */
+        (void *)NULL,
+        0,//0: vertical blanking interval 1: vertical display period
+        0
+    );
+
     //we restore the video mode
     _iocs_crtmod(last_mode);
-}
+} //terminate
 
 char * loadData(char * buffer, const char * filename, int8_t config)
 {
@@ -506,8 +508,6 @@ char * loadData(char * buffer, const char * filename, int8_t config)
 
 void interrupt vsync_disp()
 {
-    draw = 1;
-
     if(++frame_s_walk > 5){
         frame_s_walk = 0;
     }
@@ -531,6 +531,8 @@ void interrupt vsync_disp()
     if(++frame_t_run > 5){
         frame_t_run = 0;
     }
-}
+
+    draw = 1;
+} //vsync_disp
 
 
