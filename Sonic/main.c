@@ -1,6 +1,6 @@
 #include "utils.h"
 #include <signal.h>
-
+#include <string.h>
 #include <stdio.h>
 
 #define DMA_DIR_A_TO_B 0
@@ -42,9 +42,25 @@ uint8_t *s_stop[2];
 
 uint8_t *s_walk[6];
 
-volatile int frame_walk = 0;
-volatile int frame_run = 0;
-volatile int frame_spin = 0;
+
+uint8_t *t_still[4];
+
+uint8_t *t_fly[2];
+
+uint8_t *t_jump[2];
+
+uint8_t *t_run[6];
+
+uint8_t *t_walk[8];
+
+volatile int frame_s_walk = 0;
+volatile int frame_s_run = 0;
+volatile int frame_s_spin = 0;
+
+volatile int frame_t_walk = 0;
+volatile int frame_t_run = 0;
+volatile int frame_t_still = 0;
+
 volatile int draw = 0;
 
 void terminate();
@@ -89,17 +105,20 @@ int main(void)
     fconf.flags.sharing = SHARING_COMPATIBILITY_MODE;
     fconf.flags.mode = MODE_R;
 
-    s_still = loadData(NULL, "s_still.spt", fconf.config);
+    s_still = loadData(NULL, "/sonic/s_still.spt", fconf.config);
 
-    s_look_u = loadData(NULL, "s_look_u.spt", fconf.config);
+    s_look_u = loadData(NULL, "/sonic/s_look_u.spt", fconf.config);
 
-    s_look_d = loadData(NULL, "s_look_d.spt", fconf.config);
+    s_look_d = loadData(NULL, "/sonic/s_look_d.spt", fconf.config);
 
-    s_wait[0] = loadData(NULL, "s_wait_0.spt", fconf.config);
-    s_wait[1] = loadData(NULL, "s_wait_1.spt", fconf.config);
+    s_wait[0] = loadData(NULL, "/sonic/s_wait_0.spt", fconf.config);
+    s_wait[1] = loadData(NULL, "/sonic/s_wait_1.spt", fconf.config);
 
-    s_stop[0] = loadData(NULL, "s_stop_0.spt", fconf.config);
-    s_stop[1] = loadData(NULL, "s_stop_1.spt", fconf.config);
+    s_stop[0] = loadData(NULL, "/sonic/s_stop_0.spt", fconf.config);
+    s_stop[1] = loadData(NULL, "/sonic/s_stop_1.spt", fconf.config);
+
+
+
 
     //loafing files searched with patterns
     {
@@ -107,23 +126,68 @@ int main(void)
 
         int cont = 0;
 
-        status = _dos_files (&sf, "s_run_?.spt", 48);
+        status = _dos_files (&sf, "/sonic/s_run_?.spt", 0xff /*48*/);
         while(status == 0){
-            s_run[cont++] = loadData(NULL, sf.name, fconf.config);
+            char filename[23] = "/sonic/";
+            strcat(filename, sf.name);
+            s_run[cont++] = loadData(NULL, filename, fconf.config);
             status= _dos_nfiles(&sf);
         }
 
         cont = 0;
-        status = _dos_files (&sf, "s_spin_?.spt", 48);
+        status = _dos_files (&sf, "/sonic/s_spin_?.spt", 48);
         while(status == 0){
-            s_spin[cont++] = loadData(NULL, sf.name, fconf.config);
+            char filename[23] = "/sonic/";
+            strcat(filename, sf.name);
+            s_spin[cont++] = loadData(NULL, filename, fconf.config);
             status= _dos_nfiles(&sf);
         }
 
         cont = 0;
-        status = _dos_files (&sf, "s_walk_?.spt", 48);
+        status = _dos_files (&sf, "/sonic/s_walk_?.spt", 48);
         while(status == 0){
-            s_walk[cont++] = loadData(NULL, sf.name, fconf.config);
+            char filename[23] = "/sonic/";
+            strcat(filename, sf.name);
+            s_walk[cont++] = loadData(NULL, filename, fconf.config);
+            status= _dos_nfiles(&sf);
+        }
+    }
+
+    t_fly[0] = loadData(NULL, "/tails/t_fly_0.spt", fconf.config);
+    t_fly[1] = loadData(NULL, "/tails/t_fly_1.spt", fconf.config);
+
+    t_jump[0] = loadData(NULL, "/tails/t_jump_0.spt", fconf.config);
+    t_jump[1] = loadData(NULL, "/tails/t_jump_1.spt", fconf.config);
+
+    //loafing files searched with patterns
+    {
+        struct _filbuf sf;
+
+        int cont = 0;
+
+        status = _dos_files (&sf, "/tails/t_run_?.spt", 0xff /*48*/);
+        while(status == 0){
+            char filename[23] = "/tails/";
+            strcat(filename, sf.name);
+            t_run[cont++] = loadData(NULL, filename, fconf.config);
+            status= _dos_nfiles(&sf);
+        }
+
+        cont = 0;
+        status = _dos_files (&sf, "/tails/t_walk_?.spt", 48);
+        while(status == 0){
+            char filename[23] = "/tails/";
+            strcat(filename, sf.name);
+            t_walk[cont++] = loadData(NULL, filename, fconf.config);
+            status= _dos_nfiles(&sf);
+        }
+
+        cont = 0;
+        status = _dos_files (&sf, "/tails/t_stil_?.spt", 48);
+        while(status == 0){
+            char filename[23] = "/tails/";
+            strcat(filename, sf.name);
+            t_still[cont++] = loadData(NULL, filename, fconf.config);
             status= _dos_nfiles(&sf);
         }
     }
@@ -132,12 +196,14 @@ int main(void)
     _iocs_sp_on();
 
     _dos_super(0);
-    loadData((char*)S_PALETTE_START, "sonic.pal", fconf.config);
+    loadData((char*)S_PALETTE_START, "/sonic/sonic.pal", fconf.config);
+
+    loadData((char*)(S_PALETTE_START + 32), "/tails/tails.pal", fconf.config);
     _dos_super(0);
 
     {
 
-        int x, y, i, j, cont = 0, cont2 = 0;
+        int x, y, i, j, cont = 0, cont2 = 0, cont3 = 0;
 
         union {
             struct {
@@ -152,94 +218,66 @@ int main(void)
 
         sp_register.flags.vf = 0;         // VF ON
         sp_register.flags.hf = 0;         // HF OFF
-        sp_register.flags.palette = 1;    // palette number
         sp_register.flags.pcg = 0;        // pcg number
 
         for(y = 0; y < 240; y += 48){
             for(x = 0; x < 240; x += 48){
+                //if even, Tails
+                if(cont3 > 2){
+                    sp_register.flags.palette = 2;    // palette number
+                    for(i = 0; i < 32; i += 16){
+                        for(j = 0; j < 48; j += 16){
 
-                for(i = 0; i < 48; i += 16){
-                    for(j = 0; j < 48; j += 16){
+                            sp_register.flags.pcg = cont2;
 
-                        sp_register.flags.pcg = cont2;
-
-                        status = _iocs_sp_regst(
-                            cont | VERTICAL_BLANKING_NO_DETECT,     //int_ spno sprite number (0-127) //int_ mode bit 31 0: Vertical blanking interval detection post-setting 1: Not detected
-                            16 + j + x,                             //int_ x X coordinates (0-1023 16 displayed on the far left
-                            16 + i + y,                             //int_ y Y " (" " Top ")
-                            sp_register.code,                       //code pattern code
-                            3                                       //int_ prw priority
-                        );
-                        if(++cont > 127){
-                            goto end;
-                        }
-                        if(++cont2 > 26){
-                            cont2 = 0;
+                            status = _iocs_sp_regst(
+                                cont | VERTICAL_BLANKING_NO_DETECT,     //int_ spno sprite number (0-127) //int_ mode bit 31 0: Vertical blanking interval detection post-setting 1: Not detected
+                                16 + j + x,                             //int_ x X coordinates (0-1023 16 displayed on the far left
+                                16 + i + y,                             //int_ y Y " (" " Top ")
+                                sp_register.code,                       //code pattern code
+                                3                                       //int_ prw priority
+                            );
+                            if(++cont > 127){
+                                goto end;
+                            }
+                            if(++cont2 > 53){
+                                cont2 = 0;
+                            }
                         }
                     }
+                //if odd, Sonic
+                } else {
+                    sp_register.flags.palette = 1;    // palette number
+
+                    for(i = 0; i < 48; i += 16){
+                        for(j = 0; j < 48; j += 16){
+
+                            sp_register.flags.pcg = cont2;
+
+                            status = _iocs_sp_regst(
+                                cont | VERTICAL_BLANKING_NO_DETECT,     //int_ spno sprite number (0-127) //int_ mode bit 31 0: Vertical blanking interval detection post-setting 1: Not detected
+                                16 + j + x,                             //int_ x X coordinates (0-1023 16 displayed on the far left
+                                16 + i + y,                             //int_ y Y " (" " Top ")
+                                sp_register.code,                       //code pattern code
+                                3                                       //int_ prw priority
+                            );
+                            if(++cont > 127){
+                                goto end;
+                            }
+                            if(++cont2 > 53){
+                                cont2 = 0;
+                            }
+                        }
+                    }
+                }
+
+
+                if(++cont3 > 5){
+                    goto end;
                 }
             }
         }
         end: ;
-/*
-        x = 150;
-        y = 150;
-
-        for(i = 0; i < 48; i += 16){
-            for(j = 0; j < 48; j += 16){
-
-                sp_register.flags.pcg = cont;
-
-                status = _iocs_sp_regst(
-                    sp_register.flags.pcg | VERTICAL_BLANKING_NO_DETECT,    //int_ spno sprite number (0-127) //int_ mode bit 31 0: Vertical blanking interval detection post-setting 1: Not detected
-                    j + x,                                  //int_ x X coordinates (0-1023 16 displayed on the far left
-                    i + y,                                  //int_ y Y " (" " Top ")
-                    sp_register.code,                   //code pattern code
-                    3                       //int_ prw priority
-                );
-                ++cont;
-            }
-        }
-
-        x = 100;
-        y = 200;
-
-        for(i = 0; i < 48; i += 16){
-            for(j = 0; j < 48; j += 16){
-
-                sp_register.flags.pcg = cont;
-
-                status = _iocs_sp_regst(
-                    sp_register.flags.pcg | VERTICAL_BLANKING_NO_DETECT,    //int_ spno sprite number (0-127) //int_ mode bit 31 0: Vertical blanking interval detection post-setting 1: Not detected
-                    j + x,                                  //int_ x X coordinates (0-1023 16 displayed on the far left
-                    i + y,                                  //int_ y Y " (" " Top ")
-                    sp_register.code,                   //code pattern code
-                    3                       //int_ prw priority
-                );
-                ++cont;
-            }
-        }
-
-        x = 150;
-        y = 200;
-
-        for(i = 0; i < 48; i += 16){
-            for(j = 0; j < 48; j += 16){
-
-                sp_register.flags.pcg = cont2;
-
-                status = _iocs_sp_regst(
-                    cont | VERTICAL_BLANKING_NO_DETECT,    //int_ spno sprite number (0-127) //int_ mode bit 31 0: Vertical blanking interval detection post-setting 1: Not detected
-                    j + x,                                  //int_ x X coordinates (0-1023 16 displayed on the far left
-                    i + y,                                  //int_ y Y " (" " Top ")
-                    sp_register.code,                   //code pattern code
-                    3                       //int_ prw priority
-                );
-                ++cont;
-                ++cont2;
-            }
-        }
-        */
     }
 
     signal(SIGINT, terminate);	/* Processing routine settings when is pressed CTRL-C */
@@ -257,12 +295,75 @@ int main(void)
         int cont2;
         int cont3;
 
+        struct _chain sonic_animation[3];
+        struct _chain2 dma_tails_walk;
+        struct _chain2 dma_tails_run;
+        struct _chain2 dma_tails_still;
+
+        uint8_t *still = t_still[frame_t_still];
+
+
+        sonic_animation[0].addr = NULL;
+        sonic_animation[0].len = 1152;
+
+        sonic_animation[1].addr = NULL;
+        sonic_animation[1].len = 1152;
+
+        sonic_animation[2].addr = NULL;
+        sonic_animation[2].len = 1152;
+
+        dma_tails_walk.addr = NULL;
+        dma_tails_walk.len = 768;
+        dma_tails_walk.next = &dma_tails_still;
+
+        dma_tails_still.addr = NULL;
+        dma_tails_still.len = 768;
+        dma_tails_still.next = &dma_tails_run;
+
+        dma_tails_run.addr = NULL;
+        dma_tails_run.len = 768;
+        dma_tails_run.next = NULL;
+
+
+
         while(1){
             while(draw == 0){
                 ;
             }
 
-            if(_iocs_dmamode()== DMA_STATUS_IDLE){
+            sonic_animation[0].addr = s_walk[frame_s_walk];
+
+            sonic_animation[1].addr = s_run[frame_s_run];
+
+            sonic_animation[2].addr = s_spin[frame_s_spin];
+
+            _iocs_dmamov_a(
+                 sonic_animation,
+                 (char *)PCG_START,
+                 DMA_MODE(
+                     DMA_DIR_A_TO_B,    //from A to B
+                     DMA_PLUS_PLUS,     //move the pointer forward as it reads
+                     DMA_PLUS_PLUS      //move the pointer forward as it writes
+                ),
+				3
+            );
+
+            dma_tails_walk.addr = t_walk[frame_t_walk];
+            dma_tails_run.addr = t_run[frame_t_run];
+            dma_tails_still.addr = t_still[frame_t_still];
+
+            //printf("diff? %d %d\n\n", memcmp(still, t_still[frame_t_still], 768), frame_t_still);
+
+            _iocs_dmamov_l(
+                &dma_tails_walk,
+                (char *)(PCG_START + (1152 * 3)),
+                DMA_MODE(
+                     DMA_DIR_A_TO_B,    //from A to B
+                     DMA_PLUS_PLUS,     //move the pointer forward as it reads
+                     DMA_PLUS_PLUS      //move the pointer forward as it writes
+                )
+            );
+            /*
 
                 _iocs_dmamove(
                     s_walk[frame_walk],           //buffer A, the source
@@ -296,7 +397,8 @@ int main(void)
                     ),
                     1152                    //size of the memory block we are moving
                 );
-            }
+            */
+            //}
 
             draw = 1;
 
@@ -361,6 +463,8 @@ char * loadData(char * buffer, const char * filename, int8_t config)
     if(file_handler < 0){
         terminate();
         _dos_c_print("Can't open the file\r\n");
+        _dos_c_print(filename);
+        _dos_c_print("\r\n");
         _dos_c_print(getErrorMessage(file_handler));
 
         _dos_exit2(file_handler);
@@ -384,6 +488,8 @@ char * loadData(char * buffer, const char * filename, int8_t config)
 
     status2 = _dos_read(file_handler, buffer, status);
 
+    //printf("%s %d\n", filename, status2);
+
     //now we close the file
     status = _dos_close(file_handler);
 
@@ -402,16 +508,28 @@ void interrupt vsync_disp()
 {
     draw = 1;
 
-    if(++frame_walk > 5){
-        frame_walk = 0;
+    if(++frame_s_walk > 5){
+        frame_s_walk = 0;
     }
 
-    if(++frame_run > 3){
-        frame_run = 0;
+    if(++frame_s_run > 3){
+        frame_s_run = 0;
     }
 
-    if(++frame_spin > 3){
-        frame_spin = 0;
+    if(++frame_s_spin > 3){
+        frame_s_spin = 0;
+    }
+
+    if(++frame_t_walk > 7){
+        frame_t_walk = 0;
+    }
+
+    if(++frame_t_still > 3){
+        frame_t_still = 0;
+    }
+
+    if(++frame_t_run > 5){
+        frame_t_run = 0;
     }
 }
 
