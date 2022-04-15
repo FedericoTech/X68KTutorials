@@ -61,7 +61,7 @@ int main(void)
     players[2]->nJoy = 2;
     players[2]->nPlayer = 2;
 
-    players[0]->bGameOver = TRUE;
+    players[1]->bGameOver = FALSE;
 
     game_play();
 

@@ -524,7 +524,7 @@ void game_play()
     );
 
     // Main Loop
-    while (TRUE || !bGameOver){
+    while (!bGameOver){
 
         uint8_t nPlayer;
         bool bFirst = TRUE;
