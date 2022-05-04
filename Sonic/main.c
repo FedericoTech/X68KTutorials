@@ -97,6 +97,7 @@ int main(void)
 
     status = _iocs_crtmod(10); // 8 this mode is 512 x 512 256 colours
 
+
     _iocs_g_clr_on();
     _iocs_b_curoff();
 

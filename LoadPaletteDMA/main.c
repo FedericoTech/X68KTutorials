@@ -1,5 +1,3 @@
-#include <dos.h>
-#include <stdint.h>
 #include "utils.h"
 
 /**
@@ -34,18 +32,14 @@
 
 #define S_PALETTE_START 0xe82220
 
-#define DMA_DIR_A_TO_B  0b00000000
-#define DMA_DIR_B_TO_A  0b10000000
+#define DMA_DIR_A_TO_B 0
+#define DMA_DIR_B_TO_A 1
 
-#define DMA_A_FIXED     0b00000000
-#define DMA_A_PLUS_PLUS 0b00000100
-#define DMA_A_MINUS_3   0b00001000
+#define DMA_FIXED 0
+#define DMA_PLUS_PLUS 1
+#define DMA_MINUS_3 2
 
-#define DMA_B_FIXED     0b00000000
-#define DMA_B_PLUS_PLUS 0b00000001
-#define DMA_B_MINUS_3   0b00000010
-
-#define DMA_MODE(direction, A, B) (direction | A | B)
+#define DMA_MODE(direction, MAC, DAC) (direction << 7 | (MAC << 2) | DAC)
 
 #define DMA_STATUS_IDLE 0x00
 #define DMA_STATUS_IN_DMAMOVE_OP 0x8A
@@ -55,6 +49,11 @@
 int main(void)
 {
     int16_t file_handler, status;
+
+    //we will collect the palettes pallete by pallete in this array.
+    uint16_t colours[16];
+
+    volatile uint16_t *palette_addr = (uint16_t *)S_PALETTE_START;
 
     //we open the palette file
     file_handler = _dos_open(
@@ -72,11 +71,6 @@ int main(void)
         _dos_exit2(file_handler);
     }
 
-    //we will collect the palettes pallete by pallete in this array.
-    uint16_t colours[16];
-
-    volatile uint16_t *palette_addr = (uint16_t *)S_PALETTE_START;
-
     //whereas there are palettes...
     while(_dos_read(file_handler, (char*)&colours, sizeof(colours))) {
 
@@ -85,8 +79,8 @@ int main(void)
             (uint16_t*)palette_addr,    //buffer B, the destination
             DMA_MODE(
                  DMA_DIR_A_TO_B,        //from A to B
-                 DMA_A_PLUS_PLUS,       //move the pointer forward as it reads
-                 DMA_B_PLUS_PLUS        //move the pointer forward as it writes
+                 DMA_PLUS_PLUS,       //move the pointer forward as it reads
+                 DMA_PLUS_PLUS        //move the pointer forward as it writes
             ),
             sizeof(colours)             //size of the memory block we are moving
         );

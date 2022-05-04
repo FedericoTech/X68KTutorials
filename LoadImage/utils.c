@@ -30,7 +30,6 @@ __inline uint32_t millisecond()
     return _time;
 }
 
-
 const char *getErrorMessage(int8_t code)
 {
     char *message;

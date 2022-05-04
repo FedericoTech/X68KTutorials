@@ -95,7 +95,7 @@ int main(void)
         //we centre the sprite in the middle of the screen.
         int16_t x = 256, y = 256;
 
-        #ifdef __MARIKO_CC__
+        #ifndef __MARIKO_CC__
         //we set up the sprite.
         status = _iocs_sp_regst(
             0 | VERTICAL_BLANKING_DETECTION,//int_ spno sprite number (0-127) //int_ mode bit 31 0: Vertical blanking interval detection post-setting 1: Not detected

@@ -95,10 +95,6 @@ void drawRays2D()
     if(ra < 0){ ra += PI2; }
     if(ra > PI2){ ra -= PI2; }
 
-    _iocs_apage(2);
-    _iocs_wipe();
-    _iocs_apage(buffer);
-
     for(r = 0; r < 60; r++){
         float Tan = tan(ra);
         float aTan = -1 / Tan;

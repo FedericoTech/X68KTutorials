@@ -61,7 +61,7 @@ int main(void)
         uint8_t palette_num = 1; //the sprite palette count starts with 1. 0 belongs to text.
 
         //whereas there are palettes...
-        while(_dos_read(file_handler, (char*)&colours, sizeof(colours))) {
+        while(_dos_read(file_handler, (char*)&colours, sizeof colours)) {
 
             uint8_t colour_in_palette;
             //now we go through the current palette
@@ -113,25 +113,21 @@ int main(void)
         _iocs_g_clr_on();
 
         {
-            uint16_t g_colours[16 * 16];
+            uint16_t g_colour;
+            uint8_t colour_in_palette = 0;
 
-            //we read the whole palette file
-            status = _dos_read(file_handler, (char*)&g_colours, sizeof(g_colours));
+            while(status = _dos_read(file_handler, (char*)&g_colour, sizeof g_colour)){
 
-            if(status > 0){
+                status = _iocs_gpalet(  //returns 32 bit with the code of the colour just set or if colour is -1
+                    colour_in_palette,  //0 - 255
+                    g_colour            // colour code, -1 to retrieve the code in that cell
+                );
 
-                uint8_t colour_in_palette;
-                for(colour_in_palette = 0; colour_in_palette < (16 * 16) -1; colour_in_palette++){
-                    status = _iocs_gpalet(                  //returns 32 bit with the code of the colour just set or if colour is -1
-                        colour_in_palette,                  //0 - 255
-                        g_colours[colour_in_palette]        // colour code, -1 to retrieve the code in that cell
-                    );
-
-                    //if any issue...
-                    if(status < 0){
-                        _dos_c_print("The graphic screen is not initialized \r\n");
-                    }
+                //if any issue...
+                if(status < 0){
+                    _dos_c_print("The graphic screen is not initialized \r\n");
                 }
+                ++colour_in_palette;
             }
         }
 
@@ -154,23 +150,21 @@ int main(void)
             _dos_exit2(status);
         }
 
-        //we read the first palette
-        if(_dos_read(file_handler, (char*)&colours, sizeof(colours)) > 0){
+        {
+            uint16_t t_colour;
 
+            for(colour_in_palette = 0; colour_in_palette < 16; colour_in_palette++){
             {
-                uint8_t colour_in_palette;
-                //now we go through the current pallete
-                for(colour_in_palette = 0; colour_in_palette < 16; colour_in_palette++){
+                _dos_read(file_handler, (char*)&t_colour, sizeof t_colour);
 
-                    status =_iocs_tpalet(
-                         colour_in_palette, //0, 1, 2 and 3 are independent colours, 4 -7 and 8 - 15 share the same colours.
-                         colours[colour_in_palette]
-                     );
+                status =_iocs_tpalet(
+                     colour_in_palette, //0, 1, 2 and 3 are independent colours, 4 -7 and 8 - 15 share the same colours.
+                     t_colour
+                );
 
-                    //if any error...
-                    if(status < 0){
-                        _dos_c_print("Cant set the colour\r\n");
-                    }
+                //if any error...
+                if(status < 0){
+                    _dos_c_print("Cant set the colour\r\n");
                 }
             }
         }

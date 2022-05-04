@@ -58,7 +58,7 @@ int32_t loadPalette()
                     return status;
                 }
             }
-            palette_num ++;
+            ++palette_num;
         }
     }
     //now we close the file
