@@ -10,9 +10,9 @@ static void interrupt timer_interrupt()
 __inline uint32_t start_timer()
 {
     return _iocs_timerdst(
-        &timer_interrupt,
-        7,
-        16
+        timer_interrupt,	//Processing address (interrupt disabled at 0)
+        7,					//Unit time (1 = 1.0, 2 = 2.5, 3 = 4.0, 4 = 12.5, 5 = 16.0, 6 = 25.0, 7 = 50.0, micro sec unit)
+        20					//Counter (when 0, treat as 256)
     );
 }
 
