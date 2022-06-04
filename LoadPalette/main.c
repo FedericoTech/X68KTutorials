@@ -34,7 +34,7 @@
 
 int main(void)
 {
-    int8_t last_mode;
+    int8_t last_mode
     int32_t status;
     //we will collect the palettes palette by palette in this array.
 

@@ -7,6 +7,7 @@
 #else
     #include <dos.h>
     #include <iocs.h>
+    #include "newlib_fixes.h"
     #define interrupt __attribute__ ((interrupt_handler))
 #endif
 

@@ -58,7 +58,7 @@ int main(void)
         status = _dos_write (
             file_number,    //this is like the file handler in stdio but represented by an integer
             message,        //the message
-            sizeof(message) //the size of the message
+            sizeof message //the size of the message
         );
     }
 
@@ -70,7 +70,7 @@ int main(void)
     }
 
     //now we close the file
-    status = _dos_close (file_number);
+    status = _dos_close(file_number);
 
     //if any error...
     if(status < 0){

@@ -26,8 +26,17 @@
 				</ExtraCommands>
 			</Target>
 		</Build>
+		<Unit filename="asm/files.S">
+			<Option target="lydux" />
+		</Unit>
+		<Unit filename="asm/nfiles.S">
+			<Option target="lydux" />
+		</Unit>
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="newlib_fixes.h">
+			<Option target="lydux" />
 		</Unit>
 		<Unit filename="utils.c">
 			<Option compilerVar="CC" />

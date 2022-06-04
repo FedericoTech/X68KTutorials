@@ -24,6 +24,11 @@
 #define VERTICAL_BLANKING_DETECTION 0x80000000     //0b10000000000000000000000000000000
 #define VERTICAL_BLANKING_NO_DETECT 0
 
+#define SPRITE_OFF 0
+#define SPRITE_PRI_BG0 1
+#define SPRITE_PRI_BG1 2
+#define SPRITE_PRI_SP 3
+
 int8_t last_mode; //in this var we will store the video that was before we ran the program
 
 uint8_t *s_still;
@@ -63,28 +68,13 @@ volatile int frame_t_still = 0;
 
 volatile int draw = 0;
 
-void terminate();
-
 char * loadData(char * buffer, const char * filename, int8_t config);
 
 void interrupt vsync_disp();
-/*
-struct _filbuf {
-    unsigned char searchatr;
-    unsigned char driveno;
-    unsigned long dirsec;
-    unsigned short dirlft;
-    unsigned short dirpos;
-    char filename[8];
-    char ext[3];
-    unsigned char atr;
-    unsigned short time;
-    unsigned short date;
-    unsigned int_ filelen;
-    char name[23];
-};
-*/
 
+void init();
+
+void terminate();
 
 int main(void)
 {
@@ -93,13 +83,7 @@ int main(void)
 
     union FileConf fconf;
 
-    last_mode = _iocs_crtmod(-1); //we capture the current video mode
-
-    status = _iocs_crtmod(10); // 8 this mode is 512 x 512 256 colours
-
-
-    _iocs_g_clr_on();
-    _iocs_b_curoff();
+    init();
 
     //load palette
     fconf.config = 0;
@@ -107,45 +91,50 @@ int main(void)
     fconf.flags.sharing = SHARING_COMPATIBILITY_MODE;
     fconf.flags.mode = MODE_R;
 
-    s_still = loadData(NULL, "/sonic/s_still.spt", fconf.config);
+    s_still = loadData(NULL, "/sonic_sp/s_still.spt", fconf.config);
 
-    s_look_u = loadData(NULL, "/sonic/s_look_u.spt", fconf.config);
+    s_look_u = loadData(NULL, "/sonic_sp/s_look_u.spt", fconf.config);
 
-    s_look_d = loadData(NULL, "/sonic/s_look_d.spt", fconf.config);
+    s_look_d = loadData(NULL, "/sonic_sp/s_look_d.spt", fconf.config);
 
-    s_wait[0] = loadData(NULL, "/sonic/s_wait_0.spt", fconf.config);
-    s_wait[1] = loadData(NULL, "/sonic/s_wait_1.spt", fconf.config);
+    s_wait[0] = loadData(NULL, "/sonic_sp/s_wait_0.spt", fconf.config);
+    s_wait[1] = loadData(NULL, "/sonic_sp/s_wait_1.spt", fconf.config);
 
-    s_stop[0] = loadData(NULL, "/sonic/s_stop_0.spt", fconf.config);
-    s_stop[1] = loadData(NULL, "/sonic/s_stop_1.spt", fconf.config);
+    s_stop[0] = loadData(NULL, "/sonic_sp/s_stop_0.spt", fconf.config);
+    s_stop[1] = loadData(NULL, "/sonic_sp/s_stop_1.spt", fconf.config);
 
     //loafing files searched with patterns
     {
+        #ifdef __MARIKO_CC__
         struct _filbuf sf;
+        #else
+        struct dos_filbuf sf;
+        #endif
 
         int cont = 0;
 
-        status = _dos_files (&sf, "/sonic/s_run_?.spt", 0xff /*48*/);
+        status = _dos_files(&sf, "/sonic_sp/s_run_?.spt", 0xff /*48*/);
+
         while(status == 0){
-            char filename[23] = "/sonic/";
+            char filename[23] = "/sonic_sp/";
             strcat(filename, sf.name);
             s_run[cont++] = loadData(NULL, filename, fconf.config);
             status= _dos_nfiles(&sf);
         }
 
         cont = 0;
-        status = _dos_files (&sf, "/sonic/s_spin_?.spt", 48);
+        status = _dos_files(&sf, "/sonic_sp/s_spin_?.spt", 48);
         while(status == 0){
-            char filename[23] = "/sonic/";
+            char filename[23] = "/sonic_sp/";
             strcat(filename, sf.name);
             s_spin[cont++] = loadData(NULL, filename, fconf.config);
             status= _dos_nfiles(&sf);
         }
 
         cont = 0;
-        status = _dos_files (&sf, "/sonic/s_walk_?.spt", 48);
+        status = _dos_files(&sf, "/sonic_sp/s_walk_?.spt", 48);
         while(status == 0){
-            char filename[23] = "/sonic/";
+            char filename[23] = "/sonic_sp/";
             strcat(filename, sf.name);
             s_walk[cont++] = loadData(NULL, filename, fconf.config);
             status= _dos_nfiles(&sf);
@@ -160,11 +149,15 @@ int main(void)
 
     //loafing files searched with patterns
     {
+        #ifdef __MARIKO_CC__
         struct _filbuf sf;
+        #else
+        struct dos_filbuf sf;
+        #endif
 
         int cont = 0;
 
-        status = _dos_files (&sf, "/tails/t_run_?.spt", 0xff /*48*/);
+        status = _dos_files(&sf, "/tails/t_run_?.spt", 0xff /*48*/);
         while(status == 0){
             char filename[23] = "/tails/";
             strcat(filename, sf.name);
@@ -173,7 +166,7 @@ int main(void)
         }
 
         cont = 0;
-        status = _dos_files (&sf, "/tails/t_walk_?.spt", 48);
+        status = _dos_files(&sf, "/tails/t_walk_?.spt", 48);
         while(status == 0){
             char filename[23] = "/tails/";
             strcat(filename, sf.name);
@@ -182,7 +175,7 @@ int main(void)
         }
 
         cont = 0;
-        status = _dos_files (&sf, "/tails/t_stil_?.spt", 48);
+        status = _dos_files(&sf, "/tails/t_stil_?.spt", 48);
         while(status == 0){
             char filename[23] = "/tails/";
             strcat(filename, sf.name);
@@ -194,7 +187,7 @@ int main(void)
     _iocs_sp_init();
     _iocs_sp_on();
 
-    loadData((char*)S_PALETTE_START, "/sonic/sonic.pal", fconf.config);
+    loadData((char*)S_PALETTE_START, "/sonic_sp/sonic.pal", fconf.config);
     loadData((char*)(S_PALETTE_START + 32), "/tails/tails.pal", fconf.config);
 
     {
@@ -225,13 +218,25 @@ int main(void)
 
                             sp_register.flags.pcg = cont2;
 
+                            #ifdef __MARIKO_CC__
                             status = _iocs_sp_regst(
                                 cont | VERTICAL_BLANKING_NO_DETECT,     //int_ spno sprite number (0-127) //int_ mode bit 31 0: Vertical blanking interval detection post-setting 1: Not detected
                                 16 + j + x,                             //int_ x X coordinates (0-1023 16 displayed on the far left
                                 16 + i + y,                             //int_ y Y " (" " Top ")
                                 sp_register.code,                       //code pattern code
-                                3                                       //int_ prw priority
+                                SPRITE_PRI_SP                           //int_ prw priority
                             );
+                            #else
+                            //we set up the sprite.
+                            status = _iocs_sp_regst(
+                                cont,                           //int_ spno sprite number (0-127)
+                                VERTICAL_BLANKING_DETECTION,    //int_ mode bit 31 0: Vertical blanking interval detection post-setting 1: Not detected
+                                16 + j + x,                     //int_ x X coordinates (0-1023 16 displayed on the far left
+                                16 + i + y,                     //int_ y Y " (" " Top ")
+                                sp_register.code,               //code pattern code
+                                SPRITE_PRI_SP                   //int_ prw priority
+                            );
+                            #endif
                             if(++cont > 127){
                                 goto end;
                             }
@@ -249,13 +254,25 @@ int main(void)
 
                             sp_register.flags.pcg = cont2;
 
+                            #ifdef __MARIKO_CC__
                             status = _iocs_sp_regst(
                                 cont | VERTICAL_BLANKING_NO_DETECT,     //int_ spno sprite number (0-127) //int_ mode bit 31 0: Vertical blanking interval detection post-setting 1: Not detected
                                 16 + j + x,                             //int_ x X coordinates (0-1023 16 displayed on the far left
                                 16 + i + y,                             //int_ y Y " (" " Top ")
                                 sp_register.code,                       //code pattern code
-                                3                                       //int_ prw priority
+                                SPRITE_PRI_SP                           //int_ prw priority
                             );
+                            #else
+                            //we set up the sprite.
+                            status = _iocs_sp_regst(
+                                cont,                           //int_ spno sprite number (0-127)
+                                VERTICAL_BLANKING_DETECTION,    //int_ mode bit 31 0: Vertical blanking interval detection post-setting 1: Not detected
+                                16 + j + x,                     //int_ x X coordinates (0-1023 16 displayed on the far left
+                                16 + i + y,                     //int_ y Y " (" " Top ")
+                                sp_register.code,               //code pattern code
+                                SPRITE_PRI_SP                   //int_ prw priority
+                            );
+                            #endif
                             if(++cont > 127){
                                 goto end;
                             }
@@ -290,11 +307,21 @@ int main(void)
         int cont2;
         int cont3;
 
+        #ifdef __MARIKO_CC__
         struct _chain sonic_animation[2];
+        #else
+        struct iocs_chain sonic_animation[2];
+        #endif
 
+        #ifdef __MARIKO_CC__
         struct _chain2 dma_tails_walk;
         struct _chain2 dma_tails_run;
         struct _chain2 dma_tails_still;
+        #else
+        struct iocs_chain2 dma_tails_walk;
+        struct iocs_chain2 dma_tails_run;
+        struct iocs_chain2 dma_tails_still;
+        #endif
 
         uint8_t *still = t_still[frame_t_still];
 
@@ -379,70 +406,86 @@ int main(void)
     }
 
     terminate();
+
     _dos_exit();
+}
+
+void init()
+{
+    last_mode = _iocs_crtmod(-1); //we capture the current video mode
+
+    _iocs_crtmod(8); // 8 this mode is 512 x 512 256 colours
+    //_iocs_crtmod(10); // 10 this mode is 256 x 256 256 colours
+
+
+    _iocs_g_clr_on();
+    _iocs_b_curoff();
 }
 
 void terminate()			/* Processing routine when pressed CTRL-C */
 {
-    _dos_s_mfree(s_still);
-    _dos_s_mfree(s_look_u);
-    _dos_s_mfree(s_look_d);
+    _dos_mfree(s_still);
+    _dos_mfree(s_look_u);
+    _dos_mfree(s_look_d);
 
-    _dos_s_mfree(s_run[0]);
-    _dos_s_mfree(s_run[1]);
-    _dos_s_mfree(s_run[2]);
-    _dos_s_mfree(s_run[3]);
+    _dos_mfree(s_run[0]);
+    _dos_mfree(s_run[1]);
+    _dos_mfree(s_run[2]);
+    _dos_mfree(s_run[3]);
 
-    _dos_s_mfree(s_spin[0]);
-    _dos_s_mfree(s_spin[1]);
-    _dos_s_mfree(s_spin[2]);
-    _dos_s_mfree(s_spin[3]);
+    _dos_mfree(s_spin[0]);
+    _dos_mfree(s_spin[1]);
+    _dos_mfree(s_spin[2]);
+    _dos_mfree(s_spin[3]);
 
-    _dos_s_mfree(s_wait[0]);
-    _dos_s_mfree(s_wait[1]);
+    _dos_mfree(s_wait[0]);
+    _dos_mfree(s_wait[1]);
 
-    _dos_s_mfree(s_stop[0]);
-    _dos_s_mfree(s_stop[1]);
+    _dos_mfree(s_stop[0]);
+    _dos_mfree(s_stop[1]);
 
-    _dos_s_mfree(s_walk[0]);
-    _dos_s_mfree(s_walk[1]);
-    _dos_s_mfree(s_walk[2]);
-    _dos_s_mfree(s_walk[3]);
-    _dos_s_mfree(s_walk[4]);
-    _dos_s_mfree(s_walk[5]);
+    _dos_mfree(s_walk[0]);
+    _dos_mfree(s_walk[1]);
+    _dos_mfree(s_walk[2]);
+    _dos_mfree(s_walk[3]);
+    _dos_mfree(s_walk[4]);
+    _dos_mfree(s_walk[5]);
 
-    _dos_s_mfree(t_still[0]);
-    _dos_s_mfree(t_still[1]);
-    _dos_s_mfree(t_still[2]);
-    _dos_s_mfree(t_still[3]);
+    _dos_mfree(t_still[0]);
+    _dos_mfree(t_still[1]);
+    _dos_mfree(t_still[2]);
+    _dos_mfree(t_still[3]);
 
-    _dos_s_mfree(t_fly[0]);
-    _dos_s_mfree(t_fly[1]);
+    _dos_mfree(t_fly[0]);
+    _dos_mfree(t_fly[1]);
 
-    _dos_s_mfree(t_jump[0]);
-    _dos_s_mfree(t_jump[1]);
+    _dos_mfree(t_jump[0]);
+    _dos_mfree(t_jump[1]);
 
-    _dos_s_mfree(t_run[0]);
-    _dos_s_mfree(t_run[1]);
-    _dos_s_mfree(t_run[2]);
-    _dos_s_mfree(t_run[3]);
-    _dos_s_mfree(t_run[4]);
-    _dos_s_mfree(t_run[5]);
+    _dos_mfree(t_run[0]);
+    _dos_mfree(t_run[1]);
+    _dos_mfree(t_run[2]);
+    _dos_mfree(t_run[3]);
+    _dos_mfree(t_run[4]);
+    _dos_mfree(t_run[5]);
 
-    _dos_s_mfree(t_walk[0]);
-    _dos_s_mfree(t_walk[1]);
-    _dos_s_mfree(t_walk[2]);
-    _dos_s_mfree(t_walk[3]);
-    _dos_s_mfree(t_walk[4]);
-    _dos_s_mfree(t_walk[5]);
-    _dos_s_mfree(t_walk[6]);
-    _dos_s_mfree(t_walk[7]);
+    _dos_mfree(t_walk[0]);
+    _dos_mfree(t_walk[1]);
+    _dos_mfree(t_walk[2]);
+    _dos_mfree(t_walk[3]);
+    _dos_mfree(t_walk[4]);
+    _dos_mfree(t_walk[5]);
+    _dos_mfree(t_walk[6]);
+    _dos_mfree(t_walk[7]);
 
     _iocs_vdispst(  /* uninterrupt */
         (void *)NULL,
         0,//0: vertical blanking interval 1: vertical display period
         0
     );
+
+    //we activate the console cursor
+    _iocs_b_curon();
 
     //we restore the video mode
     _iocs_crtmod(last_mode);
