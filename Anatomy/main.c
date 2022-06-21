@@ -30,6 +30,8 @@ int main(void)
 {
     init();
 
+    _iocs_opmsns();
+
     //body of our program
     _dos_c_print("Hello world !\r\n");
     _dos_c_print("Press a key.\r\n");

@@ -16,20 +16,29 @@
  */
 
 //permissions for using with _dos_open
-#define ACCESS_DICTIONARY           0x80    //0b10000000 //1 not for users
-#define ACCESS_NORMAL               0x00    //0b00000000 //0
+#define OPEN_ACCESS_DICTIONARY           0x80    //0b10000000 //1 not for users
+#define OPEN_ACCESS_NORMAL               0x00    //0b00000000 //0
 
-#define SHARING_TOTAL               0x08    //0b00010000  //4 allow others to write and read
-#define SHARING_WRITE_ONLY          0x0C    //0b00001100  //3 allow others to write only
-#define SHARING_READ_ONLY           0x08    //0b00001000  //2 allow others to read only
-#define SHARING_RESTRICTED          0x04    //0b00000100  //1 don't allow others anything
-#define SHARING_COMPATIBILITY_MODE  0x00    //0b00000000  //0
+#define OPEN_SHARING_TOTAL               0x08    //0b00010000  //4 allow others to write and read
+#define OPEN_SHARING_WRITE_ONLY          0x0C    //0b00001100  //3 allow others to write only
+#define OPEN_SHARING_READ_ONLY           0x08    //0b00001000  //2 allow others to read only
+#define OPEN_SHARING_RESTRICTED          0x04    //0b00000100  //1 don't allow others anything
+#define OPEN_SHARING_COMPATIBILITY_MODE  0x00    //0b00000000  //0
 
-#define MODE_RW                     0x02    //0b00000010  //2 open for write and read
-#define MODE_W                      0x01    //0b00000001  //1 open only for writing
-#define MODE_R                      0x00    //0b00000000  //0 open only for reading
+#define OPEN_MODE_RW                     0x02    //0b00000010  //2 open for write and read
+#define OPEN_MODE_W                      0x01    //0b00000001  //1 open only for writing
+#define OPEN_MODE_R                      0x00    //0b00000000  //0 open only for reading
 
 #define OPENING_MODE(access, sharing, mode) (access | sharing | mode)
+
+#define F_ATTR_  0x00  //0b000000 //0 read and write mode and A attribute (default)
+#define F_ATTR_R 0x01  //0b000001 //1 read only
+#define F_ATTR_H 0x02  //0b000010 //2 Hidden
+#define F_ATTR_S 0x04  //0b000100 //4 System file
+#define F_ATTR_V 0x08  //0b001000 //8 Volume name
+#define F_ATTR_D 0x10  //0b010000 //16 Directory name
+#define F_ATTR_A 0x20  //0b100000 //32 Archive name
+
 
 const char *getErrorMessage(int8_t code);
 
@@ -40,8 +49,27 @@ int main(void)
     //We create a file and open it so we get its number to manage it.
     file_number = _dos_create(
         "file", //file name
-        0       //if 0 overwrite if exist, if 1 don't overwrite
+        F_ATTR_ // 0: to override if it exists, 1: not to override if extists
     );
+
+    /**
+     * other alternative methods to create a file
+     **
+
+    //We create a file if it doesn't exist.
+    file_number = _dos_newfile(
+        "file", //file name
+        F_ATTR_ //by default (not to override if extists)
+    );
+
+    //We create a file overriding if exist.
+    file_number = _dos_maketmp (
+        "file", //file name
+        F_ATTR_ //by default (to override if it exist)
+    );
+
+    */
+
 
     //if any error...
     if(file_number < 0){
@@ -83,9 +111,9 @@ int main(void)
     file_number = _dos_open(
         "file",                             //file name
         OPENING_MODE(
-            ACCESS_NORMAL,
-            SHARING_COMPATIBILITY_MODE,
-            MODE_R                          //only read mode
+            OPEN_ACCESS_NORMAL,
+            OPEN_SHARING_COMPATIBILITY_MODE,
+            OPEN_MODE_R                          //only read mode
         )
     );
 
@@ -103,8 +131,8 @@ int main(void)
         //we read the file and capture the number of characters we manage to read
         int16_t bytes_read = _dos_read(
             file_number,        //handler number
-            message_in,         //destination
-            sizeof(message_in)  //bytes to read
+            (char *) message_in,         //destination
+            sizeof message_in  //bytes to read
         );
 
         //if any error...
