@@ -87,9 +87,9 @@ int main(void)
 
     //load palette
     fconf.config = 0;
-    fconf.flags.access_dictionary = ACCESS_NORMAL;
-    fconf.flags.sharing = SHARING_COMPATIBILITY_MODE;
-    fconf.flags.mode = MODE_R;
+    fconf.flags.access_dictionary = OPEN_ACCESS_NORMAL;
+    fconf.flags.sharing = OPEN_SHARING_COMPATIBILITY_MODE;
+    fconf.flags.mode = OPEN_MODE_R;
 
     s_still = loadData(NULL, "/sonic_sp/s_still.spt", fconf.config);
 
