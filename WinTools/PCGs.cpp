@@ -2,7 +2,7 @@
 
 int PCGs::hardcodedPCG(const char* fileDest)
 {
-    ofstream pcgFileOut;
+    std::ofstream pcgFileOut;
 
     uint32_t star_crafts[] = {
         //tile 0
@@ -43,7 +43,7 @@ int PCGs::hardcodedPCG(const char* fileDest)
         0x55000000,
     };
 
-    pcgFileOut.open(fileDest, ios::binary);
+    pcgFileOut.open(fileDest, std::ios::binary);
 
     for (uint32_t buffer : star_crafts){
 

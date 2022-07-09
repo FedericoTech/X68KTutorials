@@ -1,13 +1,35 @@
 
 #include "bmp.h"
 
+void BmpHeader::printHeader()
+{
+    char sys[3];
+    memcpy(&sys, &this->sys, 2);
+
+    std::cout << "header.sys " << sys << "\0"
+        << std::endl << "header.file_siz "               << file_size
+        << std::endl << "header.reserved1 "              << reserved1
+        << std::endl << "header.reserved2 "              << reserved2
+        << std::endl << "header.starting "               << starting
+        << std::endl << "header.header_size "            << header_size
+        << std::endl << "header.witdth "                 << witdth
+        << std::endl << "header.height "                 << height
+        << std::endl << "header.color_planes "           << color_planes
+        << std::endl << "header.bits_per_pixel "         << bits_per_pixel
+        << std::endl << "header.compression_method "     << compression_method
+        << std::endl << "header.image_raw_size "         << image_raw_size
+        << std::endl << "header.horizontal_resolution "  << horizontal_resolution
+        << std::endl << "header.colours_per_pallete "    << colours_per_pallete
+        << std::endl << "header.num_important_colours "  << num_important_colours
+        << std::endl;
+}
 
 Bmp Bmp::fromBmpFile(const char *fileName) {
 
-    fstream imageFileIn;
+    std::fstream imageFileIn;
 
     //we open the image file
-    imageFileIn.open(fileName, ios::in | ios::binary);
+    imageFileIn.open(fileName, std::ios::in | std::ios::binary);
 
     //if any error...
     if(!imageFileIn.is_open()){
@@ -21,7 +43,7 @@ Bmp Bmp::fromBmpFile(const char *fileName) {
     //we retrieve the header
     imageFileIn.read((char *)&header, sizeof(header));
 
-    bmp.printHeader(header);
+    header.printHeader();
 
     bmp.has_palette = header.colours_per_pallete > 0;
     bmp.width = header.witdth;
@@ -35,11 +57,15 @@ Bmp Bmp::fromBmpFile(const char *fileName) {
 
         int num_of_colours = bmp.getNumOfColours();
 
-        int size_palette = sizeof(RGBQUAD) * num_of_colours;
+        //int size_palette = sizeof(RGBQUAD) * num_of_colours;
+        try{
+            bmp.palette = new RGBQUAD[num_of_colours];
+        } catch(const std::bad_alloc& e){
+            std::cout << "cannot allocate" << std::endl;
+            exit(1);
+        }
 
-        bmp.palette = (RGBQUAD*) malloc (size_palette);
-
-        printf("num of colours %d\n", num_of_colours);
+        std::cout << "num of colours " << num_of_colours << std::endl;
 
         //we initialize the array
         for(int cont = 0; cont < num_of_colours; cont++){
@@ -49,13 +75,13 @@ Bmp Bmp::fromBmpFile(const char *fileName) {
             bmp.palette[cont].rgbReserved = 0;
         }
 
-        puts("before initializing the palette\n");
+        std::puts("before initializing the palette\n");
 
         int size_this_palette = sizeof(RGBQUAD) * bmp.colours_per_pallete;
 
         imageFileIn.seekg(header.starting - size_this_palette, imageFileIn.beg);
 
-        puts("before reading");
+        std::puts("before reading");
 
         imageFileIn.read((char*)bmp.palette, size_this_palette);
 /*
@@ -68,16 +94,22 @@ Bmp Bmp::fromBmpFile(const char *fileName) {
             );
         }
 */
-        puts("after reading the palette\n");
+        std::puts("after reading the palette\n");
     }
 
-    imageFileIn.seekg(header.starting, ios::beg);
+    imageFileIn.seekg(header.starting, std::ios::beg);
 
-    puts("after seekg the buffer\n");
+    std::puts("after seekg the buffer\n");
 
-    uint8_t *buffer = (uint8_t*)malloc(bmp.image_raw_size);
+    //uint8_t *buffer = (uint8_t*)malloc(bmp.image_raw_size);
+    uint8_t *buffer = new (std::nothrow) uint8_t[bmp.image_raw_size];
 
-    puts("after creating the buffer\n");
+    if(buffer == nullptr){
+        std::puts("cannot allocate\n");
+        exit(1);
+    }
+
+    std::puts("after creating the buffer\n");
 
     imageFileIn.read((char*) buffer, bmp.image_raw_size);
 
@@ -108,7 +140,7 @@ Bmp Bmp::fromBmpFile(const char *fileName) {
             break;
     }
 
-    puts("before turning the image\n");
+    std::puts("before turning the image\n");
 
     bmp.turnImage();
 
@@ -116,29 +148,6 @@ Bmp Bmp::fromBmpFile(const char *fileName) {
 
     return bmp;
 } //fromFile
-
-void Bmp::printHeader(BmpHeader header)
-{
-    char sys[3];
-    memcpy(&sys, &header.sys, 2);
-
-    cout << "header.sys " << sys << "\0"
-        << endl << "header.file_siz "               << header.file_size
-        << endl << "header.reserved1 "              << header.reserved1
-        << endl << "header.reserved2 "              << header.reserved2
-        << endl << "header.starting "               << header.starting
-        << endl << "header.header_size "            << header.header_size
-        << endl << "header.witdth "                 << header.witdth
-        << endl << "header.height "                 << header.height
-        << endl << "header.color_planes "           << header.color_planes
-        << endl << "header.bits_per_pixel "         << header.bits_per_pixel
-        << endl << "header.compression_method "     << header.compression_method
-        << endl << "header.image_raw_size "         << header.image_raw_size
-        << endl << "header.horizontal_resolution "  << header.horizontal_resolution
-        << endl << "header.colours_per_pallete "    << header.colours_per_pallete
-        << endl << "header.num_important_colours "  << header.num_important_colours
-        << endl;
-}
 
 RGBQUAD *Bmp::getPalette()
 {
@@ -148,7 +157,7 @@ RGBQUAD *Bmp::getPalette()
 uint8_t * Bmp::getImage()
 {
     return image;
-} //getPalette
+} //getImage
 
 uint8_t Bmp::getBitsPerPixel()
 {
@@ -187,26 +196,23 @@ int32_t Bmp::getNumPixels()
 
 void Bmp::convertFrom32Bits2Native16(RGB32 *buffer)
 {
-    puts(__FUNCTION__);
+    std::puts(__FUNCTION__);
 
     int32_t num_of_pixels = getNumPixels();
 
     uint16_t *img = (uint16_t *) malloc(sizeof(uint16_t) * num_of_pixels);
+
+    if(img == nullptr){
+        std::puts("cannot allocate\n");
+        exit(1);
+    }
 
     for(int cont = 0; cont < num_of_pixels; cont++){
         img[cont] = RGB888_2GRB(
             buffer[cont].rgbRed,
             buffer[cont].rgbGreen,
             buffer[cont].rgbBlue,
-            (
-                (
-                    (
-                        buffer[cont].rgbRed
-                        + buffer[cont].rgbGreen
-                        + buffer[cont].rgbBlue
-                    ) / 3
-                ) > 127
-            )
+            buffer[cont].workoutShadeBit()
         );
     }
 
@@ -215,34 +221,35 @@ void Bmp::convertFrom32Bits2Native16(RGB32 *buffer)
 
 void Bmp::convertFrom24Bits2Native16(RGB24 *buffer)
 {
-    puts(__FUNCTION__);
+    std::puts(__FUNCTION__);
 
     int32_t num_of_pixels = getNumPixels();
 
-    image = (uint8_t *) malloc(sizeof(uint16_t) * num_of_pixels);
+    uint16_t * img = nullptr;
 
-    uint16_t *img = (uint16_t *) image;
+    //image = (uint8_t *) malloc(sizeof(uint16_t) * num_of_pixels);
 
-    puts("before loop");
+    try{
+        img = new uint16_t[num_of_pixels];
+    } catch(std::exception& e) {
+        std::cout << e.what() << std::endl;
+    }
+
+
+    std::puts("before loop");
 
     for(int32_t cont = 0; cont < num_of_pixels; cont++){
         img[cont] = RGB888_2GRB(
             buffer[cont].rgbRed,
             buffer[cont].rgbGreen,
             buffer[cont].rgbBlue,
-            (
-                (
-                    (
-                        buffer[cont].rgbRed
-                        + buffer[cont].rgbGreen
-                        + buffer[cont].rgbBlue
-                    ) / 3
-                ) > 127
-            )
+            buffer[cont].workoutShadeBit()
         );
     }
 
-    puts("after loop");
+    image = (uint8_t *) img;
+
+    std::puts("after loop");
 
 } //convertFrom24Bits
 
@@ -250,14 +257,14 @@ void Bmp::convertFrom24Bits2Native16(RGB24 *buffer)
 
 void Bmp::convertFrom16Bits2Native16(uint16_t * buffer, bool format)
 {
-    puts(__FUNCTION__);
+    std::puts(__FUNCTION__);
 
     image = (uint8_t *) buffer;
 } //convertFrom16Bits
 
 void Bmp::convertFrom8Bits2Native8(uint8_t * buffer)
 {
-    puts(__FUNCTION__);
+    std::puts(__FUNCTION__);
 /*
     int32_t num_of_pixels = getNumPixels();
 
@@ -275,16 +282,27 @@ void Bmp::convertFrom8Bits2Native8(uint8_t * buffer)
 
 void Bmp::convertFrom4Bits2Native4(RGB4 * buffer)
 {
-    puts(__FUNCTION__);
+    std::puts(__FUNCTION__);
 
     uint32_t num_of_pixels = getNumPixels();
 
+    //RGB4 *img = (RGB4 *) malloc(num_of_pixels/2);
 
-    RGB4 *img = (RGB4 *) malloc(num_of_pixels/2);
+    RGB4 *img = new (std::nothrow) RGB4[num_of_pixels/2];
+
+    if(img == nullptr){
+        std::puts("cannot allocate\n");
+        exit(1);
+    }
 
     uint32_t real_width = image_raw_size / height;
 
-    printf("rw: %d, hw: %d, w: %d\n", real_width, width/2, width);
+    printf(
+       "rw: %d, hw: %d, w: %d\n",
+       real_width,
+       width/2,
+       width
+    );
 
     int cont2 = 0;
     for(uint32_t j = 0; j < height; j++){
@@ -297,6 +315,7 @@ void Bmp::convertFrom4Bits2Native4(RGB4 * buffer)
         }
     }
 
+    delete[] image;
     image = (uint8_t *) img;
 }
 
@@ -304,11 +323,21 @@ void Bmp::convertFrom4Bits2Native4(RGB4 * buffer)
 
 void Bmp::convertFrom8To16Bits()
 {
-    puts(__FUNCTION__);
+    std::puts(__FUNCTION__);
 
     int32_t num_of_pixels = getNumPixels();
 
-    uint16_t * buffer = (uint16_t *) malloc(sizeof(uint16_t) * num_of_pixels);
+    delete[] image;
+    image = nullptr;
+
+    //uint16_t * buffer = (uint16_t *) malloc(sizeof(uint16_t) * num_of_pixels);
+
+    uint16_t * buffer = new (std::nothrow) uint16_t[num_of_pixels];
+
+    if(buffer == nullptr){
+        std::puts("cannot allocate\n");
+        exit(1);
+    }
 
     for(int cont = 0; cont < num_of_pixels; cont++){
 
@@ -318,15 +347,7 @@ void Bmp::convertFrom8To16Bits()
             palette[image[cont]].rgbRed,
             palette[image[cont]].rgbGreen,
             palette[image[cont]].rgbBlue,
-            (
-                (
-                    (
-                        palette[image[cont]].rgbRed
-                        + palette[image[cont]].rgbGreen
-                        + palette[image[cont]].rgbBlue
-                    ) / 3
-                ) > 127
-            )
+            palette[image[cont]].workoutShadeBit()
         );
     }
 
@@ -335,11 +356,19 @@ void Bmp::convertFrom8To16Bits()
 
 void Bmp::convertFrom4To16Bits()
 {
-    puts(__FUNCTION__);
+    std::puts(__FUNCTION__);
 
     int32_t num_of_pixels = getNumPixels() / 2;
 
-    uint16_t * buffer = (uint16_t *) malloc(sizeof(uint16_t) * num_of_pixels * 2);
+    uint16_t * buffer = nullptr;
+
+    //uint16_t * buffer = (uint16_t *) malloc(sizeof(uint16_t) * num_of_pixels * 2);
+    try{
+        buffer = new uint16_t[num_of_pixels * 2];
+    } catch(const std::bad_alloc& e){
+        std::cout << e.what() << std::endl;
+        exit(1);
+    }
 
     RGB4 * img = (RGB4 *)image;
 
@@ -352,15 +381,7 @@ void Bmp::convertFrom4To16Bits()
             palette[img[cont].pixel1].rgbRed,
             palette[img[cont].pixel1].rgbGreen,
             palette[img[cont].pixel1].rgbBlue,
-            (
-                (
-                    (
-                        palette[img[cont].pixel1].rgbRed
-                        + palette[img[cont].pixel1].rgbGreen
-                        + palette[img[cont].pixel1].rgbBlue
-                    ) / 3
-                ) > 127
-            )
+            palette[img[cont].pixel1].workoutShadeBit()
         );
 
         if((width % 2 == 0) ||(cont2 % width != 0)){
@@ -368,26 +389,20 @@ void Bmp::convertFrom4To16Bits()
                 palette[img[cont].pixel0].rgbRed,
                 palette[img[cont].pixel0].rgbGreen,
                 palette[img[cont].pixel0].rgbBlue,
-                (
-                    (
-                        (
-                            palette[img[cont].pixel0].rgbRed
-                            + palette[img[cont].pixel0].rgbGreen
-                            + palette[img[cont].pixel0].rgbBlue
-                        ) / 3
-                    ) > 127
-                )
+                palette[img[cont].pixel0].workoutShadeBit()
             );
         }
     }
+
+    delete[] image;
     image = (uint8_t *) buffer;
-    //free(img);
+
 } //convertFrom4Bits
 
 
 void Bmp::turnImage()
 {
-    puts(__FUNCTION__);
+    std::puts(__FUNCTION__);
 
     int32_t num_of_pixels = getNumPixels();
 
@@ -395,8 +410,19 @@ void Bmp::turnImage()
     {
         case CM_16BIT:
         {
-            uint16_t *buffer = (uint16_t *) malloc(sizeof(uint16_t) * num_of_pixels);
+            std::puts("turning in 16 bits\n");
 
+            //uint16_t *buffer = (uint16_t *) malloc(sizeof(uint16_t) * num_of_pixels);
+            uint16_t *buffer = nullptr;
+
+            try{
+                buffer = new uint16_t[num_of_pixels];
+            } catch(const std::bad_alloc& e){
+                std::cout << e.what() << std::endl;
+                exit(1);
+            }
+
+            //we take the image as 16 bits per pixel
             uint16_t *img = (uint16_t *) image;
 
             uint32_t k = 0;
@@ -411,15 +437,24 @@ void Bmp::turnImage()
                 }
             }
 
-            image = (uint8_t *) buffer;
+            delete[] image; //we free the previous image
+            image = (uint8_t *) buffer; //we set the current image
 
             break;
         }
         case CM_8BIT:
         {
-            char *buffer = (char *) malloc(num_of_pixels);
+            std::puts("turning in 8 bits\n");
 
-            puts("before turning the array");
+            //char *buffer = (char *) malloc(num_of_pixels);
+            char *buffer = new (std::nothrow) char[num_of_pixels];
+
+            if(buffer == nullptr){
+                std::puts("cannot allocate\n");
+                exit(1);
+            }
+
+            std::puts("before turning the array");
             uint32_t k = 0;
             //this loop goes from bottom to top
             for(int i = num_of_pixels - width; i > -1; i -= width) {
@@ -431,20 +466,28 @@ void Bmp::turnImage()
                 }
             }
 
-            //free(buffer);
-
-            image = (uint8_t *) buffer;
+            delete[] image; //we free the previous image
+            image = (uint8_t *) buffer; //we set the current image
 
             break;
 
         }
         case CM_4BIT:
         {
-            char *buffer = (char *) malloc(sizeof(char) * num_of_pixels);
+            std::puts("turning in 4 bits\n");
 
+            //we take the image as 4bit per pixel
             RGB4 * img = (RGB4 *)image;
 
-            puts("before putting the data in the array");
+            //char *buffer = (char *) malloc(sizeof(char) * num_of_pixels);
+            char *buffer = new (std::nothrow) char[num_of_pixels];
+
+            if(buffer == nullptr){
+                std::puts("cannot allocate\n");
+                exit(1);
+            }
+
+            std::puts("before putting the data in the array");
 
             int cont2 = 0;
             for(int cont = 0; cont < num_of_pixels/2; cont++){
@@ -453,9 +496,19 @@ void Bmp::turnImage()
                 buffer[cont2++] = img[cont].pixel0;
             }
 
-            puts("before turning the array");
+            std::puts("before turning the array");
 
-            char *buffer2 = (char *) malloc(num_of_pixels);
+            //char *buffer2 = (char *) malloc(num_of_pixels);
+
+            char *buffer2 = nullptr;
+
+            try{
+                buffer2 = new char[num_of_pixels];
+            } catch(const std::bad_alloc& e){
+                std::cout << e.what() << std::endl;
+                exit(1);
+            }
+
             cont2 = 0;
             //this loop goes from bottom to top
             for(int i = num_of_pixels - width; i > -1; i -= width) {
@@ -473,8 +526,9 @@ void Bmp::turnImage()
                 img[cont].pixel1 = buffer2[cont2++];
                 img[cont].pixel0 = buffer2[cont2++];
             }
-            free(buffer);
-            free(buffer2);
+            delete[] buffer;
+            delete[] buffer2;
+            buffer = buffer2 = nullptr;
             break;
 
         }
@@ -483,6 +537,8 @@ void Bmp::turnImage()
 
 int Bmp::convertTo16Bits()
 {
+    std::puts(__FUNCTION__);
+
     switch(bits_per_pixel){
     case CM_16BIT:
         break;
@@ -496,16 +552,18 @@ int Bmp::convertTo16Bits()
 
     bits_per_pixel = CM_16BIT;
     has_palette = false;
-    free(palette);
+
+    delete[] palette;
+    palette = nullptr;
 
     return 0;
 }
 
 int Bmp::saveImage(const char *fileDest)
 {
-    puts(__FUNCTION__);
+    std::puts(__FUNCTION__);
 
-    ofstream fImage(fileDest, ofstream::binary);
+    std::ofstream fImage(fileDest, std::ofstream::binary);
 
     int32_t num_of_pixels = getNumPixels();
 
@@ -513,9 +571,16 @@ int Bmp::saveImage(const char *fileDest)
     {
         case CM_16BIT:
             {
+                //we take the image as 16bit per pixel
                 uint16_t * img = (uint16_t *)image;
 
-                uint16_t * buffer = (uint16_t *) malloc(sizeof(uint16_t) * num_of_pixels);
+                //uint16_t * buffer = (uint16_t *) malloc(sizeof(uint16_t) * num_of_pixels);
+                uint16_t * buffer = new (std::nothrow) uint16_t[num_of_pixels];
+
+                if(buffer == nullptr){
+                    std::puts("cannot allocate\n");
+                    exit(1);
+                }
 
                 //reverse the bytes for the bigendien
                 for(int cont = 0; cont < num_of_pixels; cont++){
@@ -524,7 +589,8 @@ int Bmp::saveImage(const char *fileDest)
 
                 fImage.write((char*)buffer, sizeof(uint16_t) *  num_of_pixels);
 
-                free(buffer);
+                delete[] buffer;
+                buffer = nullptr;
 
                 break;
             }
@@ -547,9 +613,9 @@ int Bmp::saveImage(const char *fileDest)
 
 int Bmp::saveDump(const char *fileDest)
 {
-    puts(__FUNCTION__);
+    std::puts(__FUNCTION__);
 
-    ofstream fImage(fileDest, ofstream::binary);
+    std::ofstream fImage(fileDest, std::ofstream::binary);
 
     int32_t num_of_pixels = getNumPixels();
 
@@ -557,9 +623,20 @@ int Bmp::saveDump(const char *fileDest)
     {
         case CM_16BIT:
             {
+                std::puts("dumping in 16 bit\n");
+                //we take the image as 16bit per pixel
                 uint16_t * img = (uint16_t *)image;
 
-                uint16_t * buffer = (uint16_t *) malloc(sizeof(uint16_t) * num_of_pixels);
+                //uint16_t * buffer = (uint16_t *) malloc(sizeof(uint16_t) * num_of_pixels);
+
+                uint16_t * buffer = nullptr;
+
+                try{
+                    buffer = new uint16_t[num_of_pixels];
+                } catch(const std::bad_alloc& e){
+                    std::cout << e.what() << std::endl;
+                    exit(1);
+                }
 
                 //reverse the bytes for the bigendien
                 for(int cont = 0; cont < num_of_pixels; cont++){
@@ -568,13 +645,20 @@ int Bmp::saveDump(const char *fileDest)
 
                 fImage.write((char*)buffer, sizeof(uint16_t) *  num_of_pixels);
 
-                free(buffer);
-
+                delete[] buffer;
+                buffer = nullptr;
                 break;
             }
         case CM_8BIT:
             {
-                uint16_t * buffer = (uint16_t *) malloc(sizeof(uint16_t) * num_of_pixels);
+                std::puts("dumping in 8 bit\n");
+                //uint16_t * buffer = (uint16_t *) malloc(sizeof(uint16_t) * num_of_pixels);
+                uint16_t * buffer = new (std::nothrow)uint16_t[num_of_pixels];
+
+                if(buffer == nullptr){
+                    std::puts("cannot allocate\n");
+                    exit(1);
+                }
 
                 //reverse the bytes for the bigendien
                 for(int cont = 0; cont < num_of_pixels; cont++){
@@ -583,15 +667,25 @@ int Bmp::saveDump(const char *fileDest)
 
                 fImage.write((char*)buffer, sizeof(uint16_t) *  num_of_pixels);
 
-                free(buffer);
-
+                delete[] buffer;
+                buffer = nullptr;
                 break;
             }
         case CM_4BIT:
             {
+                std::puts("dumping in 4 bit\n");
+                //we take the image as 4bits per pixel
                 RGB4 * img = (RGB4 *)image;
 
-                uint16_t * buffer = (uint16_t *) malloc(sizeof(uint16_t) * num_of_pixels);
+                //uint16_t * buffer = (uint16_t *) malloc(sizeof(uint16_t) * num_of_pixels);
+                uint16_t * buffer = nullptr;
+
+                try {
+                    buffer = new uint16_t[num_of_pixels];
+                } catch(const std::bad_alloc& e){
+                    std::cout << e.what() << std::endl;
+                    exit(1);
+                }
 
                 int k = 0;
                 //reverse the bytes for the bigendien
@@ -602,8 +696,8 @@ int Bmp::saveDump(const char *fileDest)
 
                 fImage.write((char*)buffer, sizeof(uint16_t) *  num_of_pixels);
 
-                free(buffer);
-
+                delete[] buffer;
+                buffer = nullptr;
                 break;
             }
             break;
@@ -618,9 +712,18 @@ int Bmp::saveDump(const char *fileDest)
 int Bmp::savePalette(const char *fileDest)
 {
     if(has_palette){
-        puts(__FUNCTION__);
+        std::puts(__FUNCTION__);
 
-        uint16_t * buffer = (uint16_t *) malloc(sizeof(uint16_t) * getNumOfColours());
+        //uint16_t * buffer = (uint16_t *) malloc(sizeof(uint16_t) * getNumOfColours());
+
+        uint16_t * buffer = nullptr;
+
+        try{
+            buffer = new uint16_t[getNumOfColours()];
+        } catch(const std::bad_alloc& e){
+            std::cout << e.what() << std::endl;
+            exit(1);
+        }
 
         for(uint32_t cont = 0; cont < colours_per_pallete; cont++){
 
@@ -629,26 +732,20 @@ int Bmp::savePalette(const char *fileDest)
                     palette[cont].rgbRed,
                     palette[cont].rgbGreen,
                     palette[cont].rgbBlue,
-                    (
-                        (
-                            (
-                                palette[cont].rgbRed
-                                + palette[cont].rgbGreen
-                                + palette[cont].rgbBlue
-                            ) / 3
-                        ) > 127
-                    )
+                    palette[cont].workoutShadeBit()
                 )
             );
         }
 
 
-        ofstream fPalette(fileDest, ofstream::binary);
+        std::ofstream fPalette(fileDest, std::ofstream::binary);
 
         fPalette.write((char*)buffer, sizeof(uint16_t) * getNumOfColours());
 
         fPalette.close();
 
+        delete[] buffer;
+        buffer = nullptr;
         return 0;
     }
     return 1;
@@ -656,22 +753,28 @@ int Bmp::savePalette(const char *fileDest)
 
 int Bmp::saveTiles(const char *fileDest)
 {
-    puts(__FUNCTION__);
+    std::puts(__FUNCTION__);
 
     if(!has_palette
        || bits_per_pixel != CM_4BIT
        || width % 8 != 0
        || height % 8 != 0
     ){
-        puts("file needs to be multiple of 8");
+        std::puts("file needs to be multiple of 8 or bpp not 4bit");
         return 1;
     }
 
     int num_of_pixels = getNumPixels();
 
-    uint8_t *buffer = (uint8_t *) malloc(sizeof (uint8_t) * num_of_pixels);
+    //uint8_t *buffer = (uint8_t *) malloc(sizeof (uint8_t) * num_of_pixels);
+    uint8_t *buffer = new (std::nothrow) uint8_t[num_of_pixels];
 
-    //we convert 4 to 8 bits.
+    if(buffer == nullptr){
+        std::puts("cannot allocate\n");
+        exit(1);
+    }
+
+    //we convert 8 to 4 bits.
     RGB4 *img = (RGB4 *) image;
 
     int cont2 = 0;
@@ -680,7 +783,8 @@ int Bmp::saveTiles(const char *fileDest)
         buffer[cont2++] = img[cont].pixel0;
     }
 
-    uint8_t *buffer2 = (uint8_t *) malloc(sizeof (uint8_t) * num_of_pixels);
+    //uint8_t *buffer2 = (uint8_t *) malloc(sizeof (uint8_t) * num_of_pixels);
+    uint8_t *buffer2 = new uint8_t[num_of_pixels];
 
     int cont7 = 0;
 
@@ -690,7 +794,6 @@ int Bmp::saveTiles(const char *fileDest)
                 for(int cont6 = 0; cont6 < 8; cont6++){
 
                     buffer2[cont7++] = buffer[
-
                         cont * width
                         + cont2
 
@@ -702,41 +805,60 @@ int Bmp::saveTiles(const char *fileDest)
         }
     }
 
-    RGB4 *exit = (RGB4 *) malloc(sizeof (RGB4) * num_of_pixels / 2);
+    RGB4 *exit_buffer = new (std::nothrow) RGB4[num_of_pixels / 2];
+
+    if(exit_buffer == nullptr){
+        std::puts("cannot allocate\n");
+        exit(1);
+    }
 
     cont2 = 0;
     for(int cont = 0; cont < (int)num_of_pixels/2; cont++){
 
-        exit[cont].pixel1 = buffer2[cont2++];
-        exit[cont].pixel0 = buffer2[cont2++];
+        exit_buffer[cont].pixel1 = buffer2[cont2++];
+        exit_buffer[cont].pixel0 = buffer2[cont2++];
     }
 
-    ofstream fTiles(fileDest, ofstream::binary);
+    std::ofstream fTiles(fileDest, std::ofstream::binary);
 
-    fTiles.write((char*)exit, num_of_pixels/2);
+    fTiles.write((char*)exit_buffer, num_of_pixels/2);
 
     fTiles.close();
 
+    delete[] buffer;
+    delete[] buffer2;
+    delete[] exit_buffer;
+    buffer = buffer2 = nullptr;
+    exit_buffer = nullptr;
 
     return 0;
 }
 
 int Bmp::saveSprites(const char *fileDest)
 {
-    puts(__FUNCTION__);
+    std::puts(__FUNCTION__);
 
     if(!has_palette
        || bits_per_pixel != CM_4BIT
        || width % 16 != 0
        || height % 16 != 0
     ){
-        puts("file needs to be multiple of 16");
+        std::puts("file needs to be multiple of 16 or bpp not 4bits");
         return 1;
     }
 
     int num_of_pixels = getNumPixels();
 
-    uint8_t *buffer = (uint8_t *) malloc(sizeof (uint8_t) * num_of_pixels);
+    //uint8_t *buffer = (uint8_t *) malloc(sizeof (uint8_t) * num_of_pixels);
+
+    uint8_t *buffer = nullptr;
+
+    try{
+        buffer = new uint8_t[num_of_pixels];
+    } catch(const std::bad_alloc& e){
+        std::cout << e.what() << std::endl;
+        exit(1);
+    }
 
     //we convert 4 to 8 bits.
     RGB4 *img = (RGB4 *) image;
@@ -749,7 +871,13 @@ int Bmp::saveSprites(const char *fileDest)
     printf("h: %d, w: %d\n", height, width);
 
 
-    uint8_t *buffer2 = (uint8_t *) malloc(sizeof (uint8_t) * num_of_pixels);
+    //uint8_t *buffer2 = (uint8_t *) malloc(sizeof (uint8_t) * num_of_pixels);
+    uint8_t *buffer2 = new (std::nothrow) uint8_t[num_of_pixels];
+
+    if(buffer == nullptr){
+        std::puts("cannot allocate\n");
+        exit(1);
+    }
 
     int cont7 = 0;
 
@@ -774,21 +902,34 @@ int Bmp::saveSprites(const char *fileDest)
         }
     }
 
-    RGB4 *exit = (RGB4 *) malloc(sizeof (RGB4) * num_of_pixels / 2);
+    //RGB4 *exit = (RGB4 *) malloc(sizeof (RGB4) * num_of_pixels / 2);
+    RGB4 *exit_buffer = nullptr;
+    try{
+        exit_buffer = new RGB4[num_of_pixels / 2];
+    } catch(const std::bad_alloc& e){
+        std::cout << e.what() << std::endl;
+        exit(1);
+    }
 
     cont2 = 0;
     for(int cont = 0; cont < (int)num_of_pixels/2; cont++){
 
-        exit[cont].pixel1 = buffer2[cont2++];
-        exit[cont].pixel0 = buffer2[cont2++];
+        exit_buffer[cont].pixel1 = buffer2[cont2++];
+        exit_buffer[cont].pixel0 = buffer2[cont2++];
     }
 
-    ofstream fTiles(fileDest, ofstream::binary);
+    std::ofstream fTiles(fileDest, std::ofstream::binary);
 
-    fTiles.write((char*)exit, num_of_pixels/2);
+    fTiles.write((char*)exit_buffer, num_of_pixels/2);
 
     fTiles.close();
 
+    delete[] buffer;
+    delete[] buffer2;
+    delete[] exit_buffer;
+
+    buffer = buffer2 = nullptr;
+    exit_buffer = nullptr;
 
     return 0;
 } //saveTiles

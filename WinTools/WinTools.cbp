@@ -32,20 +32,10 @@
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 		</Compiler>
-		<Unit filename="Image.cpp" />
-		<Unit filename="Image.h" />
-		<Unit filename="PCGs.cpp" />
-		<Unit filename="PCGs.h" />
-		<Unit filename="Palettes.cpp" />
-		<Unit filename="Palettes.h" />
 		<Unit filename="bmp.cpp">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="bmp.h" />
-		<Unit filename="grafitti.cpp">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="grafitti.h" />
 		<Unit filename="main.cpp" />
 		<Unit filename="stdafx.h" />
 		<Extensions />

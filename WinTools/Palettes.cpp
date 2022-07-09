@@ -2,21 +2,21 @@
 
 int Palettes::reformatPalette(const char *fileSource, const char *fileDest)
 {
-    fstream paleteFileIn;
-    fstream paleteFileOut;
-    paleteFileIn.open(fileSource, ios::in | ios::binary);
+    std::fstream paleteFileIn;
+    std::fstream paleteFileOut;
+    paleteFileIn.open(fileSource, std::ios::in | std::ios::binary);
 
     //if any error...
     if(!paleteFileIn.is_open()){
-        cout << "Can't open the file" << endl;
+        std::cout << "Can't open the file" << std::endl;
         return 1;
     }
 
-    paleteFileOut.open(fileDest, ios::out | ios::binary);
+    paleteFileOut.open(fileDest, std::ios::out | std::ios::binary);
 
     //if any error...
     if(!paleteFileOut.is_open()){
-        cout << "Can't create the file" << endl;
+        std::cout << "Can't create the file" << std::endl;
         return 1;
     }
 
@@ -39,7 +39,7 @@ int Palettes::reformatPalette(const char *fileSource, const char *fileDest)
 
 void Palettes::savePalette(Bmp bmp, const char *fileDest)
 {
-    ofstream fPalette(fileDest, ofstream::binary);
+    std::ofstream fPalette(fileDest, std::ofstream::binary);
 
     RGBQUAD *buffer = bmp.getPalette();
 

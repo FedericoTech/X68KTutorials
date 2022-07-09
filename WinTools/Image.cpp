@@ -4,7 +4,7 @@ Image::saveAs16BitsImage(Bmp bmp, const char *fileDest)
 {
     puts(__FUNCTION__);
 
-    ofstream fImage(fileDest, ofstream::binary);
+    std::ofstream fImage(fileDest, std::ofstream::binary);
 
     int32_t num_of_pixels = bmp.getNumPixels();
 

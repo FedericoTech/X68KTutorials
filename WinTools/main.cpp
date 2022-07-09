@@ -3,31 +3,13 @@
 
 #include "stdafx.h"
 
-
-using namespace std;
-
 int main(int argc, char *argv[])
 {
     uint8_t option = atoi(argv[1]);
 
-    option = 15;
+    option = 5;
 
     switch(option){
-    case 0: //reformat pal
-        {
-            Palettes::reformatPalette("assets/palette.pal", "assets/palette_new.pal");
-        }
-        break;
-    case 1:
-        {
-            PCGs::hardcodedPCG("assets/ship.pcg");
-        }
-        break;
-    case 2:
-        {
-            Grafitti::doGrafitti("assets/R.bmp", "assets/grafitti.bmp", "assets/R.pic");
-        }
-        break;
     case 3:
         {
 
@@ -119,11 +101,11 @@ int main(int argc, char *argv[])
     case 9:
         {
             //PCGs::reformatPCG("sonic1.bmp", "sonic1.pcg");
-            Bmp bmp = Bmp::fromBmpFile("assets/sonic1.bmp");
+            //Bmp bmp = Bmp::fromBmpFile("assets/sonic1.bmp");
 
-            Palettes::savePalette(bmp, "assets/sonic.pal");
+            //Palettes::savePalette(bmp, "assets/sonic.pal");
 
-            Image::saveAs4BitsImage(bmp, "../LoadImage/default/sonic1.pic");
+            //Image::saveAs4BitsImage(bmp, "../LoadImage/default/sonic1.pic");
 
             puts("Done");
         }
@@ -376,10 +358,10 @@ int main(int argc, char *argv[])
         break;
         */
     default:
-        cout << "Nothing to do" << endl;
+        std::cout << "Nothing to do" << std::endl;
         break;
     }
 
-    cout << "Done" << endl;
+    std::cout << "Done" << std::endl;
     return 0;
 }

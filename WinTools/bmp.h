@@ -40,15 +40,6 @@ struct RGB1 {
 };
 #pragma pack(pop)
 
-#pragma pack(push)
-#pragma pack(1)
-struct RGB32 {
-    uint8_t rgbBlue;
-    uint8_t rgbGreen;
-    uint8_t rgbRed;
-    uint8_t rgbAlpha;
-};
-#pragma pack(pop)
 
 #pragma pack(push)
 #pragma pack(1)
@@ -56,16 +47,30 @@ struct RGB24 {
     uint8_t rgbBlue;
     uint8_t rgbGreen;
     uint8_t rgbRed;
+    bool workoutShadeBit()
+    {
+        return (
+            (
+                rgbRed
+                + rgbGreen
+                + rgbBlue
+            ) / 3
+        ) > 127;
+    }
 };
 #pragma pack(pop)
 
 #pragma pack(push)
 #pragma pack(1)
-typedef struct tagRGBQUAD {
-  uint8_t rgbBlue;
-  uint8_t rgbGreen;
-  uint8_t rgbRed;
-  uint8_t rgbReserved;
+struct RGB32 : public RGB24 {
+    uint8_t rgbAlpha;
+};
+#pragma pack(pop)
+
+#pragma pack(push)
+#pragma pack(1)
+typedef struct : public RGB24 {
+    uint8_t rgbReserved; //something else
 } RGBQUAD;
 #pragma pack(pop)
 
@@ -88,6 +93,8 @@ typedef struct tagRGBQUAD {
         int32_t vertical_resolution;    //4 signed, Preferred resolution in pixels per meter
         uint32_t colours_per_pallete;   //4 Number of entries in the colour map that are actually used
         uint32_t num_important_colours; //4 Number of significant colors
+
+        void printHeader();
     } BmpHeader;
 #pragma pack(pop)
 
@@ -111,7 +118,7 @@ class Bmp {
         uint8_t *alpha;
 
     protected:
-        static void printHeader(BmpHeader header);
+        //static void printHeader(BmpHeader header);
 
         void convertFrom32Bits2Native16(RGB32 * buffer);
         void convertFrom24Bits2Native16(RGB24 * buffer);
