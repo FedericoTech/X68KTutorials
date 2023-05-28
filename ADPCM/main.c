@@ -31,21 +31,21 @@
 #define SEEK_MODE_END 2
 
 
-#define ADPCM_MODE_NO_WAIT  0x0  //0b000000000000000
-#define ADPCM_MODE_WAIT     0x1  //0b100000000000000
+#define ADPCM_MODE_NO_WAIT  0x0   //0b00000000 00000000
+#define ADPCM_MODE_WAIT     0x1   //0b10000000 00000000
 
-#define ADPCM_SAMPLE_3_9KHZ  0x0  //0b000000000000000
-#define ADPCM_SAMPLE_5_2KHZ  0x1  //0b000000010000000
-#define ADPCM_SAMPLE_7_8KHZ  0x2  //0b000000100000000
-#define ADPCM_SAMPLE_10_4KHZ 0x3  //0b000000110000000
-#define ADPCM_SAMPLE_15_6KHZ 0x4  //0b000001000000000
+#define ADPCM_SAMPLE_3_9KHZ  0x0  //0b00000000 00000000
+#define ADPCM_SAMPLE_5_2KHZ  0x1  //0b00000000 10000000
+#define ADPCM_SAMPLE_7_8KHZ  0x2  //0b00000001 00000000
+#define ADPCM_SAMPLE_10_4KHZ 0x3  //0b00000001 10000000
+#define ADPCM_SAMPLE_15_6KHZ 0x4  //0b00000010 00000000
 
 #define ADPCM_SPK_MUTE   0x0
 #define ADPCM_SPK_LEFT   0x1
 #define ADPCM_SPK_RIGHT  0x2
 #define ADPCM_SPK_STEREO 0x3
 
-#define ADPCM_MODE(mode, sample, speaker) (mode << 15 | sample << 8 | speaker)
+#define ADPCM_MODE(mode, sample, speaker) (mode << 16 | sample << 8 | speaker)
 
 #define ADPCM_CTRL_END 0
 #define ADPCM_CTRL_SUSPEND 1
@@ -61,21 +61,27 @@
 #define ADPCM_STATUS_LIN 24
 // _iocs_adpcmsns()
 
-
+//if the chunk sent to the pcm is this number or less the return is inmediate
+#define MUSIC_CHUNK 65280
 
 char *buffer;
 
-int main(void)
+int main(int argc, char *argv[])
 {
     int16_t file_handler;
     int32_t status;
     int32_t size;
+    char *filename = "result.raw";
+
+    if(argc > 1){
+        filename = argv[1];
+    }
 
     _dos_c_print("loading wave!\r\n");
 
     //we open the palette file
     file_handler = _dos_open(
-        "result.raw",
+        filename,
         OPENING_MODE(
             ACCESS_NORMAL,
             SHARING_COMPATIBILITY_MODE,
@@ -121,32 +127,43 @@ int main(void)
 
     {
         int c = 0;
+        int offset = 0;
 
-        while(c < size){
-             //we play the next chunk of music
-             _iocs_adpcmout(
-                buffer + (c * 512),
+
+        while(offset < size){
+
+            int remainding_bytes = size - offset;
+
+
+            //we play the next chunk of music
+            _iocs_adpcmout(
+                buffer + offset,
                 ADPCM_MODE(
                     ADPCM_MODE_WAIT,
                     ADPCM_SAMPLE_15_6KHZ,
                     ADPCM_SPK_STEREO
                 ),
-                512
+                remainding_bytes < MUSIC_CHUNK ? remainding_bytes : MUSIC_CHUNK
             );
 
             //we move the pointer
             ++c;
+            offset += MUSIC_CHUNK;
 
             //if still playing...
-            if(_iocs_adpcmsns() != ADPCM_STATUS_IDLE){
+            while(_iocs_adpcmsns() != ADPCM_STATUS_IDLE){
                 //we print to show activity
                 printf("playing! %d\r\n", c);
+                //if we hit a key...
                 if(_dos_inpout(0xFF) != 0){
+                    //we stop the music
                     _iocs_adpcmmod(ADPCM_CTRL_END);
-                    break;
+                    //we get out the loops
+                    goto end;
                 }
             }
         }
+        end: ;
     }
 
     _dos_c_print("Done\r\n");
