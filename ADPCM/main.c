@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
         filename = argv[1];
     }
 
-    _dos_c_print("loading wave!\r\n");
+    _dos_c_print("loading pcm!\r\n");
 
     //we open the palette file
     file_handler = _dos_open(
@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
 
     //if any error...
     if(file_handler < 0){
-        _dos_c_print("Can't open the palette file\r\n");
+        _dos_c_print("Can't open the pcm file\r\n");
         _dos_exit();
     }
 
@@ -134,7 +134,6 @@ int main(int argc, char *argv[])
 
             int remainding_bytes = size - offset;
 
-
             //we play the next chunk of music
             _iocs_adpcmout(
                 buffer + offset,
@@ -163,7 +162,7 @@ int main(int argc, char *argv[])
                 }
             }
         }
-        end: ;
+        end: ; // to escape the double loop.
     }
 
     _dos_c_print("Done\r\n");
