@@ -64,7 +64,7 @@
 //if the chunk sent to the pcm is this number or less the return is inmediate
 #define MUSIC_CHUNK 65280
 
-char *buffer;
+char *buffer_a, *buffer_b;
 
 int main(int argc, char *argv[])
 {
@@ -109,15 +109,16 @@ int main(int argc, char *argv[])
        0  //0 = beginning, 1 = on the spot, 2 = end
     );
 
-    buffer = (char *) _dos_malloc(MUSIC_CHUNK * 2);
-
+    buffer_a = (char *) _dos_malloc(MUSIC_CHUNK * 2);
+    buffer_b = buffer_a + MUSIC_CHUNK;
 
     {
         int c = 0;
         int offset = 0;
 
-        if(_dos_read(file_handler, (char*) buffer, MUSIC_CHUNK)){
-            _dos_c_print("read\r\n");
+        _dos_c_print("before read\r\n");
+        if(_dos_read(file_handler, (char*) buffer_a, MUSIC_CHUNK)){
+            _dos_c_print("after read\r\n");
         }
 
         do{
@@ -125,7 +126,7 @@ int main(int argc, char *argv[])
 
             //we play the next chunk of music
             _iocs_adpcmout(
-                c % 2 == 0 ? buffer : buffer + MUSIC_CHUNK,
+                c % 2 == 0 ? buffer_a : buffer_b,
                 ADPCM_MODE(
                     ADPCM_MODE_WAIT,
                     ADPCM_SAMPLE_15_6KHZ,
@@ -138,8 +139,9 @@ int main(int argc, char *argv[])
             ++c;
             offset += MUSIC_CHUNK;
 
-            if(_dos_read(file_handler, (char*) (c % 2 == 0 ? buffer : buffer + MUSIC_CHUNK), MUSIC_CHUNK)){
-                _dos_c_print("read\r\n");
+            _dos_c_print("before read\r\n");
+            if(_dos_read(file_handler, (char*) (c % 2 == 0 ? buffer_a : buffer_b), MUSIC_CHUNK)){
+                _dos_c_print("after read\r\n");
             }
 
             //if still playing...
