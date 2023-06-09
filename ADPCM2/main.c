@@ -177,6 +177,9 @@ int main(int argc, char *argv[])
         }
     }
 
+    //we free memory
+    _dos_mfree(buffer);
+
     _dos_c_print("Done\r\n");
 
     _dos_exit();

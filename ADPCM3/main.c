@@ -126,19 +126,24 @@ int main(int argc, char *argv[])
     _dos_c_print("now we will play it!\r\n");
 
     {
-        int c = 0;
-        int offset = 0;
+        int c, offset = 0;
+        int num_of_chunks = ((int)(size / MUSIC_CHUNK)) + ((size % MUSIC_CHUNK) > 0);
+
 
 
 //we declare an array of structs that will point to each chunk of music
 #ifdef __MARIKO_CC__
-        struct _chain2 music[size / MUSIC_CHUNK];
+        struct _chain2 music[num_of_chunks];
 #else
-        struct iocs_chain2 music[size / MUSIC_CHUNK];
+        struct iocs_chain2 music[num_of_chunks];
 #endif
+        //the last one points to the first one.
+        music[num_of_chunks - 1].next = &music[0];
+
+        //printf("%d % %d = %d\r\n", size, MUSIC_CHUNK, size % MUSIC_CHUNK);
 
         //we point each element of the array to a chunk of music
-        while(offset < size){
+        for(c = 0; c < num_of_chunks; c++){
 
             int remainding_bytes = size - offset;
 
@@ -146,14 +151,13 @@ int main(int argc, char *argv[])
             music[c].addr = buffer + offset;
             //we set the length of the chunk that will be 65280 or the remainder
             music[c].len = remainding_bytes < MUSIC_CHUNK ? remainding_bytes : MUSIC_CHUNK;
-            if(c > 0) {
-                music[c].next = &music[c - 1];
-            } else {
-                music[c].next = &music[(size / MUSIC_CHUNK) - 1];
-            }
 
-            //we move the pointer
-            ++c;
+            //it not the first...
+            if(c < num_of_chunks - 1) {
+                //we link to the previous.
+                music[c].next = &music[c + 1];
+            //if the first one...
+            }
             offset += MUSIC_CHUNK;
         }
 
@@ -164,8 +168,7 @@ int main(int argc, char *argv[])
                 ADPCM_MODE_WAIT,
                 ADPCM_SAMPLE_15_6KHZ,
                 ADPCM_SPK_STEREO
-            ),
-            size / MUSIC_CHUNK  //number of chunks to be played.
+            )
         );
 
         //if still playing...
@@ -181,6 +184,9 @@ int main(int argc, char *argv[])
             }
         }
     }
+
+    //we free memory
+    _dos_mfree(buffer);
 
     _dos_c_print("Done\r\n");
 

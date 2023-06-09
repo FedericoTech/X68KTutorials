@@ -160,6 +160,9 @@ int main(int argc, char *argv[])
         end: ; // to escape the double loop.
     }
 
+    //we free memory
+    _dos_mfree(buffer_a);
+
     status = _dos_close(file_handler);
 
     //if any error...
