@@ -1,0 +1,3056 @@
+        - TWO MANUAL CALL -
+
+==============================================================================
+
+- List of DOS calls
+
+$ff00   _EXIT           End program
+$ff01   _GETCHAR        Keyboard input (with echo)
+$ff02   _PUTCHAR        Display character
+$ff03   _COMINP         Read byte from RS-232C
+$ff04   _COMOUT         Write byte to RS-232C
+$ff05   _PRNOUT         Write character to printer
+$ff06   _INPOUT         Character I/O
+$ff07   _INKEY          Get character from keyboard (no break check)
+$ff08   _GETC           Get character from keyboard (with break check)
+$ff09   _PRINT          Print character string
+$ff0a   _GETS           Get character string (with break check)
+$ff0b   _KEYSNS         Inspect key input status
+$ff0c   _KFLUSH         Get key input after flushing buffer
+$ff0d   _FFLUSH         Disk reset
+$ff0e   _CHGDRV         Select working drive
+$ff0f   _DRVCTRL        Inspect/select drive status
+
+$ff10   _CONSNS         Inspect screen output status
+$ff11   _PRNSNS         Inspect printer output status
+$ff12   _CINSNS         Inspect RS-232C input status
+$ff13   _COUTSNS        Inspect RS-232C output status
+$ff17   _FATCHK         Inspect file allocation status
+$ff18   _HENDSP         Kanji conversion control
+$ff19   _CURDRV         Get working drive
+$ff1a   _GETSS          Get character string (no break check)
+$ff1b   _FGETC          Read byte from file
+$ff1c   _FGETS          Read character string from file
+$ff1d   _FPUTC          Write byte to file
+$ff1e   _FPUTS          Write character string to file
+$ff1f   _ALLCLOSE       Close all files
+
+$ff20   _SUPER          Set supervisor/user mode
+$ff21   _FNCKEY         Get/set redefinable keys
+$ff22   _KNJCTRL        Function call for kana-kanji conversion
+$ff23   _CONCTRL        Console control / direct output
+$ff24   _KEYCTRL        Inspect console status / direct input
+$ff25   _INTVCS         Set vector handling address
+$ff26   _PSPSET         Make process stack pointer
+$ff27   _GETTIM2        Get time (longword)
+$ff28   _SETTIM2        Set time (longword)
+$ff29   _NAMESTS        Expand filename
+$ff2a   _GETDATE        Get date
+$ff2b   _SETDATE        Set date
+$ff2c   _GETTIME        Get time
+$ff2d   _SETTIME        Set time
+$ff2e   _VERIFY         Set verify flag
+$ff2f   _DUP0           Force-copy file handle
+
+$ff30 	_VERNUM 		Get OS version
+$ff31   _KEEPPR         Terminate and stay
+$ff32   _GETDPB         Get drive parameter block
+$ff33   _BREAKCK        Set break check
+$ff34   _DRVXCHG        Drive exchange
+$ff35   _INTVCG         Get vector handling address
+$ff36   _DSKFRE         Get remaining disk space
+$ff37   _NAMECK         Expand filename
+$ff39   _MKDIR          Make subdirectory
+$ff3a   _RMDIR          Remove subdirectory
+$ff3b   _CHDIR          Change working directory
+$ff3c   _CREATE         Create file
+$ff3d   _OPEN           Open file
+$ff3e   _CLOSE          Close file
+$ff3f   _READ           Read from file
+
+$ff40   _WRITE          Write to file
+$ff41   _DELETE         Delete file
+$ff42   _SEEK           Move file pointer
+$ff43   _CHMOD          Get/set file attributes
+$ff44   _IOCTRL         Device driver ioctrl direct I/O
+$ff45   _DUP            Copy file handle
+$ff46   _DUP2           Force-copy file handle
+$ff47   _CURDIR         Get working directory
+$ff48   _MALLOC         Reserve memory
+$ff49   _MFREE          Relinquish memory block
+$ff4a   _SETBLOCK       Modify memory block
+$ff4b   _EXEC           Load and execute program
+$ff4c   _EXIT2          End program with exit code
+$ff4d   _WAIT           Get process exit code
+$ff4e   _FILES          Find file
+$ff4f   _NFILES         Find next file
+
+$ff80   _SETPDB         Modify process data block
+$ff81   _GETPDB         Get process data block
+$ff82   _SETENV         Set environment variable
+$ff83   _GETENV         Get environment variable
+$ff84   _VERIFYG        Get verify flag
+$ff85   _COMMON         Control common region
+$ff86   _RENAME         Rename/move file
+$ff87   _FILEDATE       Get/set file modified date
+$ff88   _MALLOC2        Reserve memory
+$ff8a   _MAKETMP        Make temporary file
+$ff8b   _NEWFILE        Make new file
+$ff8c   _LOCK           Lock file
+$ff8f   _ASSIGN         Get/set/delete virtual drive/directory allocation
+
+$ffaa   (unlisted)      Set FFLUSH mode (unlisted)
+$ffab   _OS_PATCH       Update internal OS handler (unlisted)
+$ffac   _GETFCB         Get file control block pointer (unlisted)
+$ffad   _S_MALLOC       Reserve memory block under main memory manager
+$ffae   _S_MFREE        Relinquish memory block under main memory manager
+$ffaf   _S_PROCESS      Set sub-memory manager
+
+$fff0   _EXITVC         (address to execute at end of program)
+$fff1   _CTRLVC         (address to execute at CTRL+C abort)
+$fff2   _ERRJVC         (address to execute at error abort)
+
+$fff3   _DISKRED        Block device direct input
+$fff4   _DISKWRT        Block device direct output
+$fff5   _INDOSFLG       Get pointer to OS' work area
+$fff6   _SUPER_JSR      Subroutine call
+$fff7   _BUS_ERR        Inspect bus error occurrence
+$fff8   _OPEN_PR        Register background task
+$fff9   _KILL_PR        Kill this process
+$fffa   _GET_PR         Get thread management info
+$fffb   _SUSPEND_PR     Force-sleep thread
+$fffc   _SLEEP_PR       Sleep
+$fffd   _SEND_PR        Send thread commands/data
+$fffe   _TIME_PR        Get timer counter value
+$ffff   _CHANGE_PR      Yield execution time
+
+CAUTION: Calls listed as $ff50-$ff7f in Human68k version 2 were moved to
+         $ff80-$ffaf in version 3
+
+         The handler addresses for calls $fff5-$fff7 and $fffa-$fffe cannot
+         be changed (they are ignored). For $fff8 and $ffff, after the original
+         handler exits normally, the address set is executed. $fff9 is called
+         for every thread to kill.
+
+==============================================================================
+
+- List of error codes
+
+$ffffffff        -1     Executed invalid function code
+$fffffffe        -2     Specified file not found
+$fffffffd        -3     Specified directory not found
+$fffffffc        -4     Too many open files
+$fffffffb        -5     Cannot access directory or volume label
+$fffffffa        -6     Specified handle is not open
+$fffffff9        -7     Memory manager region was destroyed
+$fffffff8        -8     Not enough memory to execute
+$fffffff7        -9     Invalid memory manager pointer specified
+$fffffff6       -10     Illegal environment specified
+$fffffff5       -11     Abnormal executable file format
+$fffffff4       -12     Abnormal open access mode
+$fffffff3       -13     Error in selecting a filename
+$fffffff2       -14     Called with invalid parameter
+$fffffff1       -15     Error in selecting a drive
+$fffffff0       -16     Cannot remove current directory
+$ffffffef       -17     Cannot ioctrl device
+$ffffffee       -18     No more files found
+$ffffffed       -19     Cannot write to specified file
+$ffffffec       -20     Specified directory already registered
+$ffffffeb       -21     Cannot delete because file exists
+$ffffffea       -22     Cannot name because file exists
+$ffffffe9       -23     Cannot create file because disk is full
+$ffffffe8       -24     Cannot create file because directory is full
+$ffffffe7       -25     Cannot seek to specified location
+$ffffffe6       -26     Specified supervisor mode with supervisor status on
+$ffffffe5       -27     Thread with same name exists
+$ffffffe4       -28     Interprocess communication buffer is write-protected
+$ffffffe3       -29     Cannot start any more background processes
+$ffffffe0       -32     Not enough lock regions
+$ffffffdf       -33     Locked; cannot access
+$ffffffde       -34     Handler for specified drive is opened
+$ffffffdd       -35     Symbolic link nest exceeded 16 steps (lndrv)
+$ffffffb0       -80     File exists
+
+==============================================================================
+
+==============================================================================
+
+$ff00   _EXIT           End program
+
+        Ends the program. Handles of open files will be closed.
+
+==============================================================================
+
+$ff01   _GETCHAR        Wait for keyboard input (with echo)
+
+RETURN  key code
+
+        Waits for key input; outputs input key code to standard output.
+        It will check if the input key is ^C (return to parent process),
+        ^P (send future standard output to the printer as well), or ^N (exit
+        ^P status).
+
+==============================================================================
+
+$ff02   _PUTCHAR        Display specified character code
+
+ARGS    CODE.w          one-byte character code
+
+RETURN  usually 0
+
+        Outputs the character code specified in CODE to standard output.
+        It will check if an input key on the display was ^C, ^S, ^P, or ^N.
+
+        move    CODE,-(sp)
+        DOS _PUTCHAR
+        addq.l #2,sp
+
+==============================================================================
+
+$ff03   _COMINP         Get byte of input from the RS-232C port
+
+RETURN  byte of input
+
+        Gets one byte of input from the RS-232C port (with break check).
+
+==============================================================================
+
+$ff04   _COMOUT         Send byte of output to the RS-232C port
+
+ARGS    CODE.w          one-byte code
+
+        Outputs the byte code specified in CODE to the RS-232C port (with break
+        check).
+
+        move    CODE,-(sp)
+        DOS     _COMOUT
+        addq.l #2,sp
+
+==============================================================================
+
+$ff05   _PRNOUT         Outputs one character to the printer
+
+ARGS    CODE.w          one-byte character code
+
+        Outputs the character specified in CODE to the printer (with break
+        check). The upper byte of CODE must be 0, so kanji must be sent one
+        byte at a time, upper byte first, lower byte second.
+
+        move    CODE,-(sp)
+        DOS _PRNOUT
+        addq.l #2,sp
+
+==============================================================================
+
+$ff06   _INPOUT         Key I/O
+
+ARGS    CODE.w          one-byte character code
+
+RETURN  CODE = $ff, $fe
+                The input key code (if d0.l = 0, no input)
+        CODE = something else
+                d0.l = 0
+
+        If the value of CODE is $ff, it performs key input, but it will
+        return immediately if no key is input. If it is $fe, buffered key input
+        will be performed, but even if a key is being input, that key will be
+        put in the buffer. If CODE is some other value, it is considered a
+        character code and displayed accordingly.
+
+        move    CODE,-(sp)
+        DOS     _INPOUT
+        addq.l #2,sp
+
+==============================================================================
+
+$ff07   _INKEY          Get input character from keyboard (no break check)
+
+RETURN  key code
+
+        Waits until key is pressed, returns its keycode.
+
+==============================================================================
+
+$ff08   _GETC           Get input character from keyboard (with break check)
+
+RETURN  key code
+
+        Waits until key is pressed, returns its keycode. Checks whether it is
+        ^C, ^P, or ^N.
+
+==============================================================================
+
+$ff09   _PRINT          Print character string
+
+ARGS    MESPTR.l        Pointer to character string
+
+RETURN  usually 0
+
+        Displays the character string specified in MESPTR. Checks for ^C, ^S,
+        ^P, and ^N.
+
+        pea     (MESPTR)
+        TWO _PRINT
+        addq.l #4,sp
+
+==============================================================================
+
+$ff0a   _GETS           Get character string input
+
+ARGS    BUFFER.l        Pointer to input buffer
+
+RETURN  number of input characters
+
+        Reads input character string into input buffer specified in BUFFER
+        until newline. The newline character will be replaced by a null
+        character. Checks for ^C, ^P, and ^N. If the maximum number of input
+        characters is exceeded, a warning will be given, but it will not end.
+        Maximum number of input characters is set by using a buffer with
+        contents as below before calling. When executed continuing with the
+        same buffer, if the number of input characters received from the
+        previous execution is not cleared, the template still works.
+
+offset  size
+0       1.b     maximum number of input characters: n
+1       1.b     actual number of input characters
+2       n+1.b   input character string
+
+        pea     (BUFFER)
+        DOS     _GETS
+        addq.l #4,sp
+
+==============================================================================
+
+$ff0b   _KEYSNS         Inspect key input status
+
+RETURN  input status (0: no input; -1: input)
+
+        Checks key input status. Checks if there is ^C, ^P, or ^N.
+
+==============================================================================
+
+$ff0c   _KFLUSH         Get input from keyboard after flushing buffer
+
+ARGS    MODE.w          mode
+        CODE.w          code to select process
+        BUFFER.l        pointer to input buffer
+
+RETURN  MODE = 1, 7, 8
+                        the input keycode
+        MODE = 6
+                CODE = $fe, $ff
+                        the input keycode (if 0, no input)
+                CODE = something else
+                        d0.l = 0
+        MODE = 10
+                        number of input characters
+
+        After emptying the key input buffer, get input from keyboard.
+        The value of MODE corresponds to the lower byte of a DOS call;
+        it performs one of the actions below.
+
+        MODE = 1
+                Wait for key input; echo the input code to standard output.
+        MODE = 6
+                CODE = $ff      check key input (will not wait for input).
+                CODE = $fe      performs buffered key input
+                CODE = other    outputs to standard output.
+        MODE = 7
+                Wait for key input (no break check).
+        MODE = 8
+                Wait for key input (with break check).
+        MODE = 10
+                Write input character buffer until newline.
+
+MODE = 1, 7, 8
+        move    MODE,-(sp)
+        DOS _KFLUSH
+        addq.l #2,sp
+
+MODE = 6
+        move    CODE,-(sp)
+        move    MODE,-(sp)
+        DOS _KFLUSH
+        addq.l #4,sp
+
+MODE = 10
+        pea     (BUFFER)
+        move    MODE,-(sp)
+        DOS _KFLUSH
+        addq.l #6,sp
+
+==============================================================================
+
+$ff0d   _FFLUSH         Reset disk
+
+RETURN  usually 0
+
+        Initializes disk buffer contents and input buffer from standard input.
+        Does not close files. If fflush = off, does nothing.
+
+==============================================================================
+
+$ff0e   _CHGDRV         Select working drive
+
+ARGS    DRIVE.w         drive number (0: A, 1: B, ..., 25: Z)
+
+RETURN  Number of selectable drives (1-26)
+
+        Changes current working drive. Fails if return value is less than
+        selected drive number.
+
+        move    DRIVE,-(sp)
+        DOS _CHGDRV
+        addq.l #2,sp
+
+==============================================================================
+
+$ff0f   _DRVCTRL        Inspect/set drive status
+
+ARGS    MODE.w          (MD.b*256 + DRIVE.b)
+            MB.b            mode
+            DRIVE.b         drive number (0: current, 1: A, 2: B, ..., 26: Z)
+        P1.l            argument 1
+        P2.l            argument 2
+        ...
+        Pn.l            argument n
+
+RETURN  MD = 0
+                Specified drive's status
+
+                        bit 7   LED blink
+                        bit 6   eject prohibited
+                        bit 5   buffer exists
+                        bit 4   eject by user prohibited
+                        bit 3   PRO (protect = 1)
+                        bit 2   RDY (not ready = 1)
+                        bit 1   media inserted
+                        bit 0   insert error
+
+                Warning: PRO and RDY only returned when media inserted.
+
+        Inspects/sets status of drive specified by number in DRIVE according to
+        the value of mode MD.
+        The upper byte of MODE is mode MD; the lower byte specifies DRIVE, the
+        drive number.
+
+        MD = 0          Inspect status.
+        MD = 1          Eject (error if file open).
+        MD = 2          Forbid eject (also forbids MD = 1 eject).
+        MD = 3          Permit eject (opened drive is not closed; buffer is
+                        automatically cleared).
+        MD = 4          Flash LED when disk not inserted.
+        MD = 5-8        Forbid use.
+        MD = 9          Return FAT search to top with current directory as root
+                        (error if file open).
+        MD = 10         Return FAT search to top.
+        MD = 11-15      Reserved.
+        MD = 16-        Used for special block devices (possible to add
+                        optional arguments).
+
+MD = 0-4, 9, 10
+        move    MODE,-(sp)
+        TWO _DRVCTRL
+        addq.l #2,sp
+
+MD = 16-
+        move.l  Pn,-(sp)
+        ...
+        move.l  P1,-(sp)
+        move    MODE,-(sp)
+        TWO _DRVCTRL
+        lea     (n*4+2,sp),sp
+
+==============================================================================
+
+$ff10   _CONSNS         Inspect whether screen output is possible
+
+RETURN  output status (0: output not possible, not 0: output possible)
+
+        Checks whether it is possible to output to the screen.
+
+==============================================================================
+
+$ff11   _PRNSNS         Inspect whether printer output is possible
+
+RETURN  output status (0: output not possible, not 0: output possible)
+
+        Checks whether it is possible to output to the printer.
+
+==============================================================================
+
+$ff12   _CINSNS         Inspect whether RS-232C port input is possible
+
+RETURN  input status (0: input not possible, not 0: input possible)
+
+        Checks whether it is possible to get input from the RS-232C port.
+
+==============================================================================
+
+$ff13   _COUTSNS        Inspect whether RS-232C port output is possible
+
+RETURN  output status (0: output not possible, not 0: output possible)
+
+        Checks whether it is possible to output to the RS-232C port.
+
+==============================================================================
+
+$ff17   _FATCHK         Inspect whether the drive sector continues
+
+ARGS    FILE.l          Pointer to filename
+        BUFFER.l        Pointer to buffer
+        LEN.w           Number of bytes in buffer
+
+RETURN  Number of bytes used in buffer (error code if negative)
+                d0.l =  8       Continues (if called with [1])
+                d0.l = 14       Continues (if called with [2])
+
+        Writes drive number and connection status of sector of the file
+        indicated by FILE. With this DOS call it is possible to look up the
+        continuation of the FAT, as well as directly read the data portions
+        with DISKRED.
+        For this DOS call, when you push the buffer address BUFFER onto the
+        stack, there are two kinds of calling methods:
+        [1] Push as-is, and
+        [2] Push BUFFER + $80000000.
+        In the case of [1], the size of the sector number and number of sectors
+        stored in the buffer is a word, but for [2], it is a long word.
+        Be aware that for [2], the number of bytes in the buffer LEN is a
+        required argument.
+        The information stored in the buffer is as below.
+
+[1]
+offset  size
+0       1.w     Drive number       : d (1: A, 2: B, ..., 26: Z)
+2       1.w     Head sector number : s1
+4       1.w     Number of sectors  : n1
+6       1.w     Next sector number : s2
+8       1.w     Number of sectors  : n2
+        ...
+?       1.w     End                : 0
+
+[2]
+offset  size
+0       1.w     Drive number       : d (1: A, 2: B, ..., 26: Z)
+2       1.l     Head sector number : s1
+6       1.l     Number of sectors  : n1
+10      1.l     Next sector number : s2
+14      1.l     Number of sectors  : n2
+        ...
+What? 1.l End: 0
+
+[1]
+        pea     (BUFFER)
+        pea (FILE)
+        DOS _FATCHK
+        addq.l #8,sp
+
+[2]
+        move    LEN,-(sp)
+        pea     (BUFFER+$80000000)
+        pea (FILE)
+        DOS _FATCHK
+        lea     (10,sp),sp
+
+==============================================================================
+
+$ff18   _HENDSP         Control kanji conversion
+
+ARGS    MD.w            Control mode
+        POS.w           Position (from the first in the conversion window)
+        MESPTR.l        Pointer to conversion string
+
+RETURN  MD = 0, 4, 8
+                Maximum number of characters for window
+        MD = 1, 2, 5, 6, 7, 10
+                Next position
+
+        Controls kanji conversion according to value of mode MD.
+        This DOS call is used in programs that handle kanji conversion, but
+        since the Japanese FP makes use of it, general applications are not
+        allowed to use it.
+
+        MD = 0
+                Opens mode display window.
+        MD = 1
+                Display string normally from specified position.
+        MD = 2
+                Display string in reverse from specified position.
+        MD = 3
+                Close mode display window.
+        MD = 4
+                Open input window.
+        MD = 5
+                Display string normally from specified position.
+        MD = 6
+                Display string in reverse from specified position.
+        MD = 7
+                Restore specified position and after to before.
+        MD = 8
+                Open candidate window.
+        MD = 9
+                Display string normally from specified position.
+        MD = 10
+                Display string in reverse from specified position.
+        MD = 11
+                Close candidate window.
+
+MD = 0, 3, 4, 8, 11
+        move    MD,-(sp)
+        DOS _HENDSP
+        addq.l #2,sp
+
+MD = 7
+        move    POS,-(sp)
+        move    MD,-(sp)
+        DOS _HENDSP
+        addq.l #4,sp
+
+MD = 1, 2, 5, 6, 9, 10
+        pea     (MESPTR)
+        move    POS,-(sp)
+        move    MD,-(sp)
+        DOS _HENDSP
+        addq.l #8,sp
+
+==============================================================================
+
+$ff19   _CURDRV         Get current drive
+
+RETURN  Number of current drive (0: A, 1:B, ..., 25: Z)
+
+        Looks up current drive value.
+
+==============================================================================
+
+$ff1a   _GETSS          Inputs a string
+
+ARGS    BUFFER.l        Pointer to input buffer
+
+RETURN  Number of input characters
+
+        Writes a string to the buffer specified in BUFFER, reading input until
+        a newline.
+        The newline is replaced with a null character.
+        Does not perform break checks (does not newline with VOID/NEWLINE).
+        If it exceeds the maximum number of input characters, it will give a
+        warning, but will not end.
+        The input buffer's contents are as below.
+
+offset  size
+0       1.b     Maximum number of input characters: n
+1       1.b     (number of characters actually input)
+2       n+1.b   input string
+
+        pea     (BUFFER)
+        DOS _GETSS
+        addq.l #4,sp
+
+==============================================================================
+
+$ff1b   _FGETC          Input one byte from file handle
+
+ARGS    FILENO.w        File handle
+
+RETURN  The input 1-byte code
+
+        Waits until there is input from the file handle specified in FILENO; if
+        there is input, returns its code.
+
+==============================================================================
+
+$ff1c   _FGETS          Input string from file handle
+
+ARGS    BUFFER.l        Pointer to input buffer
+        FILENO.w        File handle
+
+RETURN  Number of input characters
+
+        Inputs a string from the file handle specified with FILENO until a
+        newline and writes it to the input buffer specified with BUFFER. The
+        newline is converted to a null character.
+        Does not perform break checks (does not newline with VOID/NEWLINE).
+        If maximum number of input characters is exceeded, it will read until
+        that number and end.
+        The contents of the input buffer are as below.
+
+offset  size
+0       1.b     Maximum number of input characters: n
+1       1.b     (number of characters actually input)
+2       n+1.b   input string
+
+        move    FILENO,-(sp)
+        pea     (BUFFER)
+        DOS _FGETS
+        addq.l #6,sp
+
+==============================================================================
+
+$ff1d   _FPUTC          Output one byte to file handle
+
+ARGS    CODE.w          1-byte code
+        FILENO.w        File handle
+
+        Outputs the 1-byte code specified in CODE to the file handle specified
+        in FILENO.
+
+        move    FILENO,-(sp)
+        move    CODE,-(sp)
+        DOS     _FPUTC
+        addq.l #4,sp
+
+==============================================================================
+
+$ff1e   _FPUTS          Output string to file handle
+
+ARGS    MESPTR.l        Pointer to string
+        FILENO.w        File handle
+
+        Outputs string specified in MESPTR to file handle specified in FILENO.
+        The string's null terminator is not output.
+
+        move    FILENO,-(sp)
+        pea     (MESPTR)
+        DOS _FPUTS
+        addq.l #6,sp
+
+==============================================================================
+
+$ff1f   _ALLCLOSE       Close all files
+
+        Closes all open files.
+
+==============================================================================
+
+$ff20   _SUPER          Change to supervisor/user mode
+
+ARGS    STACK.l         Mode to change to (0 or address specified by SSP)
+
+RETURN  STACK = 0
+                Previous value of SSP (error code if negative)
+
+        Changes between supervisor or user mode mode according to value on stack.
+
+        STACK = 0
+                Set value of USP to SSP; change to supervisor mode.
+        STACK = other
+                Set STACK to SSP; change to user mode.
+
+        pea     (STACK)
+        DOS _SUPER
+        addq.l #4,sp
+
+==============================================================================
+
+$ff21   _FNCKEY         Get/set redefinable keys
+
+ARGS    MODE.w          Mode and key number (MD.b*256 + FNO.b)
+        BUFFER.l        Pointer to data buffer
+
+RETURN  d0.l =  0       Completed normally
+                -1      Key number is abnormal
+
+        Gets/sets redefinable key according to value of MD.
+        This DOS call is supported by the CON device (console).
+        MD is set in the upper byte of MODE, and FNO in the lower byte.
+
+        MD = 0  Get
+        MD = 1  Set (also displays key's function, but not during 32-row mode)
+
+        FNO Key name
+         0      All keys
+         1-10 F01-F10
+        11-20   SHIFT + F01-F10
+        21      ROLL UP
+        22      ROLL DOWN
+        23      INS
+        24 OF
+        25      UP (↑)
+        26      LEFT (←)
+        27      RIGHT (→)
+        28      DOWN (↓)
+        29      CLR
+        30      HELP
+        31      HOME
+        32      UNDO
+
+        BUFFER is a buffer for getting/setting; the size varies according to the
+        value of FNO.
+
+        FNO =  0        712 bytes (32*20 + 6*12 bytes)
+        FNO =  1-20      32 bytes (31 bytes + $00)
+        FNO = 21-32       6 bytes ( 5 bytes + $00)
+
+        pea     (BUFFER)
+        move    MODE,-(sp)
+        DOS _FNCKEY
+        addq.l #6,sp
+
+==============================================================================
+
+$ff22   _KNJCTRL        Call for kana-kanji conversion function call
+
+        This DOS call is used for the Japanese FP's function call.
+
+==============================================================================
+
+$ff23   _CONCTRL        Console control / direct output
+
+ARGS    MD.w            Control mode (arguments vary according to this value)
+        CODE.w          1-byte code
+        MESPTR.l        Pointer to character string
+        ATR.w           Character attribute
+        X.w             Cursor position setting
+        Y.w             Cursor position setting
+        N.w             Cursor relative movement setting
+        MOD.w           Screen control setting
+        YS.w            Scroll limit setting
+        YL.w            Scroll limit setting
+
+RETURN  MD = 0-13, 15, 17, 18
+                d0.l = 0 (when completed normally)
+        MD = 14, 16
+                the previous mode
+
+        Performs direct input / control according to value of control code MD.
+        This DOS call is supported by the CON device.
+
+        MD = 0
+                Displays 1-byte code specified in CODE (IOCS _B_PUTC).
+        MD = 1
+                Displays character string specified in MESPTR (IOCS _B_PRINT).
+        MD = 2
+                Sets character attribute specified in ATR (IOCS _B_COLOR).
+        MD = 3
+                Sets cursor position specified in X and Y (IOCS _B_LOCATE).
+        MD = 4
+                Moves cursor a row down. On the bottom row, it scrolls up
+                (IOCS _B_DOWN_S).
+        MD = 5
+                Moves cursor a row up. On top row, it scrolls down (IOCS _B_UP_S).
+        MD = 6
+                Moves cursor N rows up without scrolling (IOCS _B_UP).
+        MD = 7
+                Moves cursor N rows down without scrolling (IOCS _B_DOWN).
+        MD = 8
+                Moves cursor N columns right without scrolling (IOCS _B_RIGHT).
+        MD = 9
+                Moves cursor N columns left without scrolling (IOCS _B_LEFT).
+        MD = 10
+                Clears screen according to value of mode MOD (IOCS _B_CLR_ST).
+
+                MOD = 0         From cursor to right edge of last row
+                MOD = 1         From left edge of first row to cursor
+                MOD = 2         Entire screen (cursor moved to top row, left edge)
+        MD = 11
+                Erases current row according too value of mode MOD (IOCS _ERA_ST).
+
+                MOD = 0         From cursor to right edge of row
+                MOD = 1         From left edge or row to cursor
+                MOD = 2         Cursor's entire row
+        MD = 12
+                Inserts N rows at cursor row (IOCS _B_INS).
+        MD = 13
+                Deletes N rows from cursor row (IOCS _B_DEL).
+        MD = 14
+                Sets the function key row's mode according to the value of MOD and
+                returns the previous mode. Scroll limits are reset.
+
+                MOD =  0        Display function keys (scroll limited to rows 0-31)
+                MOD =  1        Display modifier+function keys (same as above)
+                MOD =  2        Display nothing (same as above)
+                MOD =  3        Display nothing (scroll limited to rows 0-32)
+                MOD = -1        Get current mode.
+        MD = 15
+                Sets scroll limits with YS and YL. After scrolling, the cursor will
+                move to the left edge of the first row. The value of YS + YL sets a
+                limit of up to 32 when the function key row mode is 3 and 31 when
+                anything else. Absolute coordinates (0, YS) correspond to logical
+                coordinates (0, 0).
+        MD = 16
+                Sets screen mode according to MOD; returns previous mode.
+
+                MOD     Resolution      Graphics
+                0       768x512                 none
+                1       768x512            16 colors
+                2       512x512                 none
+                3       512x512            16 colors
+                4       512x512           256 colors
+                5       512x512         65536 colors
+                -1      Gets current mode.
+        MD = 17
+                Turns cursor display mode on (IOCS _OS_CURON).
+        MD = 18
+                Turns cursor display mode off (IOCS _OS_CUROF).
+
+        For MD = 6-9 and 12-13, when N = 0, it is treated as N = 1.
+
+MD = 0
+        move    CODE,-(sp)
+        move    MD,-(sp)
+        DOS _CONCTRL
+        addq.l #4,sp
+
+MD = 1
+        pea     (MESPTR)
+        move    MD,-(sp)
+        DOS _CONCTRL
+        addq.l #6,sp
+
+MD = 2
+        move    ATR,-(sp)
+        move    MD,-(sp)
+        DOS _CONCTRL
+        addq.l #4,sp
+
+MD = 3
+        move    Y,-(sp)
+        move    X,-(sp)
+        move    MD,-(sp)
+        DOS _CONCTRL
+        addq.l #6,sp
+
+MD = 4, 5, 17, 18
+        move    MD,-(sp)
+        DOS _CONCTRL
+        addq.l #2,sp
+
+MD = 6-9, 12-13
+        move    N,-(sp)
+        move    MD,-(sp)
+        DOS _CONCTRL
+        addq.l #4,sp
+
+MD = 10, 11, 14, 16
+        move    MOD,-(sp)
+        move    MD,-(sp)
+        DOS _CONCTRL
+        addq.l #4,sp
+
+MD = 15
+        move    YL,-(sp)
+        move    YS,-(sp)
+        move    MD,-(sp)
+        DOS _CONCTRL
+        addq.l #6,sp
+
+==============================================================================
+
+$ff24   _KEYCTRL        Inspect console status / direct input
+
+ARGS    MD.w            Controld mode (arguments vary according to this value)
+        GROUP.w         Key code group
+        INSMODE.w       INS key mode (-1: ON, 0: OFF)
+
+RETURN  MD = 0, 1
+                The keycode input
+        MD = 2
+                Status of modifier keys (bit is 1 when pressed)
+
+                        bit 10  fullwidth
+                        bit  9  hiragana
+                        bit  8  INS
+                        bit  7  CAPS
+                        bit  6  code input
+                        bit 5 romaji
+                        bit 4 kana
+                        bit  3  OPT. 2
+                        bit  2  OPT. 1
+                        bit  1  CTRL
+                        bit  0  SHIFT
+        MD = 3
+                Status of keys
+
+        Performs direct input from console / status inspection according to value
+        of control code MD.
+        This DOS call is supported by the CON device.
+
+        MD = 0
+                Input a key.
+        MD = 1
+                Do keycode readahead.
+        MD = 2
+                Inspect status of modifier keys.
+        MD = 3
+                Inspect key status of keycode group specified in GROUP.
+        MD = 4
+                Toggle INS key ON or OFF.
+
+MD = 0～2
+        move    MD,-(sp)
+        DOS _KEYCTRL
+        addq.l #2,sp
+
+MD = 3
+        move    GROUP,-(sp)
+        move    MD,-(sp)
+        DOS _KEYCTRL
+        addq.l #4,sp
+
+MD = 4
+        move    INSMODE,-(sp)
+        move    MD,-(sp)
+        DOS _KEYCTRL
+        addq.l #4,sp
+
+==============================================================================
+
+$ff25   _INTVCS         Set vector handling address
+
+ARGS    INTNO.w         Vector number
+        JOBADR.l        Handling address for selected vector
+
+RETURN  Previous handling address of selected vector
+
+        Sets JOBADR for the vector specified by INTNO, and returns the previously
+        set address.
+
+        INTNO =     0-$00ff Interrupts
+        INTNO = $0100-$01ff IOCS calls
+        INTNO = $ff00-$ffff	DOS calls
+
+        When addresses for trap #10-14 or _EXITVC are changed, the work area in PSP
+        changes as well. Also, when further aborting in _ERRJVC, its sr and ssp are
+        changed to that of the moment this DOS call was executed. In the case of
+        _CTRLVC, in addition to the _ERRJVC treatment, the sr and ssp from aborting
+        via CTRL-C also change.
+
+        head (JOBADR)
+        move    INTNO,-(sp)
+        DOS _INTVCS
+        addq.l #6,sp
+
+==============================================================================
+
+$ff26   _PSPSET         Make process stack pointer
+
+ARGS    PSPADR.l        Process stack pointer's address (memory stack pointer + 16)
+
+RETURN  Usually 0
+
+        Prepares various information for when the program ends at the address
+        specified in PSPADR.
+        The process stack pointer PSPADR must be the address of a memory stack
+        pointer + $10; its size is 240 bytes.
+
+        head (PSPADR)
+        DOS _PSPSET
+        addq.l #4,sp
+
+==============================================================================
+
+$ff27   _GETTIM2        Get time (longword)
+
+RETURN  Current time
+
+                %0000_0000_000t_tttt_00mm_mmmm_00ss_ssss
+                bit 20-16       hours (0-23)
+                bit 13- 8       minutes (0-59)
+                bit  5- 0       seconds (0-59)
+
+        Checks the current time. The difference between this and DOS _GETTIME is
+        that seconds are given in 1-second units, so the returned value must take
+        up a longword.
+
+==============================================================================
+
+$ff28   _SETTIM2        Set time (longword)
+
+ARGS    TIME.l          The time (format is same as return value of DOS _GETTIM2)
+
+RETURN  Error code
+
+        Sets the time to the value of TIME. The difference between this and DOS
+        _SETTIME is that seconds are given in 1-second units, so TIME must take up
+        a longword.
+
+        move.l  TIME,-(sp)
+        DOS _ WEEK2
+        addq.l #4,sp
+
+==============================================================================
+
+$ff29   _NAMESTS        Filename expansion
+
+ARGS    FILE.l          Pointer to filename
+        BUFFER.l        Pointer to buffer
+
+RETURN  Error code
+
+        Expands filename specified in FILE to the buffer specified in BUFFER.
+        The buffer is 88 bytes, and its contents are as below:
+
+offset  size
+0       1.b     NAMWLD  Number of wildcards (0: no wildcards -1: no file specified)
+1       1.b     NAMDRV  Drive number (A=0, B=1, ..., Z=25)
+2       65.b    NAMPTH  Path ('\' + subdirectory name if applicable + '\')
+67      8.b     NAMNM1  Filename (First eight characters)
+75      3.b     NAMEXT  Extension
+78      10.b    NAMNM2  Filename (remaining ten characters)
+
+        pea     (BUFFER)
+        pea (FILE)
+        DOS _NAMESTS
+        addq.l #8,sp
+
+==============================================================================
+
+$ff2a   _GETDATE        Get date
+
+RETURN  Current date
+
+                %0000_0000_0000_0www_yyyy_yyym_mmmd_dddd
+                bit 18-16       Day of week (0-6)
+                bit 15- 9       Year minus 1980 (0-99)
+                bit  8- 5       Month (1 = January, ..., 12 = December)
+                bit  4- 0       Day of month (1-31)
+
+        Gets the current date. Days of the week are 0-6 for Sunday through
+        Saturday; years are the year in the Gregorian calendar less 1980, but are
+        limited to 0-99.
+
+==============================================================================
+
+$ff2b   _SETDATE        Set date
+
+ARGS    DATE.w          The date
+
+RETURN  Error code
+
+        Sets the date to the value of DATE. The format of DATE is as below; the
+        year is the year in the Gregorian calendar less 1980, limited to
+        values 0-99.
+
+        %yyyy_yyym_mmmd_dddd
+        bit 15- 9       Year minus 1980 (0-99)
+        bit  8- 5       Month (1 = January, ..., 12 = December)
+        bit  4- 0       Day of month (1-31)
+
+        move    DATE,-(sp)
+        DOS _SETDATE
+        addq.l #2,sp
+
+==============================================================================
+
+$ff2c   _GETTIME        Get time
+
+RETURN  The current time (Only the lower order word has meaning)
+
+                %tttt_tmmm_mmms_ssss
+                bit 15-11       Hours (0-23)
+                bit 10- 5       Minutes (0-59)
+                bit  4- 0       Seconds / 2 (0-29)
+
+        Gets the current time. The seconds in the return value are in units of
+        2 seconds; the value is the actual number of seconds divided by 2. The
+        difference between this and DOS _GETTIM2 is that dividing the seconds by
+        two makes the return value fit in a word.
+
+==============================================================================
+
+$ff2d   _SETTIME        Set time
+
+ARGS    TIME.w          The time (format is same as return value of DOS _GETTIME)
+
+RETURN  Error code
+
+        Sets time to value of TIME. In it, seconds are given in units of 2 seconds:
+        the actual seconds divided by 2. Consequently, its values are 0-29. The
+        difference between this and DOS _SETTIM2 is that the seconds are given in
+        2-second incremends, so TIME will fit into a word.
+
+        move    TIME,-(sp)
+        DOS _SETTIME
+        addq.l #2,sp
+
+==============================================================================
+
+$ff2e   _VERIFY         Set verify flag.
+
+ARGS    FLG.w           The verify flag (0: do not verify, 1: verify)
+
+        Sets the verify flag.
+
+        move    FLG,-(sp)
+        DOS     _VERIFY
+        addq.l #2,sp
+
+==============================================================================
+
+$ff2f   _DUP0           Force-copy file handle
+
+ARGS    FILENO.w        File handle
+        NEWNO.w         File handle before copy
+
+RETURN  Previous value of NEWNO (error code if negative)
+
+        Forcibly copies file handle FILENO to another file handle NEWNO. This way,
+        you are given 2 file handles for 1 file, making it possible to perform that
+        file's operations with multiple file handles.
+        When closed, it returns to the original number.
+        NEWNO can be values 0-4; any higher should use DUP2.
+
+        move    NEWNO,-(sp)
+        move    FILENO,-(sp)
+        DOS _DUP0
+        addq.l #4,sp
+
+==============================================================================
+
+$ ff30 _VERNUM OS version check
+
+Return value version number
+
+		bit 31～24	'6'($36)
+		bit 23～16	'8'($38)
+		bit 15-8 Integer part of version number
+		bit 7-0 fractional part of version number
+
+	Find out the version number of Human68k.
+
+==============================================================================
+
+$ ff31 _KEEPPR Resident end
+
+Argument PRGLEN.l Number of resident bytes
+	CODE.w Exit code
+
+	End the process leaving the PRGLEN byte (not including the PSP part). Specified
+	If the number of bytes cannot be secured, the current memory block size remains resident.
+	Exit. Opened file handles are closed.
+	The size that actually resides in memory is the specified number of resident bytes + memory management point.
+	16 bytes + process management pointer 240 bytes.
+
+	move	CODE,-(sp)
+	move.l	PRGLEN,-(sp)
+	DOS	_KEEPPR
+
+==============================================================================
+
+$ ff32 _GETDPB Copy drive parameter block
+
+Argument DRIVE.w drive number (0: current 1: A 2: B… 26: Z)
+	DPBPTR.l Buffer pointer
+
+Return error code
+
+	Human68k the drive parameter block of the drive specified by DRIVE
+	A 94-byte buffer specified by DPBPTR after converting to a version 1 compatible format.
+	Copy to.
+	The contents of Human68k version 1 compatible format DPB are as follows.
+
+offset	size
+0 1.b Drive number (0: A 1: B… 25: Z)
+1 1.b Unit number used in the device driver
+2 1.w Number of bytes per sector
+4 1.b Number of sectors per cluster-1
+5 1.b Cluster → Number of sector shifts
+		MS-DOS format FAT (16bit Intel array) with bit 7 = 1
+6 1.w First sector number of FAT
+8 1.b Number of FAT areas
+9 1.b Number of sectors occupied by FAT (excluding copies)
+10 1.w Number of files in the root directory
+12 1.w First sector number of the data area
+14 1.w Total number of clusters +1
+16 1.w First sector number of root directory
+18 1.l Pointer to the device driver
+22 1.b Media bytes
+23 1.b DPB usage flag (if -1, writing was done)
+24 1.l Pointer to the next DPB (tailed by -1)
+28 1.w Cluster number of the current directory (0 represents the root)
+30 64.b Character buffer in the current directory
+
+	pea	(DPBPTR)
+	move	DRIVE,-(sp)
+	DOS _GETDPB
+	addq.l #6,sp
+
+==============================================================================
+
+$ ff33 _BREAKCK Break check settings
+
+Argument FLG.w Function and mode (FUNC.b × 256 + MODE.b)
+			Same as FUNC = 0 for FLG = -1.
+
+Return value setting status (same as 0 to 2 in MODE)
+
+	Set the break check according to the value of the flag FLG.
+	Note that the return value is the value you just set.
+
+	FUNC = 0 Set break checking on DOS calls.
+		MODE = 0 Check only specified DOS calls.
+			1 Check on all DOS calls.
+			2 Do not check on all DOS calls.
+			-1 Check the setting status.
+
+	The specified DOS call points to the following call for break checking:
+
+	$ff01	GETCHAR
+	$ff02	PUTCHAR
+	$ff03	COMINP
+	$ff04	COMOUT
+	$ff05	PRNOUT
+	$ff08	GETC
+	$ff09	PRINT
+	$ff0a	GETS
+	$ ff0b KEYSNS
+	$ff0c KFLUSH
+	$ ff0d FFLUSH
+	$ff1e	FPUTS
+
+	FUNC = 1 Set the mode of CTRL + C.
+	FUNC = 2 Set the mode of CTRL + N.
+	FUNC = 3 Set the mode of CTRL + P.
+	FUNC = 4 Set the mode of CTRL + Q.
+	FUNC = 5 Set the mode of CTRL + S.
+		The contents of each MODE are as follows.
+		MODE = 0 invalid
+			1 Valid
+			-1 Check the setting status.
+
+	move	FLG,-(sp)
+	DOS _BREAKCK
+	addq.l #2,sp
+
+==============================================================================
+
+$ ff34 _DRVXCHG Drive replacement
+
+Argument OLD.w drive number (0: current 1: A 2: B… 26: Z)
+	NEW.w drive number (〃)
+
+Return value OLD = -1, NEW = -1
+		New drive number for the current drive (0: A 1: B… 25: Z)
+	others
+		Error code
+
+	Swap the drive specified by OLD and the drive specified by NEW.
+	Specifying -1 for both OLD and NEW undoes all drive changes.
+
+	move	NEW,-(sp)
+	move	OLD,-(sp)
+	DOS _DRVXCHG
+	addq.l #4,sp
+
+==============================================================================
+
+$ ff35 _INTVCG Get the processing address of the vector
+
+Argument INTNO.w Vector number
+
+Return value The processing address of the specified vector
+
+	Check the processing address of the vector specified by the vector number INTNO.
+
+	INTNO = $ 0000 to $ 00ff interrupt
+	INTNO = $ 0100 to $ 01ff IOCS call
+	INTNO = $ ff00 to $ ffff DOS call
+
+	move	INTNO,-(sp)
+	DOS _INTVCG
+	addq.l #2,sp
+
+==============================================================================
+
+$ ff36 _DSKFRE Get the remaining space on the disk
+
+Argument DRIVE.w drive number
+	BUFFER.l Buffer pointer
+
+Return value Number of bytes that can be used (maximum 2GB, error code if negative)
+
+	Check the remaining capacity of the disk of the drive specified by DRIVE, and indicate the result with BUFFER.
+	Write to a fixed 8-byte buffer.
+
+offset	size
+0 1.w Number of available clusters
+2 1.w Total number of clusters
+4 1.w Number of sectors per cluster
+6 1.w Number of bytes per sector
+
+	pea	(BUFFER)
+	move	DRIVE,-(sp)
+	DOS _DSKFRE
+	addq.l #6,sp
+
+==============================================================================
+
+$ ff37 _NAMECK File name expansion
+
+Argument FILE.l Filename pointer
+	BUFFER.l Buffer pointer
+
+Return value d0.l = $ ff No file specified
+	d0.l = 0 No wildcard specified
+	d0.l <0 error code (the contents of BUFFER are meaningless)
+	d0.l = Other wildcards specified (d0.l is the number of wildcard characters)
+
+	Expand the file specified by FILE into the 91-byte buffer specified by BUFFER.
+	do.
+
+offset	size
+0 1 + 1.b drive name +':'
+2 64 + 1.b Path name +0
+67 18 + 1.b File name +0
+86 1 + 3 + 1.b extension ('.' + Extension +0)
+
+	pea	(BUFFER)
+	pea (FILE)
+	DOS _NAMECK
+	addq.l #8,sp
+
+==============================================================================
+
+$ ff39 _MKDIR Creating a subdirectory
+
+Argument FILE.l Pointer to directory name
+
+Return error code
+
+	Create the subdirectory specified by FILE.
+	The return value on success is usually 0, but when a special device driver is targeted
+	A positive integer may be returned.
+
+	pea (FILE)
+	DOS _MKDIR
+	addq.l #4,sp
+
+==============================================================================
+
+$ ff3a _RMDIR Delete subdirectory
+
+Argument FILE.l Pointer to directory name
+
+Return error code
+
+	Delete the subdirectory specified by FILE. The specified directory is empty.
+	Must be, current directory, root directory and system
+	Attribute / read-only attribute directories cannot be deleted.
+	The return value on success is usually 0, but when a special device driver is targeted
+	A positive integer may be returned.
+
+	pea (FILE)
+	DOS _RMDIR
+	addq.l #4,sp
+
+==============================================================================
+
+$ ff3b _CHDIR Change current directory
+
+Argument FILE.l Pointer to directory name
+
+Return error code
+
+	Change the current directory to the directory specified by FILE.
+	The return value on success is usually 0, but when a special device driver is targeted
+	A positive integer may be returned.
+	Does not work properly with Human68k version 3.02 (22 character long subdile)
+	The change to Kutori fails).
+
+	pea (FILE)
+	DOS _CHDIR
+	addq.l #4,sp
+
+==============================================================================
+
+Creating a $ ff3c _CREATE file
+
+Argument FILE.l Filename pointer
+	ATR.w file attribute (% XLAD_VSHR)
+
+Return value File handle of the created file (error code if negative)
+
+	Create the file specified by FILE with the attributes specified by ATR. If ATR is 0
+	If so, it is considered an archive attribute.
+	If a file with the same name already exists, the contents of that file will be lost, but that
+	This is a directory or volume label, or a system attribute / read-only genus
+	If it is a sex file, it will not be deleted and an error will occur.
+	If the most significant bit of ATR is set, even if a file with the same name exists, it will not be deleted and will be new.
+	Create a file.
+
+	move	ATR,-(sp)
+	pea (FILE)
+	DOS	_CREATE
+	addq.l #6,sp
+
+==============================================================================
+
+$ ff3d _OPEN File open
+
+Argument FILE.l Filename pointer
+	MODE.w access mode
+
+Return value File handle of open file (error code if negative)
+
+	Opens the file specified by FILE in the access mode specified by MODE.
+	Write / read / write file with system attribute / read-only attribute
+	You can't pun.
+	The contents of MODE are as follows.
+
+	bit 8 dictionary access mode
+			% 1 Use a special file handle for dictionaries
+				(Users are prohibited).
+			%0 usually
+	bit 6-4 sharing mode
+			% 100 Always allow
+			% 011 Write only allowed
+			% 010 Read only allowed
+			% 001 Always prohibited
+			% 000 compatibility mode
+	bit 1-0 read / write mode
+			% 10 read / write mode
+			% 01 write mode
+			% 00 Read mode
+
+	The sharing mode specified by bit 6 to 4 is a file by multiple processes.
+	It regulates the sharing of processes, and if multiple processes are running in parallel, the same
+	Since multiple processes may read and write to one file at the same time,
+	It is necessary to specify an appropriate sharing mode and perform exclusive control of file access.
+	There is a need.
+
+	move	MODE,-(sp)
+	pea (FILE)
+	DOS _OPEN
+	addq.l #6,sp
+
+==============================================================================
+
+$ ff3e _CLOSE File close
+
+Argument FILENO.w file handle
+
+Return error code
+
+	Closes the file handle specified by FILENO.
+
+	move	FILENO,-(sp)
+	DOS	_CLOSE
+	addq.l #2,sp
+
+==============================================================================
+
+Read from $ ff3f _READ file
+
+Argument FILENO.w file handle
+	BUFFER.l Read buffer pointer
+	LEN.l Number of bytes to read
+
+Return value Number of bytes actually read (error code if negative)
+
+	From the file handle specified by FILENO, the number of bytes specified by LEN is BUFFER.
+	Reads into the buffer specified by. After execution, the file pointer is read by
+	Move backward by the number of files. If LEN = 0, after the current file pointer position
+	Truncate and reduce the file size.
+	If the return value is less than the specified number of bytes, the file has been read to the end.
+	Means.
+
+	move.l	LEN,-(sp)
+	pea	(BUFFER)
+	move	FILENO,-(sp)
+	TWO _READ
+	lea	(10,sp),sp
+
+==============================================================================
+
+$ ff40 _WRITE Write to file
+
+Argument FILENO.w file handle
+	BUFFER.l Write buffer pointer
+	LEN.l Number of bytes to write
+
+Return value Number of bytes actually written (error code if negative)
+
+	BUFFER the number of bytes specified by LEN in the file handle specified by FILENO
+	Write from the buffer specified in. After execution, the file pointer is the written buffer.
+	Move backward by the number of it.
+	If the return value is less than the specified number of bytes, there is not enough free disk space.
+	Means that.
+
+	move.l	LEN,-(sp)
+	pea	(BUFFER)
+	move	FILENO,-(sp)
+	DOS	_WRITE
+	lea	(10,sp),sp
+
+==============================================================================
+
+Delete $ ff41 _DELETE file
+
+Argument FILE.l Filename pointer
+
+Return error code
+
+	Delete the file specified by FILE. Specify a wildcard or direct.
+	File with system attribute / read-only attribute
+	It cannot be deleted.
+
+	pea (FILE)
+	DOS _DELETE
+	addq.l #4,sp
+
+==============================================================================
+
+$ ff42 _SEEK Move file pointer
+
+Argument FILENO.w file handle
+	OFFSET.l offset
+	MODE.w move mode
+
+Offset from the beginning of the return value (error code if negative)
+
+	OFFSET the pointer of the file specified by FILENO from the position specified by MODE.
+	Moves by the number of bytes specified in. Moves the pointer after or at the beginning of the file.
+	Moving further forward will result in an error.
+	The character device cannot seek and the current position always returns 0.
+
+	MODE = 0 beginning
+	MODE = 1 Current position (can be moved forward by specifying a negative number for the offset)
+	MODE = 2 Termination (Offset can be 0 or only negative numbers can be specified)
+
+	move	MODE,-(sp)
+	move.l	OFFSET,-(sp)
+	move	FILENO,-(sp)
+	DOS	_SEEK
+	addq.l #8,sp
+
+==============================================================================
+
+$ ff43 _CHMOD File attribute changes
+
+Argument FILE.l Filename pointer
+	ATR.w file attribute (% XLAD_VSHR)
+
+Return value Attribute of the specified file (error code if negative)
+
+	Change the file specified by FILE to the attribute specified by ATR.
+	Check the attributes of the file when ATR = -1.
+
+	move	ATR,-(sp)
+	pea (FILE)
+	DOS _CHMOD
+	addq.l #6,sp
+
+==============================================================================
+
+$ ff44 _IOCTRL Direct input / output by ioctrl of device driver
+
+Argument MD.w Control mode (argument depends on this value)
+	FILENO.w file handle
+	DT.w Device Information
+	DRIVE.w device number
+	BUFFER.l Buffer pointer
+	LEN.l Number of read / write bytes
+	COUNT.w Number of retries
+	TIME.w Retry waiting time
+	F_CODE.w function number
+
+Return value MD = 0,1,10
+		Device information
+		(Lower byte is obtained from FCB, upper byte is obtained from device header)
+
+		bit 15 0: block device 1: character device
+		bit 14 0: IOCTRL not possible 1: possible
+		bit 13 0: local 1: remote
+		bit 7 0: block device 1: character device
+		bit 6 0: special IOCTRL not possible 1: possible
+		(For character devices)
+		bit 5 0: COOKED mode 1: RAW mode
+		bit 3 1: CLOCK device
+		bit 2 1: NULL 〃
+		bit 1 1: Standard output (CON) device
+		bit 0 1: Standard input force (CON)”
+		(For block devices)
+		bit 5 0: local 1: remote
+		bit 4-0 drive number
+
+	MD = 9
+		Device information
+
+		bit 15 0: block device 1: character device
+		bit 14 0: IOCTRL not possible 1: possible
+		bit 13 0: local 1: remote
+		bit 5 0: local 1: remote (same as bit 13)
+
+	MD = 2～5
+		Number of bytes actually read / written
+	MD = 6
+		Input status (0: Impossible -1: Possible)
+	MD = 7
+		Output status (0: Impossible -1: Possible)
+	MD = 11,12,13
+		Depends on the device driver.
+
+	Input / output directly to the device driver according to the value of the mode MD.
+	If the IOCTRL bit in the chair header is 0, I / O cannot be performed.
+
+	MD = 0
+		Check the device information of the file handle specified by FILENO.
+	MD = 1
+		Set the device information to the file handle specified by FILENO.
+		Only the COOKED / RAW mode attributes of the character device can be changed.
+	MD = 2
+		From the file handle specified by FILENO, the buffer specified by BUFFER
+		Read the number of bytes specified by LEN.
+	MD = 3
+		The buffer specified by BUFFER in the file handle specified by FILENO
+		Writes the number of bytes specified by LEN from.
+	MD = 4
+		LEN from the drive specified by DRIVE to the buffer specified by BUFFER
+		Reads the number of bytes specified in.
+		Input from a remote drive always returns an error.
+	MD = 5
+		LEN from the buffer specified by BUFFER to the drive specified by DRIVE
+		Write only the number of bytes specified in.
+		Output to a remote drive always returns an error.
+	MD = 6
+		Check the input status of the file handle specified by FILENO.
+		Checking remote files always fails.
+	MD = 7
+		Check the output status of the filehandle specified by FILENO.
+		Checking remote files always fails.
+	MD = 9
+		Check if the drive specified by DRIVE is local or remote.
+		Actually, I'm just looking up the device information.
+	MD = 10
+		Checks whether the drive specified by FILE is local or remote.
+		Actually, I'm just looking up the device information.
+	MD = 11
+		Set the specified COUNT and TIME to the number of retries / waiting time.
+	MD = 12
+		Perform special control with file handles.
+		Does not work properly with Human68k version 3.02 (character device)
+		It fails to check if a special ioctrl can be created for).
+	MD = 13
+		Perform special control by drive.
+		Check currently for device drivers that support the special ioctrl
+		There are DISK2HD and susie.x.
+
+MD = 0,6,7,10
+	move	FILENO,-(sp)
+	move	MD,-(sp)
+	DOS IOCTRL
+	addq.l #4,sp
+
+MD = 1
+	move	DT,-(sp)
+	move	FILENO,-(sp)
+	move	MD,-(sp)
+	DOS IOCTRL
+	addq.l #6,sp
+
+MD = 2,3
+	move.l	LEN,-(sp)
+	pea	(BUFFER)
+	move	FILENO,-(sp)
+	move	MD,-(sp)
+	DOS IOCTRL
+	lea	(12,sp),sp
+
+MD = 4,5
+	move.l	LEN,-(sp)
+	pea	(BUFFER)
+	move	DRIVE,-(sp)
+	move	MD,-(sp)
+	DOS IOCTRL
+	lea	(12,sp),sp
+
+MD = 9
+	move	DRIVE,-(sp)
+	move	MD,-(sp)
+	DOS IOCTRL
+	addq.l #4,sp
+
+MD = 11
+	move	TIME,-(sp)
+	move	COUNT,-(sp)
+	move	MD,-(sp)
+	DOS IOCTRL
+	addq.l #6,sp
+
+MD = 12,13
+	pea	(BUFFER)
+	move	F_CODE,-(sp)
+	move	FILENO,-(sp)
+	move	MD,-(sp)
+	DOS IOCTRL
+	lea	(10,sp),sp
+
+==============================================================================
+
+$ ff45 _DUP Copy file handle
+
+Argument FILENO.w file handle
+
+Return value New filehandle (error code if negative)
+
+	Copy the filehandle FILENO to create a second filehandle.
+	Since the file handles of the same file use the same file pointer,
+	You can also operate the file using that file handle.
+
+	move	FILENO,-(sp)
+	DOS _DUP
+	addq.l #2,sp
+
+==============================================================================
+
+$ ff46 _DUP2 Forced copy of file handle
+
+Argument FILENO.w file handle
+	NEWNO.w Copy destination file handle
+
+Return error code
+
+	Force filehandle FILENO to second filehandle NEWNO
+	Copy.
+	Automatically if the filehandle specified by NEWNO is already open
+	Close to and then copy.
+
+	move	NEWNO,-(sp)
+	move	FILENO,-(sp)
+	TWO _DUP2
+	addq.l #4,sp
+
+==============================================================================
+
+$ ff47 _CURDIR Get the current directory
+
+Argument DRIVE.w drive number (0: current 1: A 2: B… 26: Z)
+	BUFFER.l Buffer pointer
+
+Return error code
+
+	The current directory of the drive specified by DRIVE is specified by BUFFER 65
+	Write to byte buffer.'\' Represents drive name / root directory
+	And there is no terminating'\'.
+
+	pea	(BUFFER)
+	move	DRIVE,-(sp)
+	DOS _CURDIR
+	addq.l #6,sp
+
+==============================================================================
+
+$ ff48 _MALLOC Allocate memory
+
+Argument LEN.l Number of bytes to reserve
+
+Return value Pointer of the reserved memory block (MSP + $ 10)
+		d0.l = $ 81 ?????? The specified amount cannot be secured
+					($ ?????? is the number of bytes that can be reserved).
+		d0.l = $ 8200000? Completely unsecured ($? Is undefined).
+
+	Allocate memory for the number of bytes specified by LEN. If LEN is $ 1000000 or more.
+	An error will always occur, and you can check the maximum number of bytes that can be secured.
+
+	move.l	LEN,-(sp)
+	DOS _MALLOC
+	addq.l #4,sp
+
+==============================================================================
+
+$ ff49 _MFREE Free memory block
+
+Argument MEMPTR.l Pointer to memory block
+
+Return error code
+
+	Release the memory block specified by MEMPTR.
+	When MEMPTR = 0, all the memory allocated by oneself is released.
+
+	pea	(MEMPTR)
+	DOS _MFREE
+	addq.l #4,sp
+
+==============================================================================
+
+$ ff4a _SETBLOCK Memory block changes
+
+Argument MEMPTR.l Pointer to memory block
+	LEN.l Number of bytes to change
+
+Return error code
+		d0.l = $ 81 ?????? Immutable ($ ?????? is the number of bytes that can be changed).
+		d0.l = $ 8200000? Completely immutable ($? Is undefined).
+
+	Change the memory block specified by MEMPTR to the size specified by LEN.
+	If the LEN is $ 1000000 or more, an error will always occur and the maximum number of bytes that can be changed will be changed.
+	You can look it up.
+
+	move.l	LEN,-(sp)
+	pea	(MEMPTR)
+	TWO _SETBLOCK
+	addq.l #8,sp
+
+==============================================================================
+
+$ ff4b _ EXEC program loading / running
+
+Argument MD.w Module number and mode (MODULE.b × 256 + MODE.w)
+	FILE.l Filename pointer
+	CMDLINE.l command line pointer
+	LOADADR.l load address
+	EXECADR.l Execution address
+	FILE2.l Filename in the overlay X file
+	ENVPTR.l Environment pointer
+	LIMIT.l Limit address
+	TYPE.b file type (upper 8 bits of FILE)
+
+Return value MODE = 0,4
+		Process exit code (error code if negative)
+		When the process ends, d1-d7 / a1-a6 is undefined.
+	MODE = 1
+		d0.l Program execution address (error code if negative)
+		a0.l Memory management pointer
+		a1.l End of program
+		a2.l command line
+		a3.l Environment pointer
+		a4.l Execution address
+	MODE = 2
+		Error code
+	MODE = 3
+		Program length (error code if negative)
+	MODE = 5
+		Module number x 256 (error code if negative)
+
+	Load / execute the file specified by FILE according to the value of mode MODE.
+
+	MODE = 0
+		Use CMDLINE to specify the command line, ENVPTR to specify the environment, and FILE to specify the environment.
+		Load and execute the specified file.
+	MODE = 1
+		Use CMDLINE to specify the command line, ENVPTR to specify the environment, and FILE to specify the environment.
+		Load the specified file. If it ends normally, set MODE = 4
+		To do.
+	MODE = 2
+		Search for path from the environment specified by ENVPTR, and the frame specified by FILE.
+		Separate the end line into the full path filename and command line, FILE and
+		Set to each pointer of CMDLINE.
+		File name buffer FILE must be 90 bytes or more, command line buff
+		CMDLINE requires 256 bytes or more.
+	MODE = 3
+		Specify the load address with LOADADR and the limit address with LIMIT.
+		Load the file specified by FILE.
+	MODE = 4
+		Execute the program from the address specified by EXECADR.
+		Used when executing after loading with MD = 1.
+	MODE = 5
+		The overlay specified by FILE in the overlay X file specified by FILE2.
+		Find out the module number of the file.
+		A file whose offset from the beginning of the bind list is greater than $ fffff00
+		Returns the number of bit-inverted offset values ​​as the module number.
+		However, files with negative offset values ​​like this cannot be loaded.
+		Does not work properly with Human68k version 3.02 (specified by FILE2)
+		Searched for the file name with the first byte extension of the file name changed to X
+		Ru).
+
+	When MODE = 0 to 2, if 0 is specified for ENVPTR, the own environment is used.
+	When MODE = 0,1,3, MODULE modifies each file in the overlay X file.
+	Joule number (0 to 255) can be specified. Also, the extension of the executable file name
+	If is neither .X .Z .R, then the file type is in the upper 8 bits of FILE.
+	Specify TYPE, thereby specifying the format of the file.
+
+	TYPE = 1	.R
+	TYPE = 2	.Z
+	TYPE = 3	.X
+
+MD = 0,1
+	pea	(ENVPTR)
+	pea	(CMDLINE)
+	pea (FILE)
+	move.b	TYPE,(sp)
+	move	MD,-(sp)
+	DOS _EXEC
+	lea	(14,sp),sp
+
+MD = 2
+	pea	(ENVPTR)
+	pea	(CMDLINE)
+	pea (FILE)
+	move	MD,-(sp)
+	DOS _EXEC
+	lea	(14,sp),sp
+
+MD = 3
+	pea	(LIMIT)
+	pea (LOADADR)
+	pea (FILE)
+	move.b	TYPE,(sp)
+	move	MD,-(sp)
+	DOS _EXEC
+	lea	(14,sp),sp
+
+MD = 4
+	pea	(EXECADR)
+	move	MD,-(sp)
+	DOS _EXEC
+	addq.l #6,sp
+
+MD = 5
+	pea	(FILE2)
+	pea (FILE)
+	move	MD,-(sp)
+	DOS _EXEC
+	lea	(10,sp),sp
+
+==============================================================================
+
+$ ff4c _EXIT2 Exit with exit code
+
+Argument CODE.w Exit code
+
+	Exit the program with the exit code specified by CODE.
+	Opened file handles are closed.
+
+==============================================================================
+
+$ ff4d _WAIT Get the exit code of the process
+
+Return value Exit code
+
+	Examine the exit code of the executed process.
+	Same as the return value of DOS _EXEC (MODE = 0,4).
+
+==============================================================================
+
+$ ff4e _FILES Search files for information (first file)
+
+Argument BUFFER.l Buffer pointer
+	FILE.l Filename pointer
+	ATR.w file attribute (% XLAD_VSHR)
+
+Return error code
+
+	Files with the attributes specified by ATR and the file names specified by FILE
+	Finds and writes the file information to the 53-byte buffer specified by BUFFER.
+	Wildcards can be used in the file name.
+	The attribute returns the file if even one bit with 1 specified matches.
+
+	If the high-order byte of the file attribute is 1, there is no file name or extension.
+	If you complete with the wildcard'*' ("" search becomes "*. *", "Foo"
+	The search is treated as "foo. *").
+
+	If the most significant bit of the buffer address is set to 1, the search will be performed in addition to the normal information.
+	Write the pathname of the file from the 53rd byte of the buffer. In this case,
+	The ffah needs 141 bytes.
+	Does not work properly with Human68k version 3.02 (switch drive with DOS _DRVXCHG)
+	If it has been converted, it will be returned with the absolute drive name).
+
+offset	size
+0 1.b Attribute to search ┐
+1 1.b 〃 Drive number │
+2 1.l Sector number of the directory being searched │ Inside Human68k
+6 1.w Number of remaining sectors in the directory │ Used.
+		(Valid only for root) │ When destroyed
+8 1.w │_NFILES from the beginning of the sector on the directory is not possible.
+		Offset (No corresponding file when -1) │
+10 8.b File name to search │
+18 3.b 〃 Extension ┘
+21 1.b Properties
+22 1.w Last change time
+24 1.w Last change date
+26 1.l File size
+30 23.b File name (main file name +'.' + Extension +0)
+
+	However, when TwentyOne is resident, some of the inside information is changed, and inside TwentyOne
+	If the filename buffer EXBUF is insufficient, error code -8 is returned.
+
+offset	size
+0-9 10.b (same as standard)
+10 1.l Extended buffer address
+14 6.b TwentyOne Extended flag'Twenty'
+20 1.b Error flag (0: OK 1: ERR)
+21 32.b (same as standard)
+
+	move	ATR,-(sp)
+	pea (FIL)
+	pea	(BUFFER)
+	DOS _FILES
+	lea	(10,sp),sp
+
+==============================================================================
+
+$ ff4f _NFILES Search for the following files for information
+
+Argument BUFFER.l Buffer pointer
+
+Return error code
+
+	Using the file information buffer BUFFER set in _FILES, the following file
+	And rewrite the file information. The contents of BUFFER are the same as _FILES.
+
+	pea	(BUFFER)
+	TWO _NFILES
+	addq.l #4,sp
+
+==============================================================================
+
+$ ff80 _SETPDB Move management process
+
+Argument PDBADR.l Process management pointer
+
+Process management pointer before the return value
+
+	Transfer control to the process specified in PDBADR.
+	PDBADR must be the address obtained by _GETPDB.
+
+	pea (PDBADR)
+	DOS _SETPDB)
+	addq.l #4,sp
+
+==============================================================================
+
+$ ff81 _GETPDB Get current process information
+
+Return value Current process management pointer
+
+	Acquire a process management pointer that represents the current process.
+
+==============================================================================
+
+$ ff82 _SETENV Setting environment variables
+
+Argument ENVNAME.l Pointer to environment variable name
+	ENVPTR.l Environment pointer
+	A pointer to the value of the ENVVAL.l variable
+
+Return error code
+
+	The variable specified by ENVNAME in the environment specified by ENVPTR, and the variable specified by ENVVAL.
+	Set a large 255-byte environment variable, except that ENVVAL = 0 and ENVVAL are empty.
+	If a character string is specified, the variable specified by ENVNAME is deleted.
+	Specify 0 for ENVPTR to use your environment.
+	Does not work properly with Human68k version 3.02 (environment variable value is 255 bytes)
+	Runaway when over).
+
+	pea	(ENVVAL)
+	pea	(ENVPTR)
+	pea	(ENVNAME)
+	DOS _SETENV
+	lea	(12,sp),sp
+
+==============================================================================
+
+Get the contents of the $ ff83 _GETENV environment variable
+
+Argument ENVNAME.l Pointer to environment variable name
+	ENVPTR.l Environment pointer
+	BUFFER.l Buffer pointer
+
+Return error code
+
+	Use BUFFER to set the contents of the environment variables specified by ENVNAME in the environment specified by ENVPTR.
+	Write to the specified 256-byte buffer.
+	Specify 0 for ENVPTR to use your environment.
+
+	pea	(BUFFER)
+	pea	(ENVPTR)
+	pea	(ENVNAME)
+	DOS _GETENV
+	lea	(12,sp),sp
+
+==============================================================================
+
+$ ff84 _VERIFYG Get the verify flag
+
+Return value setting status (0: Do not verify 1: Verify)
+
+	Examine the verify flag.
+
+==============================================================================
+
+$ ff85 _COMMON common area control
+
+Argument MD.w control mode
+	NAME.l common Pointer for area name
+	POS.l position (number of bytes from the beginning of the common area)
+	BUFFER.l Buffer pointer
+	ID_PSP.l Process ID
+	LEN.l byte length
+
+Return value MD = 0
+		Number of bytes in common area (error code if negative)
+	MD = 1,2
+		Number of bytes actually read / written (error code if negative)
+	MD = 3～5
+		Error code
+
+	Control the common area according to the value of mode MD.
+	Interprocess communication can be easily realized by this DOS call.
+
+	MD = 0
+		Check if the common area specified by NAME exists, and if it exists, the area
+		Returns the size of.
+	MD = 1
+		Point with LEN from the position specified by POS in the common area specified by NAME.
+		Reads the specified number of bytes into the buffer specified by BUFFER.
+	MD = 2
+		Point to the common area specified by NAME with LEN from the position specified by POS.
+		Writes a specified number of bytes from the buffer specified by BUFFER.
+		If the common area specified by NAME does not exist, create it.
+		Specify 0 for LEN to truncate.
+	MD = 3
+		Point with LEN from the position specified by POS in the common area specified by NAME.
+		Lock the specified number of bytes by specifying the process with ID_PSP.
+		Access to processes other than those specified by ID_PSP is prohibited.
+	MD = 4
+		Point with LEN from the position specified by POS in the common area specified by NAME.
+		Unlock the specified number of bytes by specifying the process with ID_PSP.
+		Access to processes other than those specified by ID_PSP is allowed.
+	MD = 5
+		Delete the common area specified by NAME.
+
+MD = 0,5
+	pea	(NAME)
+	move	MD,-(sp)
+	DOS _COMMON
+	addq.l #6,sp
+
+MD = 1,2
+	move.l	LEN,-(sp)
+	pea	(BUFFER)
+	move.l	POS,-(sp)
+	pea	(NAME)
+	move	MD,-(sp)
+	DOS _COMMON
+	lea	(18,sp),sp
+
+MD = 3,4
+	move.l	LEN,-(sp)
+	move.l	ID_PSP,-(sp)
+	move.l	POS,-(sp)
+	pea	(NAME)
+	move	MD,-(sp)
+	DOS _COMMON
+	lea	(18,sp),sp
+
+==============================================================================
+
+$ ff86 _RENAME Rename / move file
+
+Argument OLD.l Filename pointer
+	NEW.l Pointer for new file name
+
+Return error code
+
+	Rename the file specified by OLD to the file name specified by NEW. System.
+	Files with attributes and read-only attributes cannot be renamed.
+	Move files if OLD and NEW paths are different, but between different drives
+	Movement, directories and volume labels, hidden attributes / read-only attributes
+	Files cannot be moved.
+	Does not work properly with Human68k version 3.02 (both old and new files exist,
+	And when the first FAT number of both and the upper word of the file size are equal,
+	Renamed to new file name).
+
+	pea	(NEW)
+	pea	(OLD)
+	TWO _RENAME
+	addq.l #8,sp
+
+==============================================================================
+
+$ ff87 _FILEDATE Read / set date / time of file
+
+Argument FILENO.w file handle
+	DATETIME.l Date and time
+
+Return value DATETIME = 0
+		File date and time
+	DATETIME = Other
+		Error code only when the upper word is $ ffff
+		Negative numbers may not be error codes in this call.
+
+	Obtain / set the date and time of the file handle specified by FILENO.
+	When DATETIME = 0, it is acquired, otherwise it is set.
+
+	%yyyy_yyym_mmmd_dddd_tttt_tfff_fffs_ssss
+	bit 31～25 years-1980(0～99)
+	bit 24 to 21 (January to December)
+	bit 20-16 days (1-31 days)
+	bit 15:00 to 11:00 (0 to 23:00)
+	bit 10-5 minutes (0-59 minutes)
+	bit 4 to 0 seconds/2 (0 to 29 seconds)
+
+	Seconds are expressed in seconds and are set to the actual seconds divided by 2.
+
+	move.l	DATETIME,-(sp)
+	move	FILENO,-(sp)
+	DOS _FILEDATE
+	addq.l #6,sp
+
+==============================================================================
+
+$ ff88 _MALLOC2 Allocate memory by the specified method
+
+Argument MD.w control mode
+	LEN.l Number of bytes to reserve
+	PAIR.l Process management pointer for the process you manage
+
+Return value Pointer of the reserved memory block
+		d0.l = $ 81 ?????? The specified amount cannot be secured.
+					($ ?????? is the number of bytes that can be reserved).
+		d0.l = $ 8200000? Completely unsecured ($? Is undefined).
+
+	Allocate the memory of the number of bytes specified by LEN by the search method specified by mode MD.
+	If LEN is $ 1000000 or more, an error will always occur and the maximum number of bytes that can be reserved.
+	You can check the number.
+
+	MD = 0 Search from lower level
+	MD = 1 Search from the minimum required block
+	MD = 2 Search from top
+
+	However, if the most significant bit of MD is 1, the parent processor of the allocated memory block
+	The caller can specify a process management pointer for the process. In that case, as an argument
+	Pass the address of the process management pointer to set.
+
+[usually]
+	move.l	LEN,-(sp)
+	move	MD,-(sp)
+	DOS _MALLOC2
+	addq.l #6,sp
+
+[Specified mode]
+	pea	(PAIR)
+	move.l	LEN,-(sp)
+	move	MD,-(sp)
+	DOS _MALLOC2
+	lea	(10,sp),sp
+
+==============================================================================
+
+$ ff8a _MAKETMP Creating a temporary file
+
+Argument FILE.l Filename pointer
+	ATR.w file attribute (% XLAD_VSHR)
+
+Return value File handle of the created file (error code if negative)
+
+	Create a temporary file specified by FILE with the attributes specified by ATR.
+	The file name can contain a'?' And is replaced by a number at creation time.
+	Searches by adding until the file name does not exist. If you specify a number, that
+	It is searched from the number of.
+	Note that the file name specified in FILE will be rewritten by this DOS call.
+	To do.
+
+	move	ATR,-(sp)
+	pea (FILE)
+	DOS _MAKETMP
+	addq.l #6,sp
+
+==============================================================================
+
+Creating a $ ff8b _NEWFILE file
+
+Argument FILE.l Filename pointer
+	ATR.w file attribute (% XLAD_VSHR)
+
+Return value File handle of the created file (error code if negative)
+		d0.l = -80 The specified file already exists
+
+	Creates the file specified by FILE with the attributes specified by ATR. ATR is 0.
+	If so, it is considered an archive attribute.
+	If the specified file already exists, an error (-80) will occur.
+
+	move	ATR,-(sp)
+	pea (FILE)
+	DOS _NEWFILE
+	addq.l #6,sp
+
+==============================================================================
+
+$ ff8c _LOCK File locking
+
+Argument MD.w control mode
+	FILENO.w file handle
+	OFFSET.l Offset from the beginning of the file
+	LEN.l Number of bytes to lock / unlock
+
+Return error code
+
+	Access to the file specified by FILENO according to the value of mode MD
+	Lock / unlock.
+	File locking is the exclusive control of file access from other processes.
+	Prohibit file access.
+
+	MD = 0
+		Locks the number of bytes specified by LEN from the position specified by OFFSET.
+	MD = 1
+		Unlocks the number of bytes specified by LEN from the position specified by OFFSET.
+		Exclude.
+
+	move.l	LEN,-(sp)
+	move.l	OFFSET,-(sp)
+	move	FILENO,-(sp)
+	move	MD,-(sp)
+	TWO _LOCK
+	lea	(12,sp),sp
+
+==============================================================================
+
+$ ff8f _ASSIGN Obtaining / setting / canceling virtual drive / directory allocation
+
+Argument MD.w control mode
+	BUFFER1.l Virtual drive / virtual directory pointer
+	BUFFER2.l Real drive / real directory pointer
+	MODE.w allocation mode
+
+Return value MD = 0
+		Allocation mode (error code if negative)
+			d0.l = $ 40 Allocation does not exist
+			d0.l = $ 50 Virtual drive allocation
+			d0.l = $ 60 Virtual directory allocation
+	MD = 1,4
+		Error code
+
+	Allocation of virtual drives and directories according to the value specified in mode MD
+	Acquire / set / cancel.
+	Does not work properly with Human68k version 3.02 (_FILES in complementary mode)
+	Therefore, assign it to a directory that is not specified).
+
+	MD = 0
+		Acquires the drive allocation specified by BUFFER1 and writes it to BUFFER2.
+	MD = 1
+		Specified in BUFFER1 according to the value specified in allocation mode MODE
+		Assign the directory specified by BUFFER2 to the drive.
+
+		MODE = $ 50 (virtual drive)
+			Assign the BUFFER2 directory to the BUFFER1 drive.
+		MODE = $ 60 (virtual directory)
+			Assign the drive for BUFFER1 to the directory for BUFFER2.
+	MD = 4
+		Deallocate the drive specified by BUFFER1.
+
+	MD = 0
+
+	pea	(BUFFER2)
+	pea	(BUFFER1)
+	move	MD,-(sp)
+	DOS _ASSIGN
+	lea	(10,sp),sp
+
+	MD = 1
+
+	move	MODE,-(sp)
+	pea	(BUFFER2)
+	pea	(BUFFER1)
+	move	MD,-(sp)
+	DOS _ASSIGN
+	lea	(12,sp),sp
+
+	MD = 4
+
+	pea	(BUFFER1)
+	move	MD,-(sp)
+	DOS _ASSIGN
+	addq.l #6,sp
+
+==============================================================================
+
+$ ffaa (Unpublished) FFLUSH mode setting (Unpublished)
+
+Argument MODE.w mode
+		MODE = 0 invalid
+			1 Valid
+			-1 Earnings only
+
+Mode before change of return value
+
+	Unpublished call newly created in Human68k version 3.
+	Set / acquire the execution mode of _FFLUSH.
+
+==============================================================================
+
+$ ffab _OS_PATCH OS internal processing switching (unpublished)
+
+Argument MODE.w mode and function number (MD.b × 256 + ID.b)
+	ADR.l address
+
+Return value MD = 0
+		Address of branch instruction table before change
+	MD = Other or ADR = 0
+		Error code
+
+	ID = 1	FASTIO.X
+	ID = 2	FASTSEEK.X
+	ID = 3	FASTOPEN.X
+	ID = 4	TwentyOne.x
+
+	Unpublished call newly created in Human68k version 3.
+
+	Initialize and patch the OS function specified by ID, and specify the branch instruction table by ADR.
+	Change to the address given.
+	If MD is set to non-zero or 0 is specified for the address, patching will not be performed.
+	Only set processing is performed. Also, if -1 is specified for the address, the patch will be lined.
+	Only the initialization process is executed without doing anything.
+	The branch instruction table contains 18 jmp abs.l instructions (ID) that branch to the processing address of each function.
+	= 3) or 20 (otherwise) side by side.
+
+	(Caution) The contents of this item are all based on original analysis except for the call name.
+
+	pea (ADR)
+	move	#MODE,-(sp)
+	DOS _OS_PATCH
+	addq.l #6,sp
+
+==============================================================================
+
+$ ffac _GETFCB Get a pointer to FCB (unpublished)
+
+Argument FILENO.w file handle
+
+Return value FCB pointer (if negative, it is an error code)
+
+	Returns a pointer to the FCB of the file specified by FILENO.
+	The size of FCB is 96 bytes, and the contents are as follows.
+
+offset	size
+$ 00 1.b Number of filehandles supported by this FCB
+$ 01 1.b Device information (when bit 7 = 0, bit 4 to 0 keeps the drive name)
+			bit 7 0: block device 1: character device
+			bit 6 update flag
+			bit 5 0: Local 1: Remote For block devices
+			bit 5	0:COOKED 1:RAW	┐
+			bit 3 CLOCK device │
+			bit 2 NUL 〃 │ For character devices
+			bit 1 Standard output" │
+			bit 0 standard input 〃 ┘
+$ 02 1.l Block device: DPB address
+		Character device: Pointer to the device driver
+$ 06 1.l File pointer
+$ 0a 1.l Pointer to exclusive control information
+$ 0e 1.b Access mode
+$ 0f 1.b Location on the directory (number from the beginning of the sector: 0 to 31)
+		(Not used for character devices)
+$ 10 1.b Sectors in the cluster being accessed
+$11 1.b (unused)
+$ 12 1.w Cluster number being accessed
+$ 14 1.l Sector number being accessed
+$ 18 1.l I / O buffer top
+$ 1c 1.l Sector number of the corresponding directory entry
+		(Not used for character devices)
+$ 20 1.l Last access pointer (same value as file pointer without _SEEK)
+$ 24 8.b Filename 1 (margin is $ 20)
+$ 2c 3.b File name extension (〃)
+$ 2f 1.b file attributes
+$ 30 10.b File name 2 (〃)
+$3a 1.w Last update time
+$3c 1.w Last update date
+$ 3e 1.w First FAT number
+$ 40 1.l File size
+$ 44 7.l FAT cache (upper word: number of clusters from the beginning lower word: FAT number)
+
+	move	FILENO,-(sp)
+	DOS _GETFCB
+	addq.l #2,sp
+
+==============================================================================
+
+$ ffad _S_MALLOC Allocate a memory block from the main memory management
+
+Argument MD.w control mode
+	LEN.l Number of bytes to reserve
+	PAIR.l Process management pointer for the process you manage
+
+Return value Pointer of the reserved memory block
+		d0.l = $ 81 ?????? The specified amount cannot be secured.
+					($ ?????? is the number of bytes that can be reserved).
+		d0.l = $ 8200000? Completely unsecured ($? Is undefined)
+
+	Specify by LEN from the main memory management by the search method specified by mode MD.
+	Allocate memory for the number of bytes. If LEN is $ 1000000 or more, an error will always occur.
+	You can find out the maximum number of bytes that can be secured.
+	This DOS call should not be used in regular application programs
+	No. Only resident programs can be used.
+
+	MD = 0 Search from lower level
+	MD = 1 Search from the minimum required block
+	MD = 2 Search from top
+
+	However, if the most significant bit of MD is 1, the parent processor of the allocated memory block
+	The caller can specify a process management pointer for the process. In that case, as an argument
+	Pass the address of the process management pointer to set.
+
+[usually]
+	move.l	LEN,-(sp)
+	move	MD,-(sp)
+	TWO _S_MALLOC
+	addq.l #6,sp
+
+[Specified mode]
+	pea	(PAIR)
+	move.l	LEN,-(sp)
+	move	MD,-(sp)
+	TWO _S_MALLOC
+	lea	(10,sp),sp
+
+==============================================================================
+
+$ ffae _S_MFREE Free memory block under main memory management
+
+Argument MEMPTR.l Memory management pointer
+
+Return error code
+
+	Release the memory block under main memory management specified by MEMPTR.
+	MEMPTR is the sub memory management pointer specified by S_PROCESS, and its thread
+	If the ID is the current ID, kill the process with KILL_PR. In that case sub
+	Processes that are resident and terminated under memory management of are placed under main memory management.
+	If 0 is specified for MEMPTR, all the memory allocated by the user is released.
+
+	pea	(MEMPTR)
+	DOS	_S_MFREE
+	addq.l #4,sp
+
+==============================================================================
+
+$ ffaf _S_PROCESS Sub memory management settings
+
+Argument ID.w Thread ID
+	START.l Sub memory management pointer
+	LENGTH.l Number of bytes in the entire memory block
+	I_LEN.l Number of bytes in the first block
+
+Pointer of the memory block (size I_LEN) at the beginning of the return value
+		d0.l = $ ffff00 ?? ID error ($ ?? is the maximum ID)
+		d0.l = -14 LENGTH is less than I_LEN + 16
+
+	Sub memo with the start address specified by START and the number of bytes specified by LENGTH
+	Set re-management. When setting new sub-memory management, be sure to start from the beginning.
+	Since only one block is automatically allocated, specify the number of bytes I_LEN.
+	Subsequent memory allocation requests from threads with the specified ID will be the memory of this sub.
+	Limited to control.
+
+	move.l	I_LEN,-(sp)
+	move.l	LENGTH,-(sp)
+	pea	(START)
+	move	ID,-(sp)
+	DOS	_S_PROCESS
+	lea	(14,sp),sp
+
+==============================================================================
+
+$ fff0 _EXITVC (execution address at the end of the program)
+
+	This is not a DOS call, but INTVCS is used to set the processing address for this vector.
+	By setting it, the address can be called at the end of the program.
+
+        Usually immediately after the DOS _EXEC that the parent process ran to start the child process
+	A DOS call when the address is set and the child process exits with DOS _EXIT etc.
+	Referenced as the address returned from. What is called is the processing of a DOS call.
+	Since it is after all, the process that executed DOS _EXIT etc. has already been deleted.
+	Control has been transferred to the original parent process.
+
+	This vector is rewritten and copied to the PSP each time the process is started.
+	Since it is the value in the PSP that is referenced, the vector table for the DOS call directly
+	It is not reflected even if it is rewritten.
+
+==============================================================================
+
+$ fff1 _CTRLVC (execution address when aborted by CTRL + C)
+
+	This is not a DOS call, but INTVCS is used to set the processing address for this vector.
+	By doing so, you can call that address when you abort on a break.
+	I can.
+
+	In the initial state, a routine that simply executes DOS _EXIT is set.
+	CTRL + C abort only occurs while executing a DOS call, but the configured ad
+	Les is called after killing a DOS call (already when called)
+	It is not executing a DOS call, and even if it is nested, it will be completely terminated at that point).
+
+	This vector does not change automatically, and if it does, all child processes will have that value.
+	Inherit.
+
+
+==============================================================================
+
+$ fff2 _ERRJVC (execution address when aborted due to error)
+
+	This is not a DOS call, but INTVCS is used to set the processing address for this vector.
+	By doing so, it is possible to call the address when aborting due to an error.
+	come.
+
+	In the initial state, a routine that simply executes DOS _EXIT is set.
+
+	This vector does not change automatically, and if it does, all child processes will have that value.
+	Inherit.
+
+==============================================================================
+
+$ fff3 _DISKRED Read directly from block device
+
+Argument BUFFER.l Pointer to the buffer to read
+	DRIVE.w drive number (0: current 1: A 2: B… 26: Z)
+	SECT. {w / l} First sector number to read
+	SECTLEN. {w / l} Number of sectors to read
+
+	SECTLEN from the sector specified by SECT of the block device specified by DRIVE
+	Reads the number of sectors specified by BUFFER into the buffer specified by BUFFER.
+	SECT and SCETLEN sizes for large capacity drives and special drives
+	It has been extended so that it can be specified with a long word.
+	Adding $ 80000000 to BUFFER makes the argument a longword.
+	Since reading is done in sector units, the buffer is the number of bytes per sector (usually).
+	1024 bytes for drives).
+	SECT is 0 or more, SECTLEN is 1 or more (upper limit depends on media).
+
+Normal drive
+	move SECTLEN,-(sp)
+	move	SECT,-(sp)
+	move	DRIVE,-(sp)
+	pea	(BUFFER)
+	DOS _DISKRED
+	lea	(10,sp),sp
+
+Large capacity / special drive
+	move.l	SECTLEN,-(sp)
+	move.l	SECT,-(sp)
+	move	DRIVE,-(sp)
+	pea	(BUFFER+$80000000)
+	DOS _DISKRED
+	lea	(14,sp),sp
+
+==============================================================================
+
+$ fff4 _DISKWRT Write directly to block device
+
+Argument BUFFER.l Pointer to the buffer to write
+	DRIVE.w drive number (0: current 1: A 2: B… 26: Z)
+	SECT. {w / l} First sector number to write
+	SECTLEN. {w / l} Number of sectors to write
+
+	From the buffer specified by BUFFER, SECT of the block device specified by DRIVE
+	Write the number of sectors specified by SECTLEN to the sectors specified by.
+	SECT and SCETLEN sizes are long for large capacity drives and special drives
+	It has been extended so that it can be specified in the word.
+	Adding $ 80000000 to BUFFER makes the argument a longword.
+	Since writing is done in sector units, the buffer is the number of bytes per sector (usually).
+	1024 bytes for drives).
+	SECT is 0 or more, SECTLEN is 1 or more (upper limit depends on media).
+
+Normal drive
+	move SECTLEN,-(sp)
+	move	SECT,-(sp)
+	move	DRIVE,-(sp)
+	pea	(BUFFER)
+	DOS _DISKWRT
+	lea	(10,sp),sp
+
+Large capacity / special drive
+	move.l	SECTLEN,-(sp)
+	move.l	SECT,-(sp)
+	move	DRIVE,-(sp)
+	pea	(BUFFER+$80000000)
+	DOS _DISKWRT
+	lea	(14,sp),sp
+
+==============================================================================
+
+$ fff5 _INDOSFLG Get a pointer to the OS work
+
+Return value INDOS_FLG pointer
+
+	Returns a pointer to the OS work INDOS_FLG. Because of the supervisor area,
+	Not accessible in user mode. Also, for the OS after INDOS_FLG
+	There is important work, so never rewrite it.
+	The contents of INDOS_FLG are as follows.
+
+offset	size
+0 1.w indos_f OS running level
+2 1.b doscmd OS running function number
+3 1.b fat_flg FAT search mode (0: standard 2: always from the beginning)
+4 1.w retry_count I / O number of retries (standard 3 times)
+6 1.w retry_time Retry waiting time (standard 100 = 1 second)
+8 1.w verifyf verify mode (0: Off 1: On)
+10 1.b breakf Break mode (0: Off 1: On)
+11 1.b ctrlpf CTRL + P mode (0: Off 1: On)
+12 1.b (Unpublished) Thread switching request flag
+13 1.b wkcurdrv Current drive (A = 0, B = 1,…, Z = 25)
+
+==============================================================================
+
+$ fff6 _SUPER_JSR Program subroutine call in supervisor mode
+
+Argument JOBADR.l Processing address
+	d0-d7 / a0-a6 Depends on processing
+
+Return value 
+	d0-d7 / a0-a6 Depends on processing
+
+	Jsr to the program specified by JOBADR in supervisor mode.
+	The d0-d7 / a0-a6 just before executing the DOS call is passed, and when the process returns, that
+	At the time of, d0-d7 / a0-a6 is returned, but SR does not change.
+	Since it is uncertain how SSP / USP is passed, pass the argument using the stack.
+	Can't be.
+	This DOS call addresses runaway and bus errors caused by jsr.
+	No processing is performed.
+
+	head (JOBADR)
+	TWO _SUPER_JSR
+	addq.l #4,sp
+
+==============================================================================
+
+$ fff7 _BUS_ERR Check if a bus error occurs
+
+Argument SIZE.w Access size (1: bytes 2: words 4: longwords)
+	P1.l Read pointer
+	P2.l write pointer
+
+Return value 
+	d0.l = 0 Read / write
+	d0.l = 1 Bus error occurs when writing to P2
+	d0.l = 2 Bus error occurs when reading from P1
+	d0.l = -1 error (argument is abnormal)
+
+	Read from the address specified by P1 with the size specified by SIZE and its data
+	To check if a bus error occurs by writing to the address specified in P2.
+	When the value of SIZE is abnormal or when SIZE = 2,4 and an odd address is specified for P1 and P2
+	If so, the return value will be -1.
+
+	move	SIZE,-(sp)
+	pea (P2)
+	pea (P1)
+	TWO _BUS_ERR
+	lea	(10,sp),sp
+
+==============================================================================
+
+$fff8 _OPEN_PR Background task registration
+
+Arguments 
+	NAME.l Thread name pointer
+	COUNT.w A value that determines the execution interval
+	INIT_USP.l Initial value of USP
+	INIT_SSP.l Initial value of SSP
+	INIT_SR.w SR initial value
+	INIT_PC.l program execution address
+	BUFFER.l Inter-task communication buffer pointer
+	SLEEP_TIME.l Wait time (ms)
+
+Return value Thread ID of the registered task (error code if negative)
+	d0.l = -27 A task with the same name already exists.
+	d0.l = -29 No more tasks can be registered.
+
+Registers a background task with a thread name of up to 15 characters specified by NAME.
+
+The registered thread goes to sleep.
+For COUNT, specify the number of timer interrupts to be counted to execute one task from 2 to 255. 
+If the value is 0 to 1, it is treated as 2.
+
+INIT_USP, INIT_SSP, INIT_PC are the initial values of each register when executing the registered task.
+
+System stack requires 6KB.
+
+INIT_SR specifies $0000 or $2000 and selects either user mode or supervisor mode.
+
+The initial values of all other registers are 0.
+
+BUFFER specifies the buffer address for intertask communication.
+
+SLEEP_TIME specifies the wait time in milliseconds. 0 means sleep forever.
+
+A thread registered as a background task with DOS _OPEN_PR is terminated with DOS _KEEPPR.
+
+Use DOS _KILL_PR to kill a thread from memory.
+
+The contents of BUFFER are as follows:
+
+offset size
+0 		1.l LENGTH Number of bytes in buffer for data
+4 		1.l DATABUF Start address of data buffer
+8 		1.w COMMNAD Command number
+10 		1.w ID of the other party's girlfriend (-1 allows communication)
+
+move.l SLEEP_TIME,-(sp)
+pea (BUFFER)
+pea (INIT_PC)
+move SR,-(sp)
+pea (INIT_SSP)
+pea (INIT_USP)
+move COUNT,-(sp)
+pea (NAME)
+DOS_OPEN_PR
+lea (28,sp),sp
+==============================================================================
+
+$fff9 _KILL_PR Kill own process
+
+Return value Error code
+	Kills own process.
+	In case of a resident terminated process, kills all threads with the same process id as it and frees the allocated memory.
+	Before executing this DOS call, it closes any files it has opened, undoes any modified vectors, etc. 
+	The system only deletes the thread and frees its memory.
+	If a process exits with DOS_EXIT or DOS_EXIT2 after executing several registered threads, 
+	the thread that was opened earlier is killed with KILL_PR. is not guaranteed. 
+	To kill a process other than your own, send a KILL command with DOS _SEND_PR.
+
+==============================================================================
+
+$ fffa _GET_PR Get thread management information
+
+Argument ID.w Thread ID
+	BUFFER.l Buffer pointer to write management information
+
+Return value Thread ID or error code
+
+	The 116-byte buffer specified by BUFFER for the management information of the thread with the specified ID.
+	Copy to the ffa.
+	If you specify -1 for the ID and the name of the thread for BUFFER + 96, the thread's
+	ID is returned. Also, if you specify -2 for ID, your own ID is returned.
+
+offset	size
+0 		1.l NEXT_PTR Management information storage area for the next thread
+4		1.b	WAIT_FLG	0:Normal -1:Wait
+5 		1.b COUNT subtraction counter
+6 		1.b Initial value of MAX_CNT COUNT
+7 		1.b DOSCMD DOS call number
+8 		1.l PSP_ID Process ID
+12 		1.l USP
+16		8.l	D0,D1,D2,D3,D4,D5,D6,D7
+48 		7.l A0,A1,A2,A3,A4,A5,A6
+76		1.w	SR
+78		1.l	PC
+82		1.l	SSP
+86 		1.w INDOSF system reservation (OS running level)
+88 		1.l INDOSP system reservation (OS running stack)
+92 		1.l BUFF Communication buffer between tasks
+96 		16.b Thread name
+112 	1.l WAIT_TIME Remaining wait time (milliseconds)
+
+	The size of the actual management information is 124 bytes, of which 116 bytes from the beginning
+	Only get.
+
+	pea	(BUFFER)
+	move	ID,-(sp)
+	DOS _GET_PR
+	addq.l #6,sp
+
+==============================================================================
+
+$ fffb _SUSPEND_PR Forces the thread to sleep
+
+Argument ID.w Thread ID
+
+Return error code
+		d0.l = 0 normal termination
+		d0.l <0 error code
+		d0.l = -1 Thread's own error
+		d0.l = $ ffff00 ?? ID is abnormal ($ ?? is the maximum value of ID)
+
+	Forces the thread specified by ID to sleep. Goes to sleep.
+	The thread sleeps until it is awakened by DOS SEND_PR.
+
+	move	ID,-(sp)
+	DOS _SUSPEND_PR
+	addq.l #2,sp
+
+==============================================================================
+
+$fffc _SLEEP_PR Enter sleep state
+
+Arguments TIME.l Wait time (in milliseconds)
+
+Return value Thread state
+	d0.l = -1 The waiting time has passed and I woke up on my own.
+	d0.l = -2 Woke up with DOS _SEND_PR after waiting time.
+	d0.l = other remaining time (woke up with DOS _SEND_PR).
+
+Specify the waiting time with TIME and enter the sleep state.
+When TIME = 0, sleep forever.
+A thread that has entered sleep can be forced to wake up using DOS_SEND_PR.
+If the DOS_SEND_PR command is $fffb, the intertask communication buffer remains unchanged.
+For other commands, it is set as follows.
+
+offset size
+0 		1.l LENGTH Number of bytes written to data buffer
+4 		1.l DATABUF data buffer pointer
+8 		1.w COMMAND Command number
+10 		1.w ID ID of the thread that caused it
+
+Before going to sleep, process the contents of the data buffer, 
+set the address and number of bytes in the data buffer, and set the ID to -1.
+This allows communication from other threads.
+If data is sent by SEND_PR even when not sleeping, it wakes up as soon as it 
+sleeps and returns the set waiting time.
+
+The contents of the returned value are as follows.
+
+d0.l = -1 I got up by myself after waiting time. The contents of the intertask communication buffer remain unchanged.
+d0.l = -2 Wait time elapsed, but was awakened by DOS _SEND_PR after being stopped by DOS _SUSPEND_PR.
+d0.l = Other Woke up with DOS _SEND_PR, although the wait time has not elapsed. The unit of the returned value is milliseconds.
+
+move.l TIME,-(sp)
+DOS_SLEEP_PR
+addq.l #4,sp
+
+==============================================================================
+
+$fffd _SEND_PR Send command/data to thread and wake it up if sleeping
+
+Argument 
+	MY_ID.w		Your thread ID
+	YOUR_ID.w	Your thread ID
+	CMDNO.w		Command to send
+	BUFFER.l	Pointer to data to send
+	LEN.l 		Number of bytes of data to send
+
+Return value d0.l = 0 Successful completion
+	d0.l < 0 error code
+	d0.l = -28 write error
+	d0.l = $ffff00?? Specified ID is invalid ($?? is the maximum value of ID)
+	d0.l = $8000???? The number of data bytes is invalid ($???? is the maximum capacity)
+
+Sends commands and data to the thread with the specified ID and wakes it up if it is sleeping.
+Specify your girlfriend's ID for MY_ID, and her ID for the thread you want to communicate with for YOUR_ID.
+CMDNO is a word value that indicates the content of communication, and commands other than those defined by the system are defined between threads. 
+Commands reserved by the system are $ff?? defines the values shown below.
+
+	$fff9 Request to delete thread.
+	$fffb Waking up from the forced sleep state does not change the intertask communication buffer.
+	$fffc Request to sleep.
+
+If this command has been sent when you wake up, you should immediately set the ID of the intertask communication buffer to -1 and go to sleep.
+Effective when monitoring inter-task communication buffers without sleeping.
+$ffff Check if processing is finished. If -28 is returned, processing is still in progress.
+
+Inter-task communication buffers are used to transfer commands and data.
+The contents of the buffer are as follows.
+
+offset size
+0		1.l LENGTH Number of bytes in data buffer
+4 		1.l DATABUF data buffer pointer
+8 		1.w COMMAND Command number
+10 		1.w ID ID (-1 allows communication)
+
+If the ID of the intertask communication buffer for the thread specified by YOUR_ID is set to -1, the buffer is writable, so MY_ID and CMDNO are set to ID and COMMAND respectively, and the data from BUFFER is LEN Writes the number of bytes specified by , to DATABUF, and sets LENGTH to LEN.
+Wakes up the specified thread if it is sleeping.
+In particular, the $fffb command is specially processed, it only wakes up the specified thread, and the ID of the intertask communication buffer does not have to be -1, and other buffers do not change.
+An error occurs when LEN is greater than LENGTH or when writing is not possible.
+Doesn't work properly with Human68k version 3.02 (ID check fails).
+
+move.l LEN,-(sp)
+pea (BUFFER)
+move CMDNO,-(sp)
+move YOUR_ID,-(sp)
+move MY_ID,-(sp)
+DOS_SEND_PR
+lea (14,sp),sp
+
+==============================================================================
+
+$ fffe _TIME_PR Get the timer counter value
+
+Return value Counter value of the current timer
+
+	Check the counter value (in milliseconds) of the current timer.
+	If multiple threads are running in parallel in the background, the program
+	In order to measure a certain amount of time with, it changes constantly regardless of which thread is running.
+	You will need a counter.
+	When the maximum value in the longword is exceeded, it returns to 0, so it was returned as it was last time.
+	You can find the elapsed time by subtracting it from the value.
+
+==============================================================================
+
+$ ffff _CHANGE_PR Abandon execution right
+
+	Relinquish your right to execute background tasks. Switch to the next task.
+
+==============================================================================

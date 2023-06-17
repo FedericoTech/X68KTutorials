@@ -1,0 +1,564 @@
+8.1 Background processing
+
+	Human68k ver.2.0 supports "background processing" that can execute multiple user programs in parallel.
+	
+	With this function, X68000 can be operated as a network file server, or processing such 
+	as controlling ADPCM or TV at a specified time like the TIMER command can be done under the control of Human68k.
+	This section provides an overview of background processing.
+	A background processing program is created by combining the DOS calls described here.
+   
+8.1.1 What is a process?
+
+	Programs that run under the control of Human68k are called "processes". When Human68k loads a 
+	program file stored in an external storage device (such as a floppy disk) into memory, it becomes a process.
+  
+	Each process has an environment independent of other processes.
+	A process is incremented by one each time it executes the DOS call exec($ff4b).
+  
+	At this time, the process that executed exec($ff4b) is called the parent process, 
+	and the process that is loaded from disk to memory and executed by exec($ff4b) is called the child process.
+
+	In other words, if you run an application from COMMAND.X, COMMAND.X is called the parent 
+	process and the application is called the child process.
+
+	Although it is possible to have multiple processes in memory at the same time, until now Human68k 
+	did not have the ability to run each process in parallel.
+
+	However, from Human68k ver.2.0, each process can be executed in parallel by using "thread" which will be explained next.
+  
+8.1.2 What is a thread?
+
+	A thread is a flow of control as a program executes in memory.
+	Each program running in parallel is a thread. In reality, the CPU can only execute one instruction at a time, 
+	so Human68k switches the execution of each thread at high speed to make it appear to be executed in parallel
+	(see the figure below).
+
+		Thread 1 →‥‥‥‥→‥‥‥‥→
+		Thread 2 ‥‥→‥‥‥‥→‥‥‥
+		Thread 3 ‥‥‥‥→‥‥‥‥→‥
+		────────────────→
+		Time → indicates that the thread is running.
+
+	One process can be divided into multiple threads and executed in parallel, but normally one process should be assigned as one thread. Because if you run multiple threads from a single process, if any one thread changes the environment, it will change the environment of the other threads as well.
+	Threads are registered with the system by executing the DOS call open_pr($fff8). The number of threads increases by one each time open_pr($fff8) is executed.
+  
+8.1.3 Thread State
+
+	Thread states include the active state, which is a running state, and the sleep state, which is a waiting state.
+	When a thread does not need to do anything until another thread asks it to do so, it waits by going to sleep.
+	By doing so, it will not consume extra execution time, and the overall execution speed will not be slowed down.
+	The DOS call for that is sleep_pr($fffc).
+	With this DOS call, you can specify the sleep time.
+  
+8.1.4 Inter-thread communication
+
+	When information is passed between multiple threads, if information is written or read in a chaotic manner, multiple writes may collide, or reading may occur in the middle of writing, resulting in incorrect information passing.
+	For this purpose, DOS calls are provided for passing information (communication).
+	That is the DOS call send_pr($fffd).
+	In addition to communicating information, this DOS call can also activate a sleeping thread.
+	You can also use the common area to communicate between threads. This is explained in "8.2 Common Area".
+  
+8.1.5 Thread distinction
+
+	Each of the multiple threads is assigned a unique ID and program name.
+	This ID or name specifies which thread communicates information to which thread.
+	Therefore, it is necessary to obtain the ID and/or name of each thread.
+	The DOS call for that is get_pr($fffa).
+	You can also get detailed information about each thread with this DOS call.
+  
+8.1.6 Parallel processing and right of execution
+
+	Parallel processing refers to processing as if programs are being executed at the same time by switching the execution of threads at regular time intervals.
+	A thread that has been executing for a certain period of time is said to have execution rights.
+	At this time, if a certain thread is in the supervisor state, the thread will not switch unless a DOS call is made (such a state is called "execution occupancy").
+	In such a case, the processing of other threads will stagnate, so the right to execute must be relinquished at regular intervals to prevent this.
+	The DOS call for that is change_pr($ffff).
+  
+8.1.7 Abandon Thread
+
+	Certain threads may be unnecessary for some reason during parallel processing.
+	Also, when a process terminates, it must destroy all threads created by that process.
+	The DOS call for that is kill_pr($fff9).
+	When destroying threads, don't destroy threads chaotically.
+	Chaotic discards can cause unrecoverable and fatal system anomalies. To destroy a thread other than your own, send a destruction request to the thread you want to destroy.
+	It then promptly relinquishes execution and hands it over to the thread it wants to destroy.
+	A thread that receives a destroy request will destroy according to the request if it is acceptable.
+	If the request is unacceptable, it abandons the request and then relinquishes execution.
+	After that, when execution right is returned to the thread that issued the request, get_pr($fffa) is attempted to obtain detailed information of the requested thread.
+	A successful get indicates that it could not be discarded.
+	A failure indicates that it could be discarded.
+	If you want to destroy your own thread, first enter an endless loop and wait until another thread activates it. Destroy the thread as soon as it is activated.
+	Other threads communicate periodically, as any thread may be in a waiting state as above.
+	And at this time, if the communication fails, we know that the thread has destroyed itself.
+ 
+8.1.8 Environmental competition
+
+	Multithreading means that multiple threads are running in a single process.
+	In a multithreaded execution state, all threads execute in the same environment.
+	Running in the same environment means that the processes are identical, running in the same environment for memory, DOS error handling, and everything else.
+	Therefore, do not allocate memory in multiple threads, exit with the DOS call exit($ff00), or exit with CTRL-C or a DOS error abort while leaving other threads. It means that it will not.
+	In the standard state, it ends with CTRL-C or DOS error abort processing, so it is necessary to handle those processing in each process.
+
+8.1.9 Environmental competition
+
+	For input/output devices such as files, screens, and keyboards, it is necessary to prevent contention in each thread.
+	To prevent file resource contention, DOS calls are provided for file sharing and file locking.
+	Be careful not to contend with threads for the screen and keyboard.
+	Regarding memory resources, each thread operates under the same memory management. Do not allocate, free, etc,
+	memory chaotically unless you use DOS calls to partition memory management on a per-thread basis.
+
+8.1.10 Starting a child process
+
+	If a thread executes a child process, immediately after returning from the child process, give up the execution right once.
+	This lets other threads know about it.
+   
+8.2 Common Area
+
+	There are several ways to pass data between a parent process and a child process, or between two child processes.
+	for example,
+
+		- Set parameters in the command line passed to the child process
+		- Set up a common environment area for the parent process and the child process
+		- Securing a shared memory area in the user program for communication
+
+	However, such methods have the following drawbacks.
+
+		- It is difficult for processes to communicate with each other
+		- The format and size of exchanged data are limited.
+		- The burden on the user program is large.
+
+	Human68k ver.2.0 supports the exchange of data between processes at the OS level.
+	By calling a DOS call from the user program, the OS reserves a memory area called "common area" that 
+	is shared between processes, and performs exclusive control when it is accessed.
+	The common area can be used not only between processes but also between threads.
+
+8.2.1 Functions of Common Area
+
+	The common area has the following functions.
+
+		- Securing and deleting common areas
+		- Reading/writing data to/from the common area
+		- Locking and unlocking common areas
+
+	When you reserve a common area, give it a name.
+	When accessing or locking, specify the name given to the common area. In addition to the name, it also specifies the part to be accessed or locked. 
+	In other words, it is possible to say, "Read only ?? bytes from ?? bytes from the beginning of the common area named ????".
+	Multiple common areas can be provided, and the upper limit depends on the memory capacity.
+
+8.2.2 How to use the common area
+
+	To use the common area, use the DOS call common($ff85).
+	See the DOS call common section of this manual for the following explanation.
+
+	(1) Securing common areas
+		common(2,NAME,POS,BUFFER,LEN)
+		NAME : Name given to the newly secured common area
+		POS : Position from the beginning to write the data to be initialized
+		BUFFER : Address where the data to be initialized is stored
+		LEN : Number of bytes of data to initialize
+	The return value is the number of bytes of data actually written, or an error code.
+
+	(2) Search common areas
+		common(0,NAME)
+		NAME : Name of common area to search
+	The return value is the number of bytes in the common area if found, or an error if not found.
+		
+		la code
+
+	(3) Read from common area
+		common(1,NAME,POS,BUFFER,LEN)
+		NAME : the name of the target common area
+		POS : Position from the beginning of the data to read
+		BUFFER : Address to store read data
+		LEN : Number of bytes of data to read
+	The return value is the number of bytes of data actually read or an error code.
+
+	(4) Writing to common area
+		common(2,NAME,POS,BUFFER,LEN)
+		NAME : the name of the target common area
+		POS : Position from the beginning of the data to be written
+		BUFFER : Address where the data to be written is stored
+		LEN : Number of bytes of data to write
+	The return value is the number of bytes of data actually written, or an error code.
+
+	(5) Lock common area
+		common(3,NAME,POS,ID_PSP,LEN)
+		NAME : the name of the target common area
+		POS : Position from the beginning of the area to be locked
+		ID_PSP : ID assigned when locking
+		LEN : Number of bytes in the locked area
+	
+	Return value is error code
+	Note: Locking prevents access by anyone but the process or thread with ID_PSP.
+
+	(6) Unlock the common area
+		common(4,NAME,POS,ID_PSP,LEN)
+		NAME : the name of the target common area
+		POS : Position from the beginning of the unlocked area
+		ID_PSP : ID assigned when locking
+		LEN : Number of bytes in the unlocked area
+	Return value is error code
+
+	(7) Delete common area
+		common(5,NAME)
+		NAME : the name of the target common area
+	Return value is error code
+  
+8.3 File sharing and file locking
+
+	One thing to be aware of when multiple threads run in parallel is the handling of files.
+	For example, one thread might open a file for writing while another thread opens and accesses the file.
+	Therefore, in Human68k ver.2.0, we added a new function called "file sharing".
+	File sharing is a feature that allows sharing of files.
+	Also, when opening a file, a function called file locking that prohibits access from others has been added.
+	These functions have made it possible to implement a network environment.
+
+
+8.3.1 How to use file sharing
+
+	Specify sharing when opening a file.
+	To open a file, use the DOS call open($ff3d).
+	See the DOS call open section of this manual for the following explanation.
+
+	open(NAMEPTR,MD)
+	
+	NAMEPTR : Pointer to string (file name)
+	MD: Bits 6-4 = Set sharing mode
+	000 = compatibility mode
+	001 = disable both read/write
+	010 = write protected
+	011 = read prohibited
+	100 = allowed
+	Bits 1-0 = read/write designation
+	00 = open in read mode
+	01 = Write 〃
+	10 = open in read/write mode
+	The return value is the file handle of the opened file or an error code
+
+8.3.2 How to use file locking
+
+	File locking uses the DOS call lock($ff8c).
+	lock(MD,FILENO,OFFSET,LEN)
+	MD :1 = file lock
+		0 = 〃 release
+	FILENO : File handle of file to lock
+	OFFSET : offset from the beginning of the part to be locked
+	LEN ;number of bytes to lock
+
+8.4 Overlay X files and binding
+
+	Human68k ver.2.0 supports executable files called "overlay X files".
+	An overlay X file is a collection of multiple X format executable files in one file.
+	Human68k ver.2.0 can load and execute any X format executable file in this overlay X file into memory.
+	Overlay X files are used when the program or data size is too large for the available memory capacity.
+	One way to manage a program that is too large to run due to lack of memory is to divide the program.
+	For example, a program can be divided into one main program and multiple subprograms, stored on disk, and when executing, only the necessary programs are loaded into memory and executed each time. I have.
+	However, in this case, the main program must control the loading, execution, and termination of subprograms, and pass data between subprograms, making programming difficult.
+	The overlay X-file and the BIND command described below assist the execution of programs divided in this way.
+
+
+8.4.1 Creating an overlay X file
+
+	To create an overlay X-file, use the command BIND.
+	The format of BIND is as follows.
+
+	BIND [/O] <overlay X file name> <file name> [<file name> …] [/D|/X|/L] [/T<pathname>]
+
+	Items enclosed in '[' and ']' can be omitted.
+	You can select one of the items separated by '{'.
+	The /O switch is used to create a new overlay X-file. for example,
+
+	BIND /O sample.x sample1.x sample2.x sample3.x, the overlay X file that combines sample1.x sample2.x sample3.x
+	sample.x is created.
+	
+	To add an X format executable file to an existing overlay X file, execute as follows.
+
+	BIND sample.x sample4.x sample5.x
+
+	Other switches have the following functions:
+
+	- /D switch: deletes the specified file from the overlay X file
+	- /L switch: display the file names contained in the overlay X file
+	- /X switch: extracts the specified file from the overlay X file
+	- /T switch: create a temporary file in the specified path
+
+8.4.2 Executing Programs Contained in Overlay X-Files
+
+	Each file included in the overlay X file is given a module number. 
+	Specify this module number to select a file in the overlay X file. 
+	The module number is assigned from 0 in the order added to the overlay X file.
+	In the previous BOND command example,
+
+	The module number of
+		sample1.x is 0
+		sample2.x 〃 1
+		sample3.x 〃 2
+		sample4.x 〃 3
+		sample5.x 〃 4
+
+	becomes.
+  
+	When the overlay X file "sample.x" is executed from the command 
+	processor (command.x), the module number 0 "sample1.x" is loaded and executed first.
+  
+	In addition, the normal X format executable file has a module number of 0, 
+	so it will be loaded and executed as is.
+  
+	Files with module numbers other than 0, such as "sample2.x" and "sample3.x", cannot be 
+	directly executed from the command processor. In other words, the file with 
+	module number 0 operates as the main program, and only when files with module 
+	numbers other than 0 are required as subprograms are called from the main program.
+  
+	Therefore, "sample1.x" with module number 0 functions as the main program, 
+	and subprograms such as "sample2.x" and "sample3.x" must be loaded and executed.
+  
+	The DOS call for that is exec($ff4b) (see the exec section of the DOS call description in this manual). 
+	Specify the module number in the MD parameter of this exec.
+	The meaning of MD is as follows.
+
+	15 to 8 bits: module number (0 to 255)
+
+	7 to 0 bits: control code
+		0: load and run
+		1: load only
+		2: Find command path
+		3: special load
+		4: Execute only
+		5: get the module number
+
+	Therefore, to load and execute "sample2.x" from "sample1.x", call exec($ff4b) with MD = $0100.
+	Also, since the module number can be obtained from the file name, "sample1.x" will 
+	run subprograms such as "sample2.x" and "sample3.x" without knowing the module number of those programs. You can.
+  
+  
+8.5 Explanation of sample program
+
+  Here, we use the sample program hide.x to explain how to create a program that uses background processing.
+  This program uses the following functions newly added in Human68k ver.2.0.
+
+	- File sharing Exclusive control of files
+	- Common area Shared storage area between processes and threads
+	- Background processing Parallel processing close to multitasking
+	- Creation of bind overlay X file
+
+
+8.5.1 Functions and operating environment
+
+・Function of "hide.x"
+
+format)
+   Set:hide [filename] Unlock:hide [password]
+
+  When you enter the file name, you will be asked for the password and time, so enter them according to the instructions.
+  To unlock it, enter the password you specified when you set it up.
+
+function)
+     Lock the file until the specified time.
+     A lock prohibits access to a file, making it impossible to open the file.
+     A reset will unlock it.
+
+・How to create "hide.x"
+
+List 1 is the makefile "makefile" for creating "hide.x".
+Please check the following when executing.
+
+・hidem.s and hidesp.s exist in the current directory
+- The version of the assembler (AS.X) or linker (LK.X) is 2.00 or later.
+
+Source files "hidem.s" and "hidesp.s" are assembled and linked to create executable files "hidem.x" and "hidesp.x".
+"hide.x" is a file that binds "hidem.x" and "hidesp.x".
+When running it will run the overlay "hide.x".
+
+・System environment settings
+
+To run this program, you need to make the following settings in "CONFIG.SYS".
+
+(1) Specifying file sharing and exclusive control
+
+SHARE = ​​<number of files> <number of lock areas> [Example] SHARE = ​​10 4
+
+Specify the number of files to be exclusively controlled (locked) and the number of areas to be locked.
+If you don't set this, you won't be able to lock the file.
+
+(2) Specification of memory capacity used by DOS call common($ff85)
+
+COMMON = <capacity> [Example] COMMON = 32K
+
+Specifies the amount of memory used by the DOS call common($ff85).
+common($ff85) is a DOS call to use a common area shared between processes or threads.
+If this is not set, common($ff85) is not available and calling it will result in an error.
+
+(3) Setting control information for parallel processing
+
+PROCESS = <number of programs> <level> <time slice value> [Example] PROCESS = 10 2 10
+
+For <number of programs>, specify the number of programs to be executed in parallel within the range of 2 to 32.
+For <level>, specify a value between 2 and 255 that determines the program execution interval.
+The smaller the value, the shorter the execution interval, so the execution speed will be faster.
+Also, for <time slice value>, specify the execution time of each program in the range of 1 to 100ms.
+Parallel processing is not possible unless PROCESS is specified.
+
+・File sharing (list 3, lines 134-143)
+
+Sharing is a function that enables the user who first opens a file to control access to the file by other users.
+Specifically, the open mode of the DOS call open($ff3d) has been extended to allow control over whether or not to read or write duplicate files.
+This program demonstrates using the sharing mode $1? to eliminate duplicate accesses.
+
+・Common area (list 3, lines 91-99, 197-202)
+
+The common area is reserved in the Human68k system area and is a storage area shared by processes or threads.
+For example, it can be said to be a message board for processes and threads.
+Processes and threads can access the common area by using the DOS call common($ff85).
+This program writes file handles and passwords to Comoneria.
+
+・Background processing
+
+Background processing has a function close to multitasking that apparently executes multiple programs in parallel.
+However, there are restrictions such as threads cannot use the system at the same time.
+The following two points should be noted when actually creating a background program.
+
+(1) It is necessary to create the same number of programs (processes) as the number of threads.
+
+It is possible to perform background processing even with a single program, but when the thread switches, the environment (CTRL-C set in the process management area, OS error abort processing destination, etc.) should also switch.
+Otherwise, each thread will share the environment, and if one thread modifies the environment, etc., it will affect other threads.
+However, in the same process, Human68k can only have one process management information per process.
+So to actually switch them for each thread you have to run each thread as a separate child process and change the environment at the beginning of the thread.
+
+(2) Programs that perform background processing must be resident programs.
+
+A normal program is removed from memory when the program terminates.
+However, a resident program leaves part of it in memory even after the program terminates, and is called later in some way to do processing.
+A background program consists of two programs, a parent process and a child process, and the child process is a resident program.
+In the sample program, the parent process is "hidem.s" and the child process is "hidesp.s".
+  
+8.5.2 Parent Process (Listing 2: hidem.s)
+
+  The parent process does two things.
+
+・If there is no thread, execute a child process to create a thread.
+・If there is a thread, a discard request is made through inter-thread communication.
+
+The parent process has the following structure:
+
+(1) Check the version of DOS (lines 85 to 92) The executable DOS version is 2.00 to 2.49.
+Use the DOS call vernum($ff30).
+
+(2) Check for thread existence (lines 119-131) If a thread already exists, branch at (7), otherwise proceed to (3).
+Here we use the DOS call get_pr($fffa).
+
+(3) Execute the child process (lines 17, 21-31) Use the DOS call exec($ff4b) here.
+The sample executes the process in the overlay file.
+The child process keeps its background processing part resident in memory in a sleeping state.
+
+(4) Communicate the command ($fffb) to activate the thread because the thread is in permanent sleep state (lines 62-67, 104-118)
+Here, communication is performed using the DOS call send_pr($fffd).
+
+(5) End (20 lines)
+
+(6) Get the ID numbers of yourself and the thread as communication parameters (lines 119 to 131) Here, the DOS call get_pr($fffa) is used.
+
+(7) Communicate a thread destruction request ($fff9) to the thread (lines 65-77)
+Here, send_pr($fffd) is used for communication.
+However, in the sample program, we let the thread self-destruct instead of requesting it to be destroyed.
+
+(8) End (lines 19-20)
+
+
+8.5.3 Child Process (Listing 3: hidesp.s)
+
+  The child process is divided into two parts. A resident part that performs background processing and a non-resident part that creates and terminates threads.
+  The background processing part is placed in the front, and the thread creation and resident termination parts are placed in the back. And the back part is run as a child process from the parent process and truncated when exiting the resident.
+
+  The resident section performs the following functions.
+
+	・Environment settings
+	・Receive inter-thread communication
+	・Destruction of thread
+	・Background processing
+
+  The non-resident department performs the following functions.
+
+	・Create a new thread
+	・Memory resident background processing
+
+  The resident part looks like this:
+
+(1) Environment settings (lines 14 to 15, 39 to 49) Change the processing destination of CTRL-C and error abort when the thread is switched.
+  Here we use the DOS call intvcs($ff25).
+
+(2) Receiving communication between threads (lines 16 to 38) When communication comes from another thread, the necessary information is stored in the communication buffer. 
+  Also, if it was in sleep mode, it will be activated.
+  Read commands and data from the inter-thread communication buffer and branch to the corresponding processing program.
+  See the DOS call open_pr($fff8) for the contents of the communication buffer, and sleep_pr($fffc) for the procedure for reading from the communication buffer.
+  At the end of this part, we put the thread to sleep with the DOS call sleep_pr($fffc). This is to reduce the work of the thread and not slow down the entire system by not using all of its allotted time. Make sure to sleep if there is nothing to process until the next request is made.
+
+(3) Abandon thread (line 03) Use the DOS call kill_pr($fff9) here.
+  When receiving a discard request command ($fff9) in inter-thread communication, the thread will discard according to the request if it is an acceptable request. If the request is not accepted, discard the request and then relinquish the execution right.
+  After that, when the execution right is returned to the thread that issued the request, the DOS call get_pr($fffa) is attempted to obtain the detailed information of the requested thread. A successful get indicates that it could not be discarded. A failure indicates that it could be discarded.
+  If you want to destroy your own thread, first go to sleep forever and wait until another thread activates it. Other threads communicate periodically, as any thread may be in a waiting state as above. And at this time, if the communication fails, the thread knows that it has destroyed itself.
+  When destroying threads, don't destroy threads chaotically. Chaotic discards can cause irreversible and catastrophic system failures.
+
+(4) Main body of background processing (lines 53 to 101) Here, the user can create any program.
+  However, there are restrictions, so please refer to the notes below.
+
+  The above is the main background processing and resides in memory.
+  Next, I will explain the temporary part.
+
+(5) Creating a new thread (lines 203-216) Here, the DOS call open_pr($fff8) is used.
+
+(6) Resident termination (lines 217-221)
+  Here we use the DOS call keeppr($ff31).
+  The resident program range varies depending on the location of background processing data, work, and stack area.
+  Putting them at the end of the child process means that the whole program has to be resident. However, since this part is essentially a non-resident part, the data, work, and stack areas are placed just above this, that is, at the end of background processing, as in this program. Then, the resident size is small because the resident range can be up to that point.
+  At this time, please note that data, stack, etc. should also be placed in the text section (.text). Therefore, be careful not to write section pseudo-instructions such as .data, .bss, and .stack there.
+  
+	parent process 														child process
+┌───────────────────────────────────────────────────────────┐┌──────────────────────────────────────────────┐
+│ 				 							  				││─ Resident Department ─         			  	│
+│ 				 							  				││ 							   				  	│
+│ 				 							  				││Resides in memory and performs 			  	│
+│1.When there are no threads, it runs the non-resident  	││	background processing 					  	│
+│ part of the child process and communicates to activate	││  											│ 
+│ the resident part of the forever sleep state. 			││When writing data here, do not put .data 	  	│
+│ 											  				││ 	.bss, .stack							  	│
+│ 											  				│├──────────────────────────────────────────────┤
+│2. Communicate a discard request to the   					││─ non-resident section ─ 						│
+│ resident part when there is a thread						││Create a resident part as a thread and		│
+│ 															││  terminate it permanently					│
+│ 															││ 												│
+│ 															││This part is not stored in memory				│
+└───────────────────────────────────────────────────────────┘└──────────────────────────────────────────────┘
+
+8.5.4 Precautions for programming
+
+・If you set the execution address in the middle of the program in the child process, if you write her label after the .end pseudo-instruction, execution will start from that label.
+- Background processing cannot be traced by the debugger (DB.X).
+  An incomplete program running as a thread is difficult to stop and can even crash the system.
+  Therefore, during development, separate the resident and non-resident sections and debug them thoroughly until they run perfectly.
+- As mentioned above, you need several programs in the background. Therefore, the BIND command is used to combine them into a single program.
+  The advantages of using the BIND command are:
+(1) Convenient handling as it can be handled as a single file
+(2) There is no fear that the file name of the child process will be changed
+(3) When executing the child process, it uses its own bind file name, so it can be executed regardless of the file name change.
+(4) Routine to check the initial environment such as DOS version Only the first program is enough.
+
+  When creating a background processing program, be sure to make it a single file with the BIND command.
+
+
+8.5.5 Sample program list
+
+  omit
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  

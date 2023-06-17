@@ -1,0 +1,313 @@
+
+Oh!X_1993-02.pdf 99 - 108
+
+Background SB Sato
+
+Murata Toshiyuki, Satoshi Sunda
+
+Continuing from last month, I will take up the extended functions of Human68k ver 2.0.
+This time, I will explain the background processing function for executing several processes at the same time.
+Using a program that uses this function as a concrete example, let's consider how to create it, how it resides, and how to execute it.
+
+This time, we will create a program using the ground processing function that enables parallel execution of multiple programs.
+
+We will look at the functions around the process/memory of Human68k ver 2.0, focusing on how to use it.
+As usual, I won't go into much detail about how to invoke individual DOS calls, so please refer to the Programmer's Manual when appropriate.
+
+
+
+------ Overview of background processing functions ----------
+
+Needless to say, the power of multiple programs: even though they run in parallel, there is only one CPU
+
+As mentioned above, only one program can be executed at a given moment. If you force it, run one program for a while, then run another program again, and so on, and switch control at sufficiently short intervals, it will be as if multiple programs are running in parallel. 
+I can see it. This is the basis of so-called multitasking.
+In general, task I' is switched by using a timer that periodically triggers task I'. Figure 1 shows the situation.
+The horizontal axis is time and the vertical axis is the task being executed (conceptually the program counter).
+If you look at it from the left, Program A is running first. A timer interrupt occurs here, and control passes to the interrupt routine. Task switching is performed by this timer interrupt routine.
+
+Normally, an interrupt routine returns to the program that was being executed when the interrupt occurred after completing the necessary processing. ).
+At this time, the position in program A to which it was originally supposed to return and the contents of the registers at the time the interrupt occurred are saved somewhere, and then execution of program A is resumed. • Go back to the original.
+In this way, stealthily and indiscriminately changing the register contents in the interrupt routine = task switching.
+Human68k's packed ground processing function basically executes multiple programs in parallel in this way.
+
+Well, the word "task" has been used for the sake of convenience, but in Human68k's background processing function, "(thread)" is the management unit of parallel processing.
+Thread means a series of things, and in this case, it refers to a sequence of program instructions that are processed sequentially or the flow of their processing.
+ft Threads are identified by a number called a thread ID and a thread name2).
+At startup, one main thread (thread ID is 0, thread name is "Human68k system") is prepared, and in the foreground 3')J program, that is, , COMMAND. X and each program that runs as a child process will run in this main thread".
+When a task is registered by the DOS call open_pr from this state of only the main thread, a new thread is created and executed while sharing the CPU time with the main thread.
+A packground task is always created as a resident program and always exits with the DOS call keeppr after open__pr.
+At this time, if necessary, it is possible to place multiple tasks on the same memory block, register them individually with open_pr, and then collectively make them resident.
+In that case, each task will share the environment as the same process.
+
+To destroy a registered background task, use the DOS call kill_pr.
+kill_pr destroy the thread to which the task that called it belongs, and also release the resident and occupied memory.
+In the case of a multi-task background process, when one task commits suicide, all tasks that share the environment as the same process are brought along.
+where kill_pr is just a ``suicide'' DOS call.
+There is no direct way to destroy her threads other than your own.
+In that case, he takes the method of sending a discard request through inter-thread communication to make it kill itself.
+More on inter-thread communication later.
+
+
+
+------ red switching actual ----------
+The MFT timer D is used as the thread switching timer.
+The IOCS call TIMERDST, which sets the timer D interrupt, is disabled when PROCESS is set and is no longer available to the user.
+In addition, the timer D interrupt interval can be set finely, but even if it is set to the maximum, it is too short to be used as the thread switching interval. is fixed at 1 ms, and the interrupt routine counts the number of interrupts and switches threads at regular intervals.
+
+Thread switching by interrupts is performed only in user mode. This is because system calls such as DOS calls and IOCS calls are not reentrant.
+If thread switching is allowed even during system call processing, there is a possibility that the same system call will be issued from another thread before system call processing reaches the end. DOS and IOCS calls do not support such calls.
+The timer interrupt routine checks to see if it was in supervisor mode before the interrupt by examining the sr pushed on the stack at the time of the interrupt, and if so, a system call (or other interrupt routine) and returns without switching threads. 
+A side effect of this is that thread switching is stopped even during the execution of an application program running in supervisor mode.
+Therefore, it is recommended that programs running in supervisor mode periodically call the DOS call change_pr, which voluntarily relinquishes execution and passes execution to another thread.
+
+However, if the timer interrupt routine fails to switch threads, it sets an internal flag and returns. then it will switch threads (without interrupts).
+Thus, even in a program running in supervisor mode, he will not completely stop thread switching if he issues DOS calls at appropriate intervals. Rather, it might be better to issue a dummy DOS call than change_pr if it's just a matter of not taking over the execution right.
+Using change_pr also causes an unconditional thread switch even if there is still time left in the thread to be used, but any other DOS call will change the thread |!H Thread breaks only when cut.
+As a DOS call to be used at this time, a harmless one that completes processing in a very short period of time, such as [curdrv], would be suitable.
+
+In addition, thread switching is also performed when key input is interrupted during a DOS call.
+The period in which the CPU is idle most is while waiting for the user's response, such as key input. Natural.
+In the first place, the raison d'être of multitasking (in a single-user environment) is to make use of such wasted time.
+Note that the IOCS call B_KEYINP is not tampered with in this way. Calling B_KEYINP when there is no key input ahead causes thread switching to stall until there is a key input.
+To avoid this, B_KEYSNS must make sure there is data in the key buffer before calling B_KEYINP.
+
+Now, thread switching is not simply done in order of thread ID.
+& Threads are given an execution priority level, and Human68k considers this level when deciding which thread to pass execution rights to.
+The execution priority level is represented by a value from 2 to 255, and the lower the value, the higher the level, meaning that more priority is given to CPU time.
+As a rule of thumb, if the run level value is halved, the number of times execution rights are passed doubles.
+
+By the way, Human68k implements thread switching with priority in the following way.
+Instead, prepare a 1-byte counter for each thread and initialize it with the value of execution priority level -1.
+When switching threads, look for the thread with the lowest counter value.
+This search is performed in order of thread ID, starting with the thread next to the thread that has been executing so far.
+If there is more than one thread with the lowest counter: Which one hits t?
+Execution right is passed to the thread found in this way. At this time, the remainder of the thread's counter is subtracted from the other thread's counter, and at the same time, the counter of the thread to which execution right has been passed is set. reset.
+Below is a repetition of this.
+For reference, Table 1 shows the change in the counter when there are 3 threads with execution priority levels 3, 4, and 6 (in the table, the arrow indicates resetting his counter).
+
+
+Thread A	│	Thread B	│	Thread C	│	Executed Two Reds
+────────────┼───────────────┼───────────────┼─────────────────────
+	2		│		3		│		5		│		initial state	
+	0 → 2	│		1		│		3		│		Thread A
+	1		│		0 → 3	│		2		│		Thread B
+	0 → 2	│		2		│		1		│		Thread A
+	1		│		1		│		0 →5	│		Thread C
+	0 → 2	│		0		│		4		│		Thread A
+	2		│		0 → 3	│		4		│		Thread B
+	0 → 2  	│		1		│		2		│		Thread A
+	1		│		0 → 3	│		1		│		Thread B
+	0		│		2		│		0 → 5	│		Thread C
+	0 → 2	│		2		│		5		│		Thread A
+	0		│		0 → 3	│		3		│		Thread B
+	0 → 2	│		3		│		3		│		Thread A
+	0 → 2	│		1		│		1		│		Thread A
+	1		│		0 → 3	│		0		│		Thread B
+	1		│		3		│		0 → 5	│		Thread C
+
+
+By the way, the execution priority level can only be specified when registering a task with open_pr (on the PROCESS line of CONFIG.SYS in the case of the main thread), and there is a way to change it later. not So here's Listing 1.
+Probably the only working program this month.
+When a thread HD and an execution priority level are specified as arguments, the corresponding thread management information inside Human68k is directly rewritten to change the execution priority level. Place list 2 in the current directory when assembling.
+List 2 is a background structure/constant definition file, which is commonly used in later programs.
+
+squirrel 1 RENICE.X
+
+*			Change thread execution level
+			.include		doscall.mac
+			.include		ioscall.mac
+*			.include		fefunc.h
+			.include		bg.h
+			.include		const.h
+*
+FPACK		macro	callno
+			.dc.w	callno
+			.endm
+*
+__STOL		equ		$fe10
+*
+			.text
+			.even
+*
+ent:
+			lea.l	inisp(pc),07
+			
+			tst.b	(a2)+
+			beq		usage
+			
+			movea.l	a2,a0
+			FPACK	__STOL
+			bcs		usage
+			move.w	d0,d2				* d2.w = thread ID
+			
+			FPACK	__STOL
+			bcs		usage
+			move.b	d0,d1				* d1.b = level
+			subq.b	#2,d0
+			bcc		do
+			moveq.l	#2,d1
+			
+do:			lea.l 	thinfo(pc),a1		* have a specified ID
+			pea.l 	(a1)				* get thread management information
+			move.w 	d2,-(sp)			*
+			DOS 	_GET_PR				*
+			addq.l 	#6.sp				*
+			tst.l 	d0					*
+			bmi		nfound				*
+			
+			move.l	(a1),d3				* d3 = Next Thread Management Information
+			
+			move.l	d3,d0				* Thread management information
+			moveq.l #thNMAX-1,d4		*  kidnap the main body
+sealp:		movea.l d0,a1				*
+			IOCS	_B_BPEEK			*
+			cmp.l 	d3,d0				*
+			dbeq	d4,sealp			*
+			bne		nfound				*
+			
+										* al = Body of thread management information +4
+			addq.l 	#thLeVEL-4,a1		* Change execution priority level
+			subq.b 	#1,d1				*
+			IOSC	_B_BPOKE			*
+			
+			DOS		_EXIT
+*
+usage:		lea.l	usgmes(pc),a0
+			bra		error
+nfound		lea.l 	errmes(pc),a0
+			*
+error:		move.w	#STDERR,-(sp)
+			pea.l 	(a0)
+			DOS		_FPUTS
+*			addq.l 	#6,sp
+
+			move.w 	#1,-(sp)
+			DOS		_EXIT2
+usgmes:		.dc.b 	'Feature: Thread execution top level'
+			.dc.b 	'change',CB,LF
+			.dc.b 	'use： RENICE Thread ID (0-31)'
+			.dc.b 	'level(2 - 255) ',CR,LF,0
+			.dc.b   'fragile thread not found',CR,LF,0
+*
+			.bss
+			.even
+*
+thinfo:		.ds.b  	SIZEofTHREADINFO
+*
+			.stack
+			.even
+*
+inisp:
+
+			.end	ent
+
+
+List 1 is a bad program in that it rewrites the Human68k work, but the procedure for calculating the rewrite position is justified.
+The basic line uses only publicly available information, and does not refer to the internal Hunian68 k work with absolute addresses. 
+Depending on the input, you may think that if you're going to do bad things anyway, you should just ship Human68k's work and get the address of the thread information. 
+It's my sense of beauty to use that even if it's tough6).
+
+So, in List 1, if you get a copy of the thread information with the specified ID with get_pr, follow the "pointer pointing to the next thread information" at the top of it, and find the same thing as the copy anywhere in Human68k. I'm looking for something in
+Thread information is retained inside Human68k as it is in the format returned by get_pr (List 2: lines 11-33). 
+This method works well because the there is also a way to get the thread information for thread ID 0 and follow the pointer the required number of times. 
+I have to. In Listing 1, you can tell if a given thread ID is valid when you call get_pr.
+
+
+
+------ Thread State and Inter-Thread Communication ----------
+
+A thread has an active state and a sleep state.
+I think you can read it from the word, but he describes the state of normal movement as active, and the state of temporarily stopping and acting as a samurai machine as sleep.
+The sleeping thread gets the right to execute and he doesn't come.
+
+background tasks often don't require constant running.
+For example, in the case of a clock program, basically the screen should be refreshed once a second.
+Thus, when there is nothing to do for a while after doing a batch of work, it is customary for the background task to voluntarily sleep for a period of time to avoid wasting CPU time. ".
+
+To sleep, use the DOS call sleep_pr. The sleep time can be specified in lms as an argument.
+In particular, if 0 is specified, it will be interpreted as infinite, and will continue to slip until it is woken up by an external inter-thread communication.
+In addition, the thread immediately after being created by open_pr is put to sleep state unconditionally.
+The wait time at this time is specified by the last (first on her stack) argument of open_pr.
+
+There are two ways to put threads other than your own to sleep.
+One way is to request sleep in inter-thread communication.
+In this case, the thread that received the communication will automatically go to sleep, so if the program does not support the sleep request command, it is meaningless9. >.
+To force it to sleep, use the DOS call suspend_pr. (10
+suspend_pr forcibly puts the specified thread into sleep state without using inter-thread communication.
+A thread suspended with suspend_pr will continue to sleep until it is also awakened by inter-thread communication.
+
+Inter-thread communication, which came up again and again, is done using the DOS call send_pr.
+send_pr allows you to send a 16-bit command and, if necessary, an indeterminate length of accompanying data to any thread.
+The destination thread may be asleep.
+The thread to which the communication is sent automatically becomes active.
+At this time, the receiving side can distinguish whether he was woken up by the communication or the waiting time has passed by the return value from sleep_pr.
+Even if you try to go to sleep while communication is already in progress, it returns immediately from sleep_pr and cannot go to sleep.
+
+The contents of communication are written into the communication buffer prepared for each thread.
+The communication buffer has a structure like lines 42 to 49 in list 2.
+In order to receive communication, it is necessary to set the top address of the data storage area and its size in advance, and to put 1 in the thread ID storage field of the message. .
+In the case of a program that does not sleep, it is determined whether or not communication has occurred based on whether this ID storage field is 1 or not.
+Here, when communication enters, fields other than the first address of the data area will be overwritten. Note that the buffer must be reset.
+A command code can basically be used by an application giving it its own meaning.
+However, the (FFxx h) command codes are reserved by the system, and some of them have defined meanings such as Listing 2, lines 57-60.
+Discard requests (FFF9 h) and sleep requests (FFFC h) have already been mentioned.
+(FFFB h) is a special command that only activates the thread to communicate with, but does not change the inter-thread communication buffer (= does not actually communicate).
+This is a specification to avoid changing the contents of the communication buffer when waking up a thread that has been suspended by suspend_pr in the middle of processing inter-thread communication. 
+The check command (FFFF h) is a command to try to communicate and check whether it was accepted.
+If there is still unprocessed data in the destination's communication buffer, send_pr will return error code -28, so you know if communication is possible.
+However, you probably won't use this command very often.
+The command to make it active (FFFB h) It is not treated as special as it is, and the command is actually sent. to reset the inter-thread communication buffer.
+
+In this case, it would be smarter to directly send the command you want to send from the beginning and check for errors.
+
+As an example of using inter-thread communication, List 3 shows a program that destroys an arbitrary thread.
+Since it simply sends a discard request command, it only has meaning as an example of using send_pr. It can also be transformed into a program that makes it easy.
+In addition, lines 27-33,
+
+move . w d0, ― (sp)
+
+DOS .SUSPEND
+
+addq.l #2,sp 
+
+It can also be a program that forces sleep. If you prepare everything, it will come in handy.
+
+
+
+
+
+However, List 3 has the power to cut corners;
+First, although send_pr is supposed to specify the thread ID of the sender as an argument to clarify the identity of I'J, List 3 is mostly Assuming it's the main thread (which is usually true) and neglecting to get its own thread id.
+Second, you do not check to see if the other party received the communication. 笫3, the opponent has not confirmed whether he has properly destroyed himself.
+Fourth, a discard request shouldn't be sent so carelessly in the first place.
+Some programs assume that another program (usually a non-resident part of her program) will do some cleanup prior to destruction.
+By the way, TIMER.X and PRINT.X seem to work fine, but other programs may make mistakes.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
