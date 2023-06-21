@@ -93,7 +93,7 @@ Thread A	│	Thread B	│	Thread C	│	Executed Two Reds
 	0 → 2	│		1		│		3		│		Thread A
 	1		│		0 → 3	│		2		│		Thread B
 	0 → 2	│		2		│		1		│		Thread A
-	1		│		1		│		0 →5	│		Thread C
+	1		│		1		│		0 → 5	│		Thread C
 	0 → 2	│		0		│		4		│		Thread A
 	2		│		0 → 3	│		4		│		Thread B
 	0 → 2  	│		1		│		2		│		Thread A
@@ -109,99 +109,102 @@ Thread A	│	Thread B	│	Thread C	│	Executed Two Reds
 
 By the way, the execution priority level can only be specified when registering a task with open_pr (on the PROCESS line of CONFIG.SYS in the case of the main thread), and there is a way to change it later. not So here's Listing 1.
 Probably the only working program this month.
-When a thread HD and an execution priority level are specified as arguments, the corresponding thread management information inside Human68k is directly rewritten to change the execution priority level. Place list 2 in the current directory when assembling.
+When a thread HD and an execution priority level are specified as arguments, the corresponding thread management information inside Human68k is directly rewritten to change the execution priority level. 
+Place list 2 in the current directory when assembling.
 List 2 is a background structure/constant definition file, which is commonly used in later programs.
 
 Listing 1 RENICE.X
 ────────────────────────────────────────────────────────────────────────────────
+1:	*			Change thread execution level
 
-*			Change thread execution level
-			.include		doscall.mac
-			.include		ioscall.mac
-*			.include		fefunc.h
-			.include		bg.h
-			.include		const.h
-*
-FPACK		macro	callno
-			.dc.w	callno
-			.endm
-*
-__STOL		equ		$fe10
-*
-			.text
-			.even
-*
-ent:
-			lea.l	inisp(pc),07
-			
-			tst.b	(a2)+
-			beq		usage
-			
-			movea.l	a2,a0
-			FPACK	__STOL
-			bcs		usage
-			move.w	d0,d2				* d2.w = thread ID
-			
-			FPACK	__STOL
-			bcs		usage
-			move.b	d0,d1				* d1.b = level
-			subq.b	#2,d0
-			bcc		do
-			moveq.l	#2,d1
-			
-do:			lea.l 	thinfo(pc),a1		* have a specified ID
-			pea.l 	(a1)				* get thread management information
-			move.w 	d2,-(sp)			*
-			DOS 	_GET_PR				*
-			addq.l 	#6.sp				*
-			tst.l 	d0					*
-			bmi		nfound				*
-			
-			move.l	(a1),d3				* d3 = Next Thread Management Information
-			
-			move.l	d3,d0				* Thread management information
-			moveq.l #thNMAX-1,d4		*  kidnap the main body
-sealp:		movea.l d0,a1				*
-			IOCS	_B_BPEEK			*
-			cmp.l 	d3,d0				*
-			dbeq	d4,sealp			*
-			bne		nfound				*
-			
-										* al = Body of thread management information +4
-			addq.l 	#thLeVEL-4,a1		* Change execution priority level
-			subq.b 	#1,d1				*
-			IOSC	_B_BPOKE			*
-			
-			DOS		_EXIT
-*
-usage:		lea.l	usgmes(pc),a0
-			bra		error
-nfound		lea.l 	errmes(pc),a0
-			*
-error:		move.w	#STDERR,-(sp)
-			pea.l 	(a0)
-			DOS		_FPUTS
-*			addq.l 	#6,sp
+				.include		doscall.mac
+				.include		ioscall.mac
+	*			.include		fefunc.h
+				.include		bg.h
+				.include		const.h
+	*
+	FPACK		macro	callno
+10:				.dc.w	callno
+				.endm
+	*
+	__STOL		equ		$fe10
+	*
+				.text
+				.even
+	*
+	ent:
+				lea.l	inisp(pc),07
+20:				
+				tst.b	(a2)+
+				beq		usage
+				
+				movea.l	a2,a0
+				FPACK	__STOL
+				bcs		usage
+				move.w	d0,d2				* d2.w = thread ID
+				
+				FPACK	__STOL
+30:				bcs		usage
+				move.b	d0,d1				* d1.b = level
+				subq.b	#2,d0
+				bcc		do
+				moveq.l	#2,d1
+				
+	do:			lea.l 	thinfo(pc),a1		* have a specified ID
+				pea.l 	(a1)				* get thread management information
+				move.w 	d2,-(sp)			*
+				DOS 	_GET_PR				*
+40:	*			addq.l 	#6.sp				*
+				tst.l 	d0					*
+				bmi		nfound				*
+				
+				move.l	(a1),d3				* d3 = Next Thread Management Information
+				
+				move.l	d3,d0				* Thread management information
+				moveq.l #thNMAX-1,d4		*  kidnap the main body
+	sealp:		movea.l d0,a1				*
+				IOCS	_B_BPEEK			*
+50:				cmp.l 	d3,d0				*
+				dbeq	d4,sealp			*
+				bne		nfound				*
+				
+											* al = Body of thread management information +4
+				addq.l 	#thLeVEL-4,a1		* Change execution priority level
+				subq.b 	#1,d1				*
+				IOSC	_B_BPOKE			*
+				
+				DOS		_EXIT
+60:	*
+	usage:		lea.l	usgmes(pc),a0
+				bra		error
+	nfound		lea.l 	errmes(pc),a0
+				*
+	error:		move.w	#STDERR,-(sp)
+				pea.l 	(a0)
+				DOS		_FPUTS
+	*			addq.l 	#6,sp
 
-			move.w 	#1,-(sp)
-			DOS		_EXIT2
-usgmes:		.dc.b 	'Feature: Thread execution top level'
-			.dc.b 	'change',CB,LF
-			.dc.b 	'use： RENICE Thread ID (0-31)'
-			.dc.b 	'level(2 - 255) ',CR,LF,0
-			.dc.b   'fragile thread not found',CR,LF,0
-*
-			.bss
-			.even
-*
-thinfo:		.ds.b  	SIZEofTHREADINFO
-*
-			.stack
-			.even
-*
-inisp:
+70:				move.w 	#1,-(sp)
+				DOS		_EXIT2
+	*
+	usgmes:		.dc.b 	'Feature: Thread execution top level'
+				.dc.b 	'change',CB,LF
+				.dc.b 	'use： RENICE Thread ID (0-31)'
+				.dc.b 	'level(2 - 255) ',CR,LF,0
+	errmes:		.dc.b   'fragile thread not found',CR,LF,0
+	*
+				.bss
+80:				.even
+	*
+	thinfo:		.ds.b  	SIZEofTHREADINFO
+	*
+				.stack
+				.even
+	*
+				.ds.l	256
+	inisp:
 
-			.end	ent
+90:				.end	ent
 ────────────────────────────────────────────────────────────────────────────────
 
 List 1 is a bad program in that it rewrites the Human68k work, but the procedure for calculating the rewrite position is justified.
@@ -756,7 +759,7 @@ Therefore, s_process cuts out the main memory in advance and allocates it exclus
 , s_malloc and s_free allocate/free memory blocks for memory allocated unconditionally to the main thread.
 
 malloc2 is a high-level call that improves the DOS call malloc so that the memory allocation method can be specified.
-malloc unconditionally allocates memory from the lower address side, but by specifying the mode in malloc2, it allocates from the higher memory side (Mote 2), Or allocate memory (mode 1) from the free memory force; 5 I can.
+malloc unconditionally allocates memory from the lower address side, but by specifying the mode in malloc2, it allocates from the higher memory side (Mode 2), Or allocate memory (mode 1) from the free memory force; 5 I can.
 A force not directly related to background processing?, might be useful in a batch program to move itself to the top of his memory in order to prevent memory fragmentation when making the program resident.
 
 Then there are the Foreplay X files that exec now supports. Again, this is not just for back ground processing, and is reasonably useful if you have the resident and transient parts in separate X files.

@@ -117,94 +117,96 @@ change_pr を 使う と， また' その ス レツ ドが 使つ て いら�
 
 リス 卜 1 RENICE.X
 ────────────────────────────────────────────────────────────────────────────────
-*			ス レツ ドの 実行 ほ 先 レベル を 変^す 
-			.include		doscall.mac
-			.include		ioscall.mac
-*			.include		fefunc.h
-			.include		bg.h
-			.include		const.h
-*
-FPACK		macro	callno
-			.dc.w	callno
-			.endm
-*
-__STOL		equ		$fe10
-*
-			.text
-			.even
-*
-ent:
-			lea.l	inisp(pc),07
-			
-			tst.b	(a2)+
-			beq		usage
-			
-			movea.l	a2,a0
-			FPACK	__STOL
-			bcs		usage
-			move.w	d0,d2				* d2.w = ス レツ ド ID
-			
-			FPACK	__STOL
-			bcs		usage
-			move.b	d0,d1				* d1.b = レ ペル
-			subq.b	#2,d0
-			bcc		do
-			moveq.l	#2,d1
-			
-do:			lea.l 	thinfo(pc),a1		* 指定ID を持つ
-			pea.l 	(a1)				* スレツドの管理情報を得る
-			move.w 	d2,-(sp)			*
-			DOS 	_GET_PR				*
-			addq.l 	#6.sp				*
-			tst.l 	d0					*
-			bmi		nfound				*
-			
-			move.l	(a1),d3				* d3 = 次のスレツド管理情報
-			
-			move.l	d3,d0				* スレツド管理情報の
-			moveq.l #thNMAX-1,d4		*  本体を 拐す
-sealp:		movea.l d0,a1				*
-			IOCS	_B_BPEEK			*
-			cmp.l 	d3,d0				*
-			dbeq	d4,sealp			*
-			bne		nfound				*
-			
-										* al = スレツド管理情報の本体+4
-			addq.l 	#thLeVEL-4,a1		* 実行優先レベルを苗き換える
-			subq.b 	#1,d1				*
-			IOSC	_B_BPOKE			*
-			
-			DOS		_EXIT
-*
-usage:		lea.l	usgmes(pc),a0
-			bra		error
-nfound		lea.l 	errmes(pc),a0
-			*
-error:		move.w	#STDERR,-(sp)
-			pea.l 	(a0)
-			DOS		_FPUTS
-*			addq.l 	#6,sp
+1:	*			ス レツ ドの 実行 ほ 先 レベル を 変^す 
 
-			move.w 	#1,-(sp)
-			DOS		_EXIT2
-usgmes:		.dc.b 	'機能： ス レリ ドの 実行 ほ 先 レベル'
-			.dc.b 	'変実する',CB,LF
-			.dc.b 	'使用ま： RENICE ス レツ ド ID (0-31)'
-			.dc.b 	'レベル(2 - 255) ',CR,LF,0
-			.dc.b   '脆のスレツドが見つかりませ ',CR,LF,0
-*
-			.bss
-			.even
-*
-thinfo:		.ds.b  	SIZEofTHREADINFO
-*
-			.stack
-			.even
-*
-inisp:
+				.include		doscall.mac
+				.include		ioscall.mac
+	*			.include		fefunc.h
+				.include		bg.h
+				.include		const.h
+	*
+	FPACK		macro	callno
+10:				.dc.w	callno
+				.endm
+	*
+	__STOL		equ		$fe10
+	*
+				.text
+				.even
+	*
+	ent:
+				lea.l	inisp(pc),07
+20:				
+				tst.b	(a2)+
+				beq		usage
+				
+				movea.l	a2,a0
+				FPACK	__STOL
+				bcs		usage
+				move.w	d0,d2				* d2.w = ス レツ ド ID
+				
+				FPACK	__STOL
+30:				bcs		usage
+				move.b	d0,d1				* d1.b = レ ペル
+				subq.b	#2,d0
+				bcc		do
+				moveq.l	#2,d1
+				
+	do:			lea.l 	thinfo(pc),a1		* 指定ID を持つ
+				pea.l 	(a1)				* スレツドの管理情報を得る
+				move.w 	d2,-(sp)			*
+				DOS 	_GET_PR				*
+40:	*			addq.l 	#6.sp				*
+				tst.l 	d0					*
+				bmi		nfound				*
+				
+				move.l	(a1),d3				* d3 = 次のスレツド管理情報
+				
+				move.l	d3,d0				* スレツド管理情報の
+				moveq.l #thNMAX-1,d4		*  本体を 拐す
+	sealp:		movea.l d0,a1				*
+				IOCS	_B_BPEEK			*
+50:				cmp.l 	d3,d0				*
+				dbeq	d4,sealp			*
+				bne		nfound				*
+				
+											* al = スレツド管理情報の本体+4
+				addq.l 	#thLeVEL-4,a1		* 実行優先レベルを苗き換える
+				subq.b 	#1,d1				*
+				IOSC	_B_BPOKE			*
+				
+				DOS		_EXIT
+60:	*
+	usage:		lea.l	usgmes(pc),a0
+				bra		error
+	nfound		lea.l 	errmes(pc),a0
+				*
+	error:		move.w	#STDERR,-(sp)
+				pea.l 	(a0)
+				DOS		_FPUTS
+	*			addq.l 	#6,sp
 
-			.end	ent
-			
+70:				move.w 	#1,-(sp)
+				DOS		_EXIT2
+	*
+	usgmes:		.dc.b 	'機能： ス レリ ドの 実行 ほ 先 レベル'
+				.dc.b 	'変実する',CB,LF
+				.dc.b 	'使用ま： RENICE ス レツ ド ID (0-31)'
+				.dc.b 	'レベル(2 - 255) ',CR,LF,0
+	errmes:		.dc.b   '脆のスレツドが見つかりませ ',CR,LF,0
+	*
+				.bss
+80:				.even
+	*
+	thinfo:		.ds.b  	SIZEofTHREADINFO
+	*
+				.stack
+				.even
+	*
+				.ds.l	256
+	inisp:
+
+				.end	ent
 ────────────────────────────────────────────────────────────────────────────────
 
 リスト 1 は Human68k の ワーク を 書き換えて し まう という 点で 悪い プ ログ ラム だが， 書き換える 位 置 を 算出す る 手順 は 正当 といえる も の だ。 
