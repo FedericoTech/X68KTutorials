@@ -4,19 +4,19 @@
 
 - List of DOS calls
 
-$ff00   _EXIT           End program
-$ff01   _GETCHAR        Keyboard input (with echo)
-$ff02   _PUTCHAR        Display character
-$ff03   _COMINP         Read byte from RS-232C
-$ff04   _COMOUT         Write byte to RS-232C
-$ff05   _PRNOUT         Write character to printer
-$ff06   _INPOUT         Character I/O
-$ff07   _INKEY          Get character from keyboard (no break check)
-$ff08   _GETC           Get character from keyboard (with break check)
-$ff09   _PRINT          Print character string
-$ff0a   _GETS           Get character string (with break check)
-$ff0b   _KEYSNS         Inspect key input status
-$ff0c   _KFLUSH         Get key input after flushing buffer
+$ff00   _EXIT           void _dos_exit() 											End program
+$ff01   _GETCHAR        int _dos_getchar()											Keyboard input (with echo)
+$ff02   _PUTCHAR        void _dos_putchar(int code)									Display character
+$ff03   _COMINP         int _dos_cominp()											Read byte from RS-232C
+$ff04   _COMOUT         void _dos_comout(int code)									Write byte to RS-232C
+$ff05   _PRNOUT         void _dos_prnout(int code)									Write character to printer
+$ff06   _INPOUT         int _dos_inpout(int code)									Character I/O
+$ff07   _INKEY          int _dos_inkey()											Get character from keyboard (no break check)
+$ff08   _GETC           int _dos_getchar()											Get character from keyboard (with break check)
+$ff09   _PRINT          void _dos_print(const char *string)							Print character string
+$ff0a   _GETS           int _dos_gets (struct _inpptr *ptr)							Get character string (with break check)
+$ff0b   _KEYSNS         int _dos_keysns(void)										Inspect key input status
+$ff0c   _KFLUSH         int _dos_kflushgp()											Get key input after flushing buffer
 $ff0d   _FFLUSH         Disk reset
 $ff0e   _CHGDRV         Select working drive
 $ff0f   _DRVCTRL        Inspect/select drive status
@@ -35,13 +35,13 @@ $ff1d   _FPUTC          Write byte to file
 $ff1e   _FPUTS          Write character string to file
 $ff1f   _ALLCLOSE       Close all files
 
-$ff20   _SUPER          Set supervisor/user mode
+$ff20   _SUPER          int _dos_super(long stack)									Set supervisor/user mode
 $ff21   _FNCKEY         Get/set redefinable keys
 $ff22   _KNJCTRL        Function call for kana-kanji conversion
 $ff23   _CONCTRL        Console control / direct output
 $ff24   _KEYCTRL        Inspect console status / direct input
-$ff25   _INTVCS         Set vector handling address
-$ff26   _PSPSET         Make process stack pointer
+$ff25   _INTVCS         void* _dos_intvcs(int intno, void* jobadr)					Set vector handling address
+$ff26   _PSPSET         void _dos_pspset (struct _psp *pspadr)						Make process stack pointer
 $ff27   _GETTIM2        Get time (longword)
 $ff28   _SETTIM2        Set time (longword)
 $ff29   _NAMESTS        Expand filename
@@ -76,24 +76,25 @@ $ff44   _IOCTRL         Device driver ioctrl direct I/O
 $ff45   _DUP            Copy file handle
 $ff46   _DUP2           Force-copy file handle
 $ff47   _CURDIR         Get working directory
-$ff48   _MALLOC         Reserve memory
-$ff49   _MFREE          Relinquish memory block
-$ff4a   _SETBLOCK       Modify memory block
+$ff48   _MALLOC         void* _dos_malloc(int size)											Reserve memory
+$ff49   _MFREE          int _dos_mfree(void* memptr) 										Relinquish memory block
+$ff4a   _SETBLOCK       int _dos_setblock(void* memptr, int newlen)							Modify memory block
 $ff4b   _EXEC           Load and execute program
 $ff4c   _EXIT2          End program with exit code
 $ff4d   _WAIT           Get process exit code
 $ff4e   _FILES          Find file
 $ff4f   _NFILES         Find next file
 
-$ff80   _SETPDB         Modify process data block
-$ff81   _GETPDB         Get process data block
-$ff82   _SETENV         Set environment variable
-$ff83   _GETENV         Get environment variable
+$ff80   _SETPDB         struct _psp* _dos_setpdb(struct _psp* pdbadr)							Modify process data block
+$ff81   _GETPDB         struct _psp* _dos_getpdb()												Get process data block
+$ff82   _SETENV         int _dos_setenv (const char* name, const char* env, const char* buffer)	Set environment variable
+$ff83   _GETENV         int _dos_getenv (const char* name, const char* env, char* buffer)		Get environment variable
 $ff84   _VERIFYG        Get verify flag
 $ff85   _COMMON         Control common region
 $ff86   _RENAME         Rename/move file
 $ff87   _FILEDATE       Get/set file modified date
-$ff88   _MALLOC2        Reserve memory
+$ff88   _MALLOC2        void* _dos_malloc2 (int md, int size)									Reserve memory
+						void* _dos_malloc0 (int md, int size, struct _psp *pspadr)
 $ff8a   _MAKETMP        Make temporary file
 $ff8b   _NEWFILE        Make new file
 $ff8c   _LOCK           Lock file
@@ -102,8 +103,9 @@ $ff8f   _ASSIGN         Get/set/delete virtual drive/directory allocation
 $ffaa   (unlisted)      Set FFLUSH mode (unlisted)
 $ffab   _OS_PATCH       Update internal OS handler (unlisted)
 $ffac   _GETFCB         Get file control block pointer (unlisted)
-$ffad   _S_MALLOC       Reserve memory block under main memory manager
-$ffae   _S_MFREE        Relinquish memory block under main memory manager
+$ffad   _S_MALLOC       void* _dos_s_malloc(int md, int size)									Reserve memory block under main memory manager
+						void* _dos_s_malloc0(int md, int size, struct _psp *pspadr)
+$ffae   _S_MFREE        int _dos_s_mfree(void* memptr)											Relinquish memory block under main memory manager
 $ffaf   _S_PROCESS      Set sub-memory manager
 
 $fff0   _EXITVC         (address to execute at end of program)
@@ -1834,7 +1836,7 @@ $ ff48 _MALLOC Allocate memory
 
 Argument LEN.l Number of bytes to reserve
 
-Return value Pointer of the reserved memory block (MSP + $ 10)
+Return value Pointer of the reserved memory block (MSP + $ 10) (Main Stack Pointer)
 		d0.l = $ 81 ?????? The specified amount cannot be secured
 					($ ?????? is the number of bytes that can be reserved).
 		d0.l = $ 8200000? Completely unsecured ($? Is undefined).
@@ -1865,7 +1867,8 @@ Return error code
 
 $ ff4a _SETBLOCK Memory block changes
 
-Argument MEMPTR.l Pointer to memory block
+Argument 
+	MEMPTR.l Pointer to memory block
 	LEN.l Number of bytes to change
 
 Return error code
@@ -2160,19 +2163,18 @@ Return value setting status (0: Do not verify 1: Verify)
 
 $ ff85 _COMMON common area control
 
-Argument MD.w control mode
+Argument 
+	MD.w control mode
 	NAME.l common Pointer for area name
 	POS.l position (number of bytes from the beginning of the common area)
 	BUFFER.l Buffer pointer
 	ID_PSP.l Process ID
 	LEN.l byte length
 
-Return value MD = 0
-		Number of bytes in common area (error code if negative)
-	MD = 1,2
-		Number of bytes actually read / written (error code if negative)
-	MD = 3～5
-		Error code
+Return value 
+	MD = 0 Number of bytes in common area (error code if negative)
+	MD = 1,2 Number of bytes actually read / written (error code if negative)
+	MD = 3～5 Error code
 
 	Control the common area according to the value of mode MD.
 	Interprocess communication can be easily realized by this DOS call.
@@ -2281,7 +2283,8 @@ Return value DATETIME = 0
 
 $ ff88 _MALLOC2 Allocate memory by the specified method
 
-Argument MD.w control mode
+Argument 
+	MD.w control mode
 	LEN.l Number of bytes to reserve
 	PAIR.l Process management pointer for the process you manage
 
@@ -2633,7 +2636,7 @@ $ fff0 _EXITVC (execution address at the end of the program)
 	This is not a DOS call, but INTVCS is used to set the processing address for this vector.
 	By setting it, the address can be called at the end of the program.
 
-        Usually immediately after the DOS _EXEC that the parent process ran to start the child process
+    Usually immediately after the DOS _EXEC that the parent process ran to start the child process
 	A DOS call when the address is set and the child process exits with DOS _EXIT etc.
 	Referenced as the address returned from. What is called is the processing of a DOS call.
 	Since it is after all, the process that executed DOS _EXIT etc. has already been deleted.

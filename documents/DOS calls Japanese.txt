@@ -725,15 +725,13 @@ $ff20   _SUPER          Change to supervisor/user mode
 
 ARGS    STACK.l         Mode to change to (0 or address specified by SSP)
 
-RETURN  STACK = 0
-                Previous value of SSP (error code if negative)
+RETURN  
+		STACK = 0		Previous value of SSP (error code if negative)
 
         Changes between supervisor or user mode mode according to value on stack.
 
-        STACK = 0
-                Set value of USP to SSP; change to supervisor mode.
-        STACK = other
-                Set STACK to SSP; change to user mode.
+        STACK = 0 		Set value of USP to SSP; change to supervisor mode.
+        STACK = other	Set STACK to SSP; change to user mode.
 
         pea     (STACK)
         DOS     _SUPER
