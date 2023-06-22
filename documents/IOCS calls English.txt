@@ -1,0 +1,3639 @@
+	--IOCS CALL MANUAL -
+
+================================================= ============================
+
+・ IOCS call list
+
+$ 00 _B_KEYINP Read key data
+$ 01 _B_KEY SNS key input inspection
+$ 02 _B_SFTSNS Obtaining shift key status
+$ 03 _KEY_INIT Initialization of input relations
+$ 04 _BITSNS Key status acquisition
+$ 05 _SKEYSET Key input occurs
+$ 06 _LEDCTRL Keyboard LED settings
+$ 07 _LEDSET Set keyboard LED to key input mode
+$ 08 _KEYDLY Key repeat start time setting
+$ 09 _KEYREP Key repeat interval setting
+$ 0a (Unpublished) TV control permission by OPT.2.
+$ 0b (Unpublished) TV control prohibited by OPT.2.
+$ 0c _TVCTRL TV control
+$ 0d _LEDMOD LED mode setting
+$ 0e _TGUSEMD Screen usage settings
+$ 0f _DEFCHR Gaiji definition
+$ 10 _CRTMOD CRT mode setting
+$ 11 _CONTRAST Contrast setting
+$ 12 _HSVTORGB HSV → RGB conversion
+$ 13 _TPALET Text palette setting
+$ 14 _TPALET2 Text palette independent setting
+$ 15 _TCOLOR Text plane specification
+Obtaining $ 16 _FNTADR font address
+$ 17 _VRAMGET Text VRAM byte read
+$ 18 _VRAMPUT Text VRAM byte-by-byte write
+$ 19 _FNTGET Font loading
+$ 1a _TEXTGET Text VRAM dot-by-dot read
+$ 1b _TEXTPUT Text VRAM dot-by-dot write
+$ 1c _CLIPPUT Text VRAM dot-by-dot write (with clipping)
+$ 1d _SCROLL Setting display coordinates
+$ 1e _B_CURON Cancel cursor pause
+$ 1f _B_CUROFF Cursor pause
+$ 20 _B_PUTC character display
+$ 21 _B_PRINT String display
+$ 22 _B_COLOR Display color setting
+$ 23 _B_LOCATE Move cursor
+$ 24 _B_DOWN_S Move cursor down one line
+$ 25 _B_UP_S Move cursor up one line
+$ 26 _B_UP Move the cursor up by the specified number of lines
+$ 27 _B_DOWN Move the cursor down by the specified number of lines
+$ 28 _B_RIGHT Move the cursor to the right by the specified number of digits
+$ 29 _B_LEFT Move the cursor to the left by the specified number of digits
+$ 2a _B_CLR_ST Erase multiple lines on the screen
+$ 2b _B_ERA_ST Erase multiple digits of the current line
+$ 2c _B_INS Insert multiple lines
+$ 2d _B_DEL Delete multiple lines
+$ 2e _B_CONSOL Display range setting
+$ 2f _B_PUTMES Coordinate specification string display
+$ 30 _SET232C RS-232C parameter setting
+$ 31 _LOF232C RS-232C Find the number of data in the receive buffer
+$ 32 _INP232C RS-232C Get received data
+$ 33 _ISNS232C RS-232C Checking received data
+$ 34 _OSNS232C RS-232C Check if data can be sent
+$ 35 _OUT232C RS-232C data transmission
+$ 36 (Unpublished) Processing address setting when receiving mouse data
+$ 37 (Unpublished) ESC [> Escape sequence extended processing address setting
+$ 38 _SETFNTADR Gaiji font address setting
+$ 39 (Unpublished) PCM data settings for BEEP sound
+$ 3a (Unpublished) Printer parameter settings
+$ 3b _JOYGET Joystick input
+$ 3c _INIT_PRN Printer initialization
+$ 3d _SNSPRN Check if it can be output to the printer
+$ 3e _OUTLPT Printer direct output
+$ 3f _OUTPRN Printer output
+$ 40 _B_SEEK Disc Seek
+$ 41 _B_VERIFY Disc verification
+$ 42 _B_READDI Read for diagnostic disk
+$ 43 _B_DSKINI Drive Initialization
+$ 44 _B_DRVSNS drive status check
+$ 45 _B_WRITE Writing to disk
+$ 46 _B_READ Reading from disk
+$ 47 _B_RECALI Disc recalibrate
+$ 48 _B_ASSIGN Hard disk alternative track settings
+$ 49 _B_WRITED Write corrupted data to 2HD
+$ 4a _B_READID 2Read ID information for HD
+$ 4b _B_BADFMT Disable Hard Disk Corruption Track
+Read corrupted data from $ 4c _B_READDL 2HD
+$ 4d _B_FORMAT Disk format
+$ 4e _B_DRVCHK 2HD drive status settings
+$ 4f _B_EJECT Disk Ejection / Shipping
+$ 50 _DATEBCD Date data binary → BCD conversion
+$ 51 _DATESET Date setting
+$ 52 _TIMEBCD Time data binary → BCD conversion
+$ 53 _TIMESET Time setting
+$ 54 _DATEGET Read date
+$ 55 _DATEBIN BCD → binary conversion of date data
+$ 56 _TIMEGET Read time
+$ 57 _TIMEBIN BCD → binary conversion of time data
+$ 58 _DATECNV Date data string → binary conversion
+$ 59 _TIMECNV Time data string → binary conversion
+$ 5a _DATEASC Date data binary → string conversion
+$ 5b _TIMEASC Time data binary → string conversion
+$ 5c _DAYASC Day of the week data binary → string conversion
+$ 5d _ALARMMOD Alarm Allow / Prohibit
+$ 5e _ALARMSET alarm setting
+$ 5f _ALARMGET Get alarm settings
+$ 60 _ADPCMOUT ADPCM output
+$ 61 _ADPCMINP ADPCM input
+$ 62 _ADPCMAOT ADPCM output (array chain)
+$ 63 _ADPCMAIN ADPCM input (array chain)
+$ 64 _ADPCMLOT ADPCM output (link array chain)
+$ 65 _ADPCMLIN ADPCM input (link array chain)
+$ 66 _ADPCMSNS ADPCM status check
+$ 67 _ADPCMMOD ADPCM execution control
+$ 68 _OPMSET OPM register setting
+$ 69 _OPMSNS OPM Status check
+$ 6a _OPMINTST OPM interrupt setting
+$ 6b _TIMERDST Timer-D Interrupt setting
+$ 6c _VDISPST Vertical sync interrupt setting
+$ 6d _CRTCRAS Raster interrupt setting
+$ 6e _HSYNCST Horizontal sync interrupt setting
+$ 6f _PRNINTST Printer interrupt setting
+$ 70 _MS_INIT Mouse initialization
+$ 71 _MS_CURON Mouse cursor display
+$ 72 _MS_CUROF Mouse cursor clear
+$ 73 _MS_STAT Check the display status of the mouse cursor
+$ 74 _MS_GETDT Check mouse movement / button status
+$ 75 _MS_CURGT Mouse cursor coordinates acquisition
+$ 76 _MS_CURST Mouse cursor coordinates
+$ 77 _MS_LIMIT Mouse cursor movement range setting
+$ 78 _MS_OFFTM Find out how long it takes to release the mouse button
+$ 79 _MS_ONTM Find out how long it takes to press a mouse button
+$ 7a _MS_PATST Mouse cursor pattern definition
+$ 7b _MS_SEL Mouse cursor pattern selection
+$ 7c _MS_SEL2 Mouse cursor animation
+$ 7d _SKEY_MOD Soft keyboard control
+$ 7e _DENSNS Calculator control
+$ 7f _ONTIME Check the elapsed time after startup
+$ 80 _B_INTVCS Vector setting
+$ 81 _B_SUPER Supervisor / user mode switching
+$ 82 _B_BPEEK Read 1 byte from the specified address
+$ 83 _B_WPEEK Read one word from the specified address
+$ 84 _B_LPEEK Read 1 longword from the specified address
+$ 85 _B_MEMSTR Read multiple bytes from the specified address
+$ 86 _B_BPOKE Write 1 byte to the specified address
+$ 87 _B_WPOKE Write one word to the specified address
+$ 88 _B_LPOKE Write to specified address 1 longword
+$ 89 _B_MEMSET Write multiple bytes to the specified address
+$ 8a _DMAMOVE DMA transfer
+$ 8b _DMAMOV_A DMA transfer (array chain)
+$ 8c _DMAMOV_L DMA transfer (link array chain)
+$ 8d _DMAMODE DMA status check
+$ 8e _BOOTINF Get boot information
+$ 8f _ROMVER ROM version
+$ 90 _G_CLR_ON Graphic screen initialization and display mode setting
+$ 91 (Unpublished) Graphic screen mode setting
+$ 92 (Unpublished) Priority setting
+$ 93 (Unpublished) Screen display and special mode settings
+$ 94 _GPALET Graphic palette setting
+$ 95 (Unpublished) Color code setting
+$ 96 (Unpublished) Access page settings
+$ 97 (Unpublished) Graphic VRAM dot-by-dot read
+$ 98 (Unpublished) Graphic VRAM dot-by-dot writing (with color mask)
+$ 99 (Unpublished) Graphic VRAM dot-by-dot write
+$ 9a (Unpublished) Write graphic VRAM bit pattern
+$ 9b (Unpublished) Graphic VRAM bit pattern write (with back color)
+$ 9c (Unpublished) Graphic VRAM Bit Pattern Enlarged Write
+$ a0 _SFTJIS S-JIS → JIS code conversion
+$ a1 _JISSFT JIS → S-JIS code conversion
+$ a2 _AKCONV ANK → S-JIS code conversion
+$ a3 _RMACNV Romaji → ANK Kana conversion
+$ a4 _DAKJOB Dakuten processing
+$ a5 _HANJOB Semi-voiced sound mark processing
+$ ac _SYS_STAT System state setting
+$ ad _B_CONMOD Cursor and scroll settings
+$ ae _OS_CURON Cursor display
+$ af _OS_CUROF Cursor erase
+$ b0 _DRAWMODE Graphic drawing mode setting
+$ b1 _APAGE Graphic drawing page settings
+$ b2 _VPAGE Graphic screen display page settings
+$ b3 _HOME Graphic screen display position setting
+$ b4 _WINDOW Graphic drawing window settings
+$ b5 _WIPE Clear graphic screen
+$ b6 _PSET Graphic screen point set
+$ b7 _POINT Get points on the graphic screen
+$ b8 _LINE Graphic screen line
+$ b9 _BOX Graphic screen box
+$ ba _FILL Graphic screen box fill
+$ bb _CIRCLE Graphic screen circle
+$ bc _PAINT Graphic screen paint
+$ bd _SYMBOL Graphic screen symbol
+$ be _GETGRM Graphic screen dot-by-dot reading
+$ bf _PUTGRM Graphic screen dot-by-dot writing
+$ c0 _SP_INIT Sprite initialization
+$ c1 _SP_ON Sprite display
+$ c2 _SP_OFF ​​Sprite Erase
+$ c3 _SP_CGCLR Clear sprite pattern
+$ c4 _SP_DEFCG Sprite pattern definition
+$ c5 _SP_GTPCG Sprite pattern loading
+$ c6 _SP_REGST Sprite register settings
+$ c7 _SP_REGGT Read sprite register
+$ c8 _BGSCRLST Background scroll register setting
+$ c9 _BGSCRLGT Reading background scroll register
+$ ca _BGCTRLST Background control register settings
+$ cb _BGCTRLGT Read background control register
+$ cc _BGTEXTCL Clear background text
+$ cd _BGTEXTST Background text setting
+$ ce _BGTEXTGT Reading background text
+$ cf _SPALET Sprite palette settings
+$ d3 _TXXLINE Horizontal line on the text screen
+$ d4 _TXYLINE Vertical line on the text screen
+$ d5 _TXLINE Text screen line
+$ d6 _TXBOX Text screen box
+$ d7 _TXFILL Text screen box fill
+$ d8 _TXREV Text screen inversion
+$ df _TXRASCPY Raster copy of text screen
+$ f0 _OPMDRV OPMDRV control
+$ f1 _RSDRV Extended RS-232C control
+$ f2 _A_JOYGET Analog joystick control
+$ f3 _MUSICDRV MUSICDRV control
+$ f5 _SCSIDRV SCSI IOCS
+$ fd _ABORTRST Reconfigure environment to abort
+$ fe _IPLERR Reboot
+$ ff _ABORTJOB Abort
+
+================================================= ============================
+
+・ Key scan code
+
+Key code Key input status bit
+ Group 7 6 5 4 3 2 1 0
+
+	0 6 & 5% 4 $ 3 # 2 "1! ESC
+	1 BS \ | ^ ~-= 0 9) 8 (7'
+	2 U Y T R E W Q TAB
+	3 S A CR [{@` P O I
+	4; + L K J H G F D
+	5 N B V C X Z]}: *
+	6 DEL HOME SPACE _ /?.>, <M
+	7 CLR ↓ → ↑ ← UNDO R_DOWN R_UP
+	8 4 + 9 8 7-* /
+	9 0 ENTER 3 2 1 = 6 5
+	a XF3 XF2 XF1 HELP registration symbol.,
+	b Hira INS CAPS Code Low-Major Kana XF5 XF4
+	c F4 F3 F2 F1 F0 COPY BREAK Full-width
+	d F9 F8 F7 F6 F5
+	e OPT.2 OPT.1 CTRL SHIFT
+
+	Scan code = key code group x 8 + key input status bit
+
+          10: TAB 20: D 30: M 40: / 50 :, 60: Full-width 70: SHIFT
+01: ESC 11: Q 21: F 31 :, <41: * 51 :. 61: BREAK 71: CTRL
+02: 1! 12: W 22: G 32:.> 42:-52: Symbol 62: COPY 72: OPT.1
+03: 2 "13: E 23: H 33: /? 43: 7 53: Registration 63: F0 73: OPT.2
+04: 3 # 14: R 24: J 34: _ 44: 8 54: HELP 64: F1
+05: 4 $ 15: T 25: K 35: SPACE 45: 9 55: XF1 65: F2
+06: 5% 16: Y 26: L 36: HOME 46: + 56: XF2 66: F3
+07: 6 & 17: U 27:; + 37: DEL 47: 4 57: XF3 67: F4
+08: 7 '18: I 28 :: * 38: R_UP 48: 5 58: XF4 68: F5
+09: 8 (19: O 29:]} 39: R_DOWN 49:6 59: XF5 69: F6
+0a: 9) 1a: P 2a: Z 3a: UNDO 4a: = 5a: Kana 6a: F7
+0b: 0 1b: @ `2b: X 3b: ← 4b: 1 5b: Roman character 6b: F8
+0c:-= 1c: [{2c: C 3c: ↑ 4c: 2 5c: Code 6c: F9
+0d: ^ ~ 1d: CR 2d: V 3d: → 4d: 3 5d: CAPS
+0e: \ | 1e: A 2e: B 3e: ↓ 4e: ENTER 5e: INS
+0f: BS 1f: S 2f: N 3f: CLR 4f: 0 5f: Hiragana
+
+================================================= ============================
+
+================================================= ============================
+
+$ 00 _B_KEYINP Read key data
+
+Return key data
+	d0.hb scan code
+	d0.b ASCII code
+
+	Read the key data. If the key is not entered, wait until it is entered.
+	For SHIFT, CTRL, OPT.1, OPT.2, $ 80 in scancode even when released
+	Returns the added value.
+	ASCII code is changed by SHIFT, CTRL, Kana, CAPS, and ASCII characters are defined.
+	If not, it will be 0.
+	The keys normally assigned to TV controls are not entered, but pressed down
+	It is reflected in the state.
+
+================================================= ============================
+
+$ 01 _B_KEY SNS key input inspection
+
+Return value d0.l = 0 No key input
+		There is $ 1_ ???? 〃 ($ ???? is the key data)
+
+	Check if the key is entered. The contents of the key data buffer do not change.
+
+================================================= ============================
+
+$ 02 _B_SFTSNS Obtaining shift key status
+
+Return value d0.l Shift key state
+		bit 14 full-width
+		bit 13 Hiragana
+		bit 12 INS
+		bit 11 CAPS
+		bit 10 code input
+		bit 9 romaji
+		bit 8 kana
+
+		bit 7 CAPS
+		bit 6 code input
+		bit 5 romaji
+		bit 4 kana
+		bit 3 OPT.2
+		bit 2 OPT.1
+		bit 1 CTRL
+		bit 0 SHIFT
+
+		Bits 7 to 0 indicate whether the key is actually pressed (1) or not (0).
+		Bits 14 to 8 indicate whether the LED is on (1) or off (0).
+
+	Check the status of the shift key.
+
+================================================= ============================
+
+$ 03 _KEY_INIT Initialization of input relations
+
+Argument d1.b LED key mode initial value
+
+	Clears the keyboard buffer and initializes the LED mode. This IOCS call
+	Is used when the ROM starts up, so it should not be used by general applications.
+	In ROM IOCS, all interrupts are allowed when called with a shortcut.
+	Please be careful as you will return at.
+
+================================================= ============================
+
+$ 04 _BITSNS Key status acquisition
+
+Argument d1.w Key code group (0 to $ f)
+
+Return value d0.b Key pressed down state
+
+	The pressed state of the keys included in the specified key code group is displayed in bit units.
+	Examine. Indicates that the corresponding bit is 1 and the key is pressed.
+
+================================================= ============================
+
+$ 05 _SKEYSET Key input occurs
+
+Argument d1.l scan code
+		bit 7 0: Press key 1: Release key
+		bit 6-0 scan code
+
+	Generates the input of the specified key in software.
+
+================================================= ============================
+
+$ 06 _LEDCTRL Keyboard LED settings
+
+Argument d1.b Keyboard LED state
+		bit 6 full-width
+		bit 5 hiragana
+		bit 4 INS
+		bit 3 CAPS
+		bit 2 code input
+		bit 1 romaji
+		bit 0 kana
+
+	Set the mode of the keyboard LED. The key input mode does not change.
+
+================================================= ============================
+
+$ 07 _LEDSET Set keyboard LED to key input mode
+
+	Set the keyboard LED mode to the key input mode.
+
+================================================= ============================
+
+$ 08 _KEYDLY Key repeat start time setting
+
+Argument d1.b Key repeat start time (0 to 15)
+
+	Set the time to start key repeat to (200 + 100 × d1.b) ms.
+
+================================================= ============================
+
+$ 09 _KEYREP Key repeat interval setting
+
+Argument d1.b Key repeat interval (0 to 15)
+
+	Set the key repeat interval to (30 + 5 × d1.b ・) ms.
+
+================================================= ============================
+
+$ 0a (Unpublished) TV control permission by OPT.2.
+
+	Allow TV control by OPT.2.
+	ROM IOCS works normally unless called with $ 0a set in d0.b.
+	Please note that it does not.
+
+================================================= ============================
+
+$ 0b (Unpublished) TV control prohibited by OPT.2.
+
+	Prohibit TV control by OPT.2.
+	ROM IOCS works normally unless called with $ 0b set in d0.b.
+	Please note that it does not.
+
+================================================= ============================
+
+$ 0c _TVCTRL TV control
+
+Argument d1.l TV control code
+		d1.l = $ 01 Volume up
+			 $ 02 〃 Down
+			 $ 03 〃 Standard
+			 $ 04 Channel call
+			 $ 05 TV screen (reset)
+			 $ 06 Audio mute
+			 $ 07 Power on
+			 $ 08 TV / computer screen switching
+			 $ 09 Switching TV / external input or changing computer display mode
+			 $ 0a Contrast standard
+			 $ 0b Channel up
+			 $ 0c 〃 Down
+			 $ 0d Power off
+			 $ 0e Power on / off
+			 $ 0f Super Impose and Contrast Down / Standard Switching
+			 $ 10 Channel 1
+			 $ 11 〃 2
+			 $ 12 〃 3
+			 $ 13 〃 4
+			 $ 14 〃 5
+			 $ 15 〃 6
+			 $ 16 〃 7
+			 $ 17 〃 8
+			 $ 18 〃 9
+			 $ 19 〃 10
+			 $ 1a 〃 11
+			 $ 1b 〃 12
+			 $ 1c TV screen ($ 05)
+			 $ 1d Computer screen ($ 05 + $ 08)
+			 $ 1e Super Impose and Contrast Down ($ 05 + $ 0f)
+			 $ 1f Super Impose and Contrast Standard ($ 05 + $ 0f + $ 0a)
+			+ $ 20 After powering on ($ 07), perform the above function
+
+The return value d1.w is destroyed.
+
+	Control the display.
+
+================================================= ============================
+
+$ 0d _LEDMOD LED mode setting
+
+Argument d1.l LED key number
+		d1.l = 0 Kana
+			1 romaji
+			2 Code input
+			3 CAPS
+			4 INS
+			5 Hiragana
+			6 full-width
+	d2.b ON / OFF specification (0: OFF 1: ON)
+
+Return value d0.l = 0 Normal termination
+		-1 Error (key number is too large)
+
+	Set keyboard LED and key input mode.
+
+================================================= ============================
+
+$ 0e _TGUSEMD Screen usage settings
+
+Argument d1.b Specify graphic / text screen
+		d1.b = 0 Graphic screen ($ c00000 ～ $ dfffff)
+			1 Text screen ($ e40000- $ e7ffff)
+	d2.b Screen usage status
+		d2.b = 0 unused
+			1 In use on the system (soft keyboard / calculator)
+			2 In use in application (RAMDISK etc.)
+			3 destruction
+			-1 Check the current usage status.
+
+Usage status before changing the return value (If -1, the screen specification is abnormal)
+
+	Set the usage status of the graphic / text screen.
+	If you set the text usage to 2, the soft keyboard / calculator will be erased, and then
+	Mouse cursor / soft keyboard / calculator cannot be newly displayed.
+
+================================================= ============================
+
+$ 0f _DEFCHR Gaiji definition
+
+Argument d1.hw Pattern size
+		d1.hw = 8 8x16, 16x16 dots
+			12 12x24, 24x24 〃
+	d1.w Kanji code (Shift-JIS / JIS)
+	a1.l pattern address
+
+Return value d0.l = 0 Normal termination
+		-1 Error (Specified Kanji code is not an external character)
+
+	Set external characters.
+	The kanji codes that can be specified are full-width $ eb9f to $ ebfc (JIS: $ 7621 to $ 767e) and
+	$ ec40- $ ec7e ($ 7721-777e), half-width $ f400- $ f5ff.
+	When CONDRV.SYS and HIOCS.X are resident, set the cursor shape with d1.l = 0 and set the cursor shape.
+	Undo with d1.l = -1. Also, with d1.l = $ ffff in CONDRV.SYS
+	Set the cursor shape in the backscroll window.
+
+================================================= ============================
+
+$ 10 _CRTMOD CRT mode setting
+
+Argument d1.w CRT mode
+				Actual screen Display screen Number of colors KkHz
+		d1.w = 0 1024 512 x 512 16 1 31
+			 1 〃 〃 〃 〃 15
+			 2 〃 256 x 256 〃 〃 31
+			 3 〃 〃 〃 〃 15
+			 4 512 512 x 512 16 4 31
+			 5 〃 〃 〃 〃 15
+			 6 〃 256 x 256 〃 〃 31
+			 7 〃 〃 〃 〃 15
+			 8 〃 512 x 512 256 2 31
+			 9 〃 〃 〃 〃 15
+			10 〃 256 x 256 〃 〃 31
+			11 〃 〃 〃 〃 15
+			12 〃 512 x 512 65536 1 31
+			13 〃 〃 〃 〃 15
+			14 〃 256 x 256 〃 〃 31
+			15 〃 〃 〃 〃 15
+			16 1024 768 x 512 16 1 31
+			17 〃 1024 x 424 〃 〃 24
+			18 〃 1024 x 848 〃 〃 24
+
+			19 〃 640 x 480 〃 〃 24
+
+			20 〃 768 x 512 256 2 31
+			21 〃 1024 x 848 〃 〃 24
+			22 〃 1024 x 424 〃 〃 24
+			23 〃 640 x 480 〃 〃 24
+			24 〃 768 x 512 65536 1 31
+			25 〃 1024 x 848 〃 〃 24
+			26 〃 1024 x 424 〃 〃 24
+			27 〃 640 x 480 〃 〃 24
+			+ $ 100 Mode switching only
+			-1 Check the current mode
+
+Current mode (0-19) when return value d1.w = -1
+
+	Set CRT mode. Clear text screen plane 0/1 to display mode
+	In addition, the graphic screen and sprite screen are not cleared and are set to non-display mode.
+	The text palette is initialized.
+	The 640 x 480 mode with d1.w = 19 is available in ROM IOCS version 1.2 and above.
+	d1.w = 20-27 displays real screen graphics smaller than the display screen size
+	In mode, it can be used only with ROM IOCS version 1.3 (all models in terms of hardware)
+	Also feasible).
+
+================================================= ============================
+
+$ 11 _CONTRAST Contrast setting
+
+Argument d1.b Contrast
+		d1.b = 0 to 15 Set the contrast
+			-1 Examine the contrast
+			-2 Return to system settings
+
+Contrast before changing the return value
+
+	Set the contrast.
+
+================================================= ============================
+
+$ 12 _HSVTORGB HSV → RGB conversion
+
+Argument d1.l HSV data
+		% iiif_ffff_000s_ssss_000v_vvvv
+		bit 23-21 hue
+			% 000 Red-Yellow
+			% 001 Yellow to green
+			% 010 Green-Cyan
+			% 011 Cyan to blue
+			% 100 Blue-Magenta
+			% 101 Magenta-Red
+			% 110 prohibited
+			% 111 〃
+		bit 20-16 hue (hue)
+		bit 12-8 Saturation (0: white $ 1f: primary color)
+		bit 4 ~ 0 Brightness (0: black $ 1f: primary color)
+
+Return RGB data (luminance bit is always 0)
+		% gggg_grrr_rrbb_bbb0
+		bit 15-11 green component
+		bit 10 ~ 6 Red 〃
+		bit 5-1 blue 〃
+	However, if the hue is abnormal, -1 is returned.
+
+	Converts color data in HSV format to RGB format.
+	The HSV method is a method of specifying colors by hue / saturation / lightness.
+
+================================================= ============================
+
+$ 13 _TPALET Text palette setting
+
+Argument d1.b Palette code (0 to 15)
+		d1.b = 0 Text color 0
+			1 〃 1
+			twenty two
+			3 〃 3
+			4-7 soft keyboard / calculator 0
+			8 ~ 15 〃 1
+	d2.l color code
+		d2.l = 0 ～ $ ffff Set color code
+			-1 Check the color code
+			-2 Return to system settings
+
+Return status (color code when d2.l = -1)
+	d0.l = 0 Normal termination
+		-1 The color code is abnormal
+
+	Set the color code in the text palette. Specify 4 to 7,8 to 15 in the palette.
+	When you do, the same color code will be set for all of them.
+
+================================================= ============================
+
+$ 14 _TPALET2 Text palette independent setting
+
+Argument d1.b Palette code (0 to 15)
+	d2.l color code
+		d2.l = 0 ～ $ ffff Set color code
+			-1 Check the color code
+
+Return status (color code when d2.l = -1)
+	d0.l = 0 Normal termination
+		-1 The color code is abnormal
+
+	Set the color code in the text palette.
+	Unlike IOCS TPALET ($ 13), it can be set independently for each palette.
+
+================================================= ============================
+
+$ 15 _TCOLOR Text plane specification
+
+Argument d1.b Specifying the access plane
+		d1.b =% ??? 1 plane 0
+			% ?? 10 〃 1
+			%? 100 〃 2
+			% 1000 〃 3
+			% 0000 〃 0
+
+The return value d1.w is destroyed.
+
+	Text accessed with IOCS TEXTGET ($ 1a), TEXTPUT ($ 1b), CLIPPUT ($ 1c)
+	Set the plane. You must set the plane 0 after use, but 0
+	Otherwise, the behavior of other IOCS calls is not guaranteed.
+
+================================================= ============================
+
+Obtaining $ 16 _FNTADR font address
+
+Argument d1.w Kanji code (Shift-JIS / JIS)
+	d2.b Pattern size
+		d2.b = 6 6x12,12x12 dots
+			8 8x16, 16x16 〃
+			12 12x24, 24x24 〃
+
+Return value d0.l Pattern address
+	The number of dots in the X direction of the d1.hw pattern
+	d1.w Number of bytes in the X direction of the pattern-1
+	d2.w 〃 Y 〃 Number of dots-1
+
+	Look up the address of the specified character font.
+	The obtained address may be the supervisor area.
+	Each character is not always arranged consecutively in the order of the character code.
+	Pattern data does not always remain for external characters and 12-dot characters.
+	This IOCS call is used by the system, so from general applications
+	Do not use.
+	In ROM IOCS version 1.3 and HIOCS.X, 8 is specified when d2.b = 0.
+	It is treated as if it was done, but be careful because the operation is different otherwise.
+
+================================================= ============================
+
+$ 17 _VRAMGET Text VRAM byte read
+
+Argument d1.w Number of bytes in the X direction of the buffer-1
+	d2.w 〃 Y 〃 Number of dots-1
+	Number of bytes in d3.l (VRAM X-direction buffer X-direction)
+	a1.l Buffer address
+	a2.l VRAM 〃
+
+The contents of the return value d0 / d1 / d2 / a1 / a2 are not guaranteed.
+
+	Read bytes from VRAM into the buffer.
+	If you specify a text screen for VRAM, the number of bytes in the X direction of VRAM is 128 bytes.
+	It becomes.
+
+================================================= ============================
+
+$ 18 _VRAMPUT Text VRAM byte-by-byte write
+
+Argument d1.w Number of bytes in the X direction of the buffer-1
+	d2.w 〃 Y 〃 Number of dots-1
+	Number of bytes in d3.l (VRAM X-direction buffer X-direction)
+	a1.l Buffer address
+	a2.l VRAM 〃
+
+The contents of the return value d0 / d1 / d2 / a1 / a2 are not guaranteed.
+
+	Write bytes from the buffer to VRAM.
+	If you specify a text screen for VRAM, the number of bytes in the X direction of VRAM is 128 bytes.
+	It becomes.
+
+================================================= ============================
+
+$ 19 _FNTGET Font loading
+
+Argument d1.hw Pattern size
+		d1.hw = 6 6x12,12x12 dots
+			0,8 8x16,16x16 〃
+			12 12x24, 24x24 〃
+	d1.w Kanji code (Shift-JIS / JIS)
+	a1.l Data buffer address (4 + number of bytes for font size required)
+		(0, a1) Number of dots in the X direction of the pattern
+		(2, a1) Y 〃
+		(4, a1) (Pattern data)
+
+Address where the return pattern exists (forwarding source)
+
+	Load the specified character font.
+
+================================================= ============================
+
+$ 1a _TEXTGET Text VRAM dot-by-dot read
+
+Argument d1.w X coordinates
+	d2.w Y coordinates
+	a1.l Data buffer address
+		(0, a1) Number of dots in the X direction of the pattern
+		(2, a1) Y 〃
+		(4, a1) (Pattern data)
+
+	Read from text VRAM in dot increments.
+
+================================================= ============================
+
+$ 1b _TEXTPUT Text VRAM dot-by-dot write
+
+Argument d1.w X coordinates
+	d2.w Y coordinates
+	a1.l Data buffer address
+		(0, a1) Number of dots in the X direction of the pattern
+		(2, a1) Y 〃
+		(4, a1) Pattern data
+
+	Write to text VRAM in dot units.
+
+================================================= ============================
+
+$ 1c _CLIPPUT Text VRAM dot-by-dot write (with clipping)
+
+Argument d1.w X coordinates
+	d2.w Y coordinates
+	a1.l Data buffer address
+		(0, a1) Number of dots in the X direction of the pattern
+		(2, a1) Y 〃
+		(4, a1) Pattern data
+	a2.l Clipping coordinate buffer address
+		(0, a2) Leftmost X coordinate
+		(2, a2) Top Y 〃
+		(4, a2) Right end X 〃
+		(6, a2) Lower end Y 〃
+
+	Write dot-by-dot to text VRAM while clipping.
+
+================================================= ============================
+
+$ 1d _SCROLL Setting display coordinates
+
+Argument d1.w Action specification
+		d1.w = 0 Graphic page 0 setting
+			1 〃 1 〃
+			twenty two 〃
+			3 〃 3 〃
+			Only the acquisition of the display coordinates of 4 〃 0
+			5 〃 1 〃
+			6 〃 2 〃
+			7 〃 3 〃
+			8 Text settings
+			9 〃 Only acquisition of display coordinates
+	d2.w X coordinates (when set)
+	d3.w Y 〃
+
+Display coordinates before changing the return value
+	d0.hw X coordinates
+	d0.lw Y 〃
+
+	Set display coordinates for graphics and text.
+	If you set the X coordinate of the text screen to a position where the display screen extends beyond the actual screen
+	The display is distorted.
+	Normally, the display coordinates before the change always return 0 depending on the hardware specifications.
+
+================================================= ============================
+
+$ 1e _B_CURON Cancel cursor pause
+
+	Unpause the cursor display.
+
+================================================= ============================
+
+$ 1f _B_CUROFF Cursor pause
+
+	Pause the cursor display.
+
+================================================= ============================
+
+$ 20 _B_PUTC character display
+
+Argument d1.w Character code
+
+Cursor position after display of return value
+	d0.hw digit position
+	d0.w line 〃
+
+	Display characters.
+	When displaying Chinese characters, the 1st and 2nd bytes may be divided into two parts.
+	Attempted to display full-width characters when only one half-width character can be displayed at the right edge of the screen
+	In that case, display a half-width space, start a new line, and then display full-width characters.
+
+================================================= ============================
+
+$ 21 _B_PRINT String display
+
+Argument a1.l String address
+
+Return value d0.l Cursor position after display
+		d0.hw digit position
+		d0.w line 〃
+	a1.l 0 address at the end of the string
+
+	Display a string.
+
+================================================= ============================
+
+$ 22 _B_COLOR Display color setting
+
+Argument d1.w Display attribute
+	d1.w = 0 Text palette 0 (usually black)
+		  1 〃 1 (〃 light blue)
+		  2 〃 2 (〃 yellow)
+		  3 〃 3 (〃 white)
+		+4 emphasis
+		+8 reversal
+		+12 Reverse emphasis
+		 -1 Examine the attribute
+
+Return value d0.b Display attribute before change (If it is a negative number, the display attribute specification is abnormal)
+
+	IOCS B_PUTC ($ 20), B_PRINT ($ 21) to set the attributes of the characters to be displayed.
+
+================================================= ============================
+
+$ 23 _B_LOCATE Move cursor
+
+Argument d1.w digit position (however, when d1.w = -1, only the cursor position is obtained)
+	d2.w line 〃
+
+Cursor position before moving the return value (If -1, the cursor position is specified incorrectly)
+	d0.hw digit position
+	d0.w line 〃
+
+	Move the cursor to the specified position.
+	In ROM IOCS version 1.3, the same value as d0.l is returned to d1.l only when the coordinates are acquired.
+
+================================================= ============================
+
+$ 24 _B_DOWN_S Move cursor down one line
+
+Return value is always 0
+
+	Move the cursor down one line.
+	Scroll up if the cursor is on the bottom line.
+
+================================================= ============================
+
+$ 25 _B_UP_S Move cursor down one line
+
+Return value is always 0
+
+	Move the cursor up one line.
+	Scroll down if the cursor is on the first line.
+
+================================================= ============================
+
+$ 26 _B_UP Move the cursor up by the specified number of lines
+
+Argument d1.b Number of moved lines (when 0, it is regarded as 1)
+
+Return value is always 0
+
+	Move the cursor over the specified line.
+	If you cannot move the specified number of lines, do not move.
+	In ROM IOCS version 1.3, 0 if moved, -1 if not moved
+	return it.
+
+================================================= ============================
+
+$ 27 _B_DOWN Move the cursor down by the specified number of lines
+
+Argument d1.b Number of moved lines (when 0, it is regarded as 1)
+
+Return value is always 0
+
+	Move the cursor down the specified line.
+	If you cannot move the specified number of lines, move to the bottom line.
+
+================================================= ============================
+
+$ 28 _B_RIGHT Move the cursor to the right by the specified number of digits
+
+Argument d1.b Number of moving digits (when 0, it is regarded as 1)
+
+Return value is always 0
+
+	Move the cursor to the right of the specified digit.
+	If you cannot move by the specified number of digits, move to the right end.
+
+================================================= ============================
+
+$ 29 _B_LEFT Move the cursor to the left by the specified number of digits
+
+Argument d1.b Number of moving digits (when 0, it is regarded as 1)
+
+Return value is always 0
+
+	Move the cursor to the left of the specified digit.
+	If you cannot move by the specified number of digits, move to the left end.
+
+================================================= ============================
+
+$ 2a _B_CLR_ST Erase multiple lines on the screen
+
+Argument d1.b Specify the erasure range
+		d1.b = 0 From the cursor position to the right end of the last line
+			1 From the left end of the first line to the cursor position
+			2 Whole screen (After erasing, the cursor moves to the left end of the first line)
+
+	Specify a range to erase multiple lines on the screen.
+
+================================================= ============================
+
+$ 2b _B_ERA_ST Erase multiple digits of the current line
+
+Argument d1.b Specify the erasure range
+		d1.b = 0 From the cursor position to the right end
+			1 From the left edge to the cursor position
+			2 entire cursor line
+
+Return value d0.l = 0 Normal termination
+		Other abnormal termination (range specification or cursor position is abnormal)
+
+	Specify a range to erase multiple digits of the cursor line.
+	The return value on abnormal termination is usually -1, but it is less than ROM IOCS version 1.3 and it is not possible.
+	-It is indefinite if the cause is the sol position.
+
+================================================= ============================
+
+$ 2c _B_INS Insert multiple lines
+
+Argument d1.b Number of inserted lines (when 0, it is regarded as 1)
+
+Return value is always 0
+
+	Insert multiple lines at the cursor position. The lines below the cursor line scroll.
+	The cursor moves to the far left.
+	For ROM IOCS version less than 1.3, set the high-order byte of the argument d1.w to 0.
+	Please note that it does not work properly.
+
+================================================= ============================
+
+$ 2d _B_DEL Delete multiple lines
+
+Argument d1.b Number of deleted lines (when 0, it is regarded as 1)
+
+Return value is always 0
+
+	Delete multiple lines from the cursor position. The lines below the cursor line scroll.
+	For ROM IOCS version less than 1.3, set the high-order byte of the argument d1.w to 0.
+	Please note that it does not work properly.
+
+================================================= ============================
+
+$ 2e _B_CONSOL Display range setting
+
+Argument d1.l Display start position (does not change when d1.l = -1)
+		d1.hw Display start dot position in the X direction (1008 or less in multiples of 16)
+		d1.w Y 〃 (4 〃 1020 〃)
+	d2.l display range (does not change when d2.l = -1)
+		d2.hw Number of display digits in the X direction-1 (0 to 127)
+		d2.w Y 〃 Number of lines-1 (0 to 63)
+
+Return value d0.l Always 0
+	d1.l Display start offset before change (X / 8 + Y * 128)
+	d2.l 〃 Display range
+
+	Set the display range of the text screen. The cursor moves to the left end of the first line.
+	The coordinates handled by IOCS $ 20 to $ 2d are displayed with (0,0) at the upper left of the set display range.
+	Affects within range. However, scroll / clear screen will be in digits outside the display range.
+	Affects. IOCS B_CONMOD ($ ad) to scroll only the display range
+	Mode 18: Specify sost copy scroll.
+	When embedding IOCS.X, a multiple of 8 can be specified for the argument d1.hw, but ROM IOCS
+	Address errors occur when you specify a multiple of 8 below version 1.3.
+
+================================================= ============================
+
+$ 2f _B_PUTMES Coordinate specification string display
+
+Argument d1.b Display attribute
+	d1.b = 0 Text palette 0 (usually black)
+		  1 〃 1 (〃 light blue)
+		  2 〃 2 (〃 yellow)
+		  3 〃 3 (〃 white)
+		+4 emphasis
+		+8 reversal
+		+12 Reverse emphasis
+	d2.w Display digit position (absolute coordinates: 0 to 127)
+	d3.w Display line position (absolute coordinates: 0 to 63)
+	d4.w Number of display digits-1
+	a1.l Address of display string
+
+Return value d0.l Indefinite (contents are not guaranteed)
+	d2.w Digit position after display
+	d4.w Indefinite (contents are not guaranteed)
+	a1.l Address at the end of the string (if the specified string is longer than the number of displayed digits)
+		Address next to the last displayed character)
+
+	Display a character string directly from the specified absolute coordinates. For function key line display.
+	Not affected by IOCS B_CONSOL ($ 2e).
+	Do not display more than the number of digits (half-width space is displayed if full-width characters cannot be displayed
+	If the length of the character string is less than the specified number of digits, the rest will display a half-width space.
+	The character code $ fe is displayed as a blank.
+	If you go to the right edge of the text screen, it will not be displayed anymore and will not scroll.
+
+================================================= ============================
+
+$ 30 _SET232C RS-232C parameter setting
+
+Argument d1.w RS-232C setting value (when d1.w = -1, check the current setting)
+		bits 15-14 Stop bits (1: 1bit 2: 1.5bit 0,3: 2bit)
+		bit 13-12 Parity (1: odd 3: even 0,2: none)
+		bit 11 to 10 bit length (0: 5bit or less 1: 6bit 2: 7bit 3: 8bit)
+		bit 9 XON / XOFF processing (0: OFF 1: ON)
+		bit 8 SI / SO processing (〃)
+		bit 7 ~ 0 BPS (0: 75 1: 150 2: 300 3: 600 4:1200
+				    5: 2400 6:4800 7: 9600 8:17 361)
+
+Settings before changing the return value
+
+	Set the RS-232C mode.
+	If you specify a value outside the range for BPS, it will be initialized as 1200BPS.
+	Do not use ROM IOCS because SI / SO processing does not work properly.
+	BPS number 8 is only available in ROM IOCS version 1.3.
+
+================================================= ============================
+
+$ 31 _LOF232C RS-232C Find the number of data in the receive buffer
+
+Return value d0.w RS-232C Number of received data
+
+	Check the number of data in the receive buffer of RS-232C.
+
+================================================= ============================
+
+$ 32 _INP232C RS-232C Get received data
+
+Return value d0.w RS-232C Received data (lower 8 bits)
+
+	Receive data from RS-232C.
+	If you have not received the data, wait until it is received.
+
+================================================= ============================
+
+$ 33 _ISNS232C RS-232C Checking received data
+
+Return value d0.l = 0 No received data
+		$ 100 ?? 〃 Yes ($ ?? is received data)
+
+	Check if data is being received from RS-232C.
+	The contents of the received data buffer do not change.
+
+================================================= ============================
+
+$ 34 _OSNS232C RS-232C Check if data can be sent
+
+Return value d0.l = 0 Cannot be sent
+		4 〃 Possible (buffer is empty, not XON)
+
+	Check if data can be sent to RS-232C.
+
+================================================= ============================
+
+$ 35 _OUT232C RS-232C data transmission
+
+Argument d1.b Send data
+
+	Send data to RS-232C.
+	If the data cannot be sent, wait until it can be sent.
+
+================================================= ============================
+
+$ 36 (Unpublished) Processing address setting when receiving mouse data
+
+Argument d1.l Processing address (cancel when 0)
+	d2.w Counter initial value
+
+	Set the address of the subroutine called when data is received from the mouse
+	Normally, the address that rewrites the data used by the mouse processing IOCS is
+	It is set.
+	When the set address is called, 3 bytes from the address indicated by a1.l
+	The data received from the mouse is set in.
+	Increasing the value of the counter increases the call interval (shortest when 1).
+	If you specify 0 for the processing address, the standard address is set.
+
+================================================= ============================
+
+$ 37 (Unpublished) ESC [> Escape sequence extended processing address setting
+
+Argument d1.l Processing address (cancel when 0)
+
+Return value Address before change (ROM IOCS version 1.3 only)
+
+	Of the escape sequences, the add of the subroutine that performs the extension processing of the ESC [> system.
+	If you specify 0 for the processing address, the standard address is set.
+	When the set address is called, d0.w contains the next 2-byte data of ESC [>,
+	The address of ESC [> is set in a0.l.
+	Only ROM IOCS version 1.3 returns the address before the change.
+
+================================================= ============================
+
+$ 38 _SETFNTADR Gaiji font address setting
+
+Argument d1.l Font address (negative number, address acquisition only)
+	d2.l Gaiji group number
+		d2.l = 0 16x16 dots JIS: $ 2c21 ～ $ 2d7e
+			1 16x16 〃: $ 7621 ～ $ 777e
+			2 8x16 〃: $ f400 ～ $ f5ff
+			3 24x24 〃: $ 2c21 ～ $ 2d7e
+			4 24x24 〃: $ 7621 ～ $ 777e
+			5 12x24 〃: $ f400 ～ $ f5ff
+			6 6x12 〃 (half-width)
+			7 8x 8 〃 (1/4 square)
+			8 8x16 〃 (half-width)
+			9 16x16 〃 (full-width)
+			10 12x12 〃 (1/4 square)
+			11 12x24 〃 (half-width)
+			12 24x24 〃 (full-width)
+			13 16x16 〃 (double-byte non-kanji)
+			14 16x16 〃 (1st level character)
+			15 16x16 〃 (2nd level character)
+			0x80 Get extended external character processing address
+
+Return value Address before change
+	If -1 is returned when setting the address, an error (such as when an odd address is specified).
+
+	Set the address of the external character font data.
+	When HIOCS.X is installed, d2.l is 6 or more and normal character fonts can be set.
+	Note that ROM IOCS does not cause an error even if an odd address is set.
+
+================================================= ============================
+
+$ 39 (Unpublished) PCM data settings for BEEP sound
+
+Argument d1.l PCM data address
+	d2.w 〃 size
+
+Return value d0.l Always 0
+	d1.l PCM data address before change
+	d2.w 〃 size
+
+	Set the address and length of the PCM data for the BEEP sound.
+
+================================================= ============================
+
+$ 3a (Unpublished) Printer parameter settings
+
+Argument a1.l Parameter address (ROM at 0)
+
+	Printer processing Sets the parameters used by IOCS.
+	Specifying 0 for the parameter address sets the initial value in ROM.
+	The contents of the parameters are as follows.
+
+offset size
+$ 00 1.l T-VRAM plane 0 address ($ e00000)
+$ 04 1.w Number of dots in Y direction ÷ 12-1 (41)
+$ 06 1.l Y-direction remainder line pattern when outputting enlarged bit image
+$ 0a 1.w Number of dots in Y direction ÷ 24-1 (21)
+$ 0c 1.l Y-direction remainder line pattern when outputting reduced bit image
+$ 10 1.w Number of dots in X direction ÷ 8-1 (96)
+$ 12 8.b Kanji mode specification code
+$ 1a 8.b 〃 Release 〃
+$ 22 4.b LF code
+$ 26 6.b Newline width 16/120 inch code
+$ 2c 6.b Code that returns the line feed width to the state when the power was turned on.
+$ 32 6.b Newline width 10/120 inch code
+$ 38 6.b 〃 5/150 〃
+$ 3e 8.b Bit image output code (1536 x 24 dot output)
+$ 46 8.b 〃 (768 × 24 〃)
+$ 4e 8.b 〃 (18 × 24 〃)
+$ 56 8.b 〃 (36 × 24 〃)
+$ 5e 1.b 0: MSB to LSB 1: LSB to MSB output in this order
+$ 5f 1.b Number of blank dots on the left and right when outputting a half-width bit image
+$ 60 1.b Full-width 〃
+$ 61 1.b mode (output as bit image if bit value is 1)
+		bit 4: Half-width characters
+		bit 3: First-level Chinese characters and double-byte non-Kanji characters
+		bit 2: Second level Chinese characters
+		bit 1: First external character
+		bit 0: Second external character
+
+	$ 06, $ 0c is valid only for the lower 3 bytes, and the remainder of 512 / (value of $ 04, $ 0a) from the left end
+	Set the bit to 1 by the number of dots in.
+	For codes from $ 12 to $ 56, specify the number of bytes in the code with the first byte, and the rest
+	Specify the code.
+	Note that the LF code specification buffer from $ 22 can be used by incorporating PRNDRVn.SYS.
+	Is reduced to 2 bytes, starting at $ 24 and specifying the CR code.
+
+================================================= ============================
+
+$ 3b _JOYGET Joystick input
+
+Argument d1.w Joystick number (0/1)
+
+Return value Joystick data (pressed when 0, separated by 1)
+		bit 7 always 1
+		bit 6 button 1
+		bit 5 〃 2
+		bit 4 always 1
+		bit 3 lever right
+		bit 2 〃 Left
+		bit 1 〃 Below
+		bit 0 〃 Above
+
+	Read the joystick data.
+	If you specify an invalid joystick number, 0 is always returned.
+
+================================================= ============================
+
+$ 3c _INIT_PRN Printer initialization
+
+Argument d1.hb Number of lines per page-1 (not specified by -1)
+	d1.b Number of columns per line-1 (〃)
+
+Return value d0.l = 0 Cannot be output
+		$ 20 output possible
+
+	Initialize the printer port and check if it can be output to the printer at the same time.
+	The argument d1.w is the print format for IOCS _OUTPRN ($ 3f).
+
+================================================= ============================
+
+$ 3d _SNSPRN Check if it can be output to the printer
+
+Return value d0.l = 0 Cannot be output
+		$ 20 output possible
+
+	Check if it can be output to the printer.
+
+================================================= ============================
+
+$ 3e _OUTLPT Printer direct output
+
+Argument d1.b Output data
+
+	Data is output directly to the printer. Kanji processing is not performed, and automatic line breaks / page breaks are not performed.
+	Normally, the process does not return until the output to the printer is completed.
+	ROM IOCS version less than 1.3 is used during high-speed operation with accelerators, etc.
+	And may not work properly due to insufficient weight.
+
+================================================= ============================
+
+$ 3f _OUTPRN Printer output
+
+Argument d1.b Output data
+
+The return value d1.b is destroyed.
+
+	Output characters to the printer. Kanji processing is performed in S-JIS, and for double-byte characters
+	Output in 2 batches of 1 byte each.
+	Normally, the process does not return until the output to the printer is completed.
+
+================================================= ============================
+
+$ 40 _B_SEEK Disc Seek
+
+Argument 
+	d1.hb PDA
+	d1.hb = $ 10 ～ $ 13 2DD / 8 0 ～ 3
+			$ 30- $ 33 2DD / 9 〃
+			$ 70- $ 73 2HQ 〃
+			$ 80- $ 8f SASI-HD 0-15
+			$ 90 ～ $ 93 2HD 0 ～ 3
+	d1.b mode (meaningless for SASI-HD)
+		bit 6 MFM / MFM mode switching 0: FM 1: MFM (usually 1)
+		bit 5 Retry 0: Do not retry 1: Do
+		bit 4 seek 0: do not seek 1: do
+		When retrying, retry without seeking 5 times, then 5 times
+		Recalibrate / seek and then retry.
+	d2.l Target seek position (record number in 256-byte units for SASI-HD)
+		bit 31-24 Sector length 0:128 1:256 2:512 3:1024 (bytes)
+		bit 23-16 tracks (0-76)
+		bit 15-8 side (0/1)
+		bit 7 to 0 sectors (1 to 8)
+
+Return value SASI-HD: 
+	Status
+		d0.l = positive number Normal termination
+			-1 No response within the specified time
+			-3 error
+			Other abnormal termination (lowest byte is error code)
+	2HD-FD: FDC status
+		bit 31-24 Result status 0 (ST0)
+		bit 23-16 Cylinder number at the end of the command (PCN)
+
+	Seek to the specified position on the disk.
+	If the SASI-HD seek returns $ ffffff ??, $ ?? is the first byte of the sense byte.
+	Shows it.
+	PDA $ 10-13, $ 30- $ 33, $ 70- $ 73 are ROM IOCS version 1.3 or
+	Can only be used when FDDEVICE.X is resident. Also, for ROM IOCS version 1.3
+	SASI-HD is intended for those connected to SCSI.
+
+================================================= ============================
+
+$ 41 _B_VERIFY Disc verification
+
+Argument d1.hb PDA
+	d1.b mode (meaningless for SASI-HD)
+	d2.l Target inspection position
+	d3.l Number of bytes to inspect
+	a1.l Address of the data to be inspected
+
+The return value d2 / d3 / a1 is not guaranteed.
+	SASI-HD: Status (abnormal termination with negative number)
+		d0.l = positive number Normal termination
+			-1 No response within the specified time
+			-2 Data mismatch
+			-3 error
+			Other abnormal termination (lowest byte is error code)
+	2HD-FD: FDC status (-1 is incorrect parameter)
+		bit 31-24 Result status 0 (ST0)
+		bit 23 ~ 16 〃 1 (ST1)
+		bit 15-8 〃 2 (ST2)
+		bit 7 ~ 0 Cylinder number (C)
+
+	Perform a comparative inspection of the data.
+
+	For comparison with 2HD-FD, use the FDC's SCAN EQUAL instruction to compare the data.
+	So when the data is $ ff, the bytes are not compared and are equal
+	Treated as.
+
+================================================= ============================
+
+$ 42 _B_READDI Read for diagnostic disk
+
+Argument d1.hb PDA (SASI-HD: $ 80- $ 8f cannot be specified)
+	d1.b mode
+	d2.l Target reading position
+	d3.l Number of bytes to read
+	a1.l Address of the buffer to read
+
+The return value d2 / d3 / a1 is not guaranteed.
+	FDC status (-1 abnormal parameter)
+		bit 31-24 Result status 0 (ST0)
+		bit 23 ~ 16 〃 1 (ST1)
+		bit 15-8 〃 2 (ST2)
+		bit 7 ~ 0 Cylinder number (C)
+
+	Read the disk for 2HD diagnosis. Not used for normal reading.
+
+================================================= ============================
+
+$ 43 _B_DSKINI Drive Initialization
+
+Argument d1.hb PDA
+	d2.l Time to motor off (meaningless for SASI-HD)
+	a1.l SASI-HD: Assign drive parameter data address
+		2HD-FD: Data address of the SPECIFY command
+
+Return value SASI-HD: Status (abnormal termination with negative number)
+	2HD-FD: FDC status
+		bit 31-24 Result status 3 (ST3)
+		bit 23 ~ 0 indefinite
+
+	Initialize the drive.
+	The time to turn off the motor is in 1/100 second units, and if 0 is specified, it becomes the standard value (2 seconds).
+	If you specify 0 for a1.l, the standard settings are used.
+
+================================================= ============================
+
+$ 44 _B_DRVSNS drive status check
+
+Argument d1.hb PDA
+
+Return value SASI-HD: Status (abnormal termination with negative number)
+	2HD-FD: FDC status
+		bit 31-24 Result status 3 (ST3)
+		bit 23 ~ 0 indefinite
+
+	Check the status of the disk.
+
+================================================= ============================
+
+$ 45 _B_WRITE Writing to disk
+
+Argument d1.hb PDA
+	d1.b mode (meaningless for SASI-HD)
+	d2.l Target writing position
+	d3.l Number of bytes to write
+	a1.l Address of data to write
+
+The return value d2 / d3 / a1 is not guaranteed.
+	SASI-HD: Status (abnormal termination with negative number)
+	2HD-FD: FDC status (-1 is incorrect parameter)
+		bit 31-24 Result status 0 (ST0)
+		bit 23 ~ 16 〃 1 (ST1)
+		bit 15-8 〃 2 (ST2)
+		bit 7 ~ 0 Cylinder number (C)
+
+	Write data to disk.
+	Note: The OS operates independently of the buffering process that the OS is doing.
+	If you keep the data in the buffer, the data on the disk is guaranteed.
+	It may not be possible.
+
+================================================= ============================
+
+$ 46 _B_READ Reading from disk
+
+Argument d1.hb PDA
+	d1.b mode (meaningless for SASI-HD)
+	d2.l Target reading position
+	d3.l Number of bytes to read
+	a1.l Address of the buffer to read
+
+The return value d2 / d3 / a1 is not guaranteed.
+	SASI-HD: Status (abnormal termination with negative number)
+	2HD-FD: FDC status (-1 is incorrect parameter)
+		bit 31-24 Result status 0 (ST0)
+		bit 23 ~ 16 〃 1 (ST1)
+		bit 15-8 〃 2 (ST2)
+		bit 7 ~ 0 Cylinder number (C)
+
+	Read data from disk.
+	Note: The OS operates independently of the buffering process that the OS is doing.
+	If you keep the data in the buffer, the data on the disk is guaranteed.
+	It may not be possible.
+
+================================================= ============================
+
+$ 47 _B_RECALI Disc recalibrate
+
+Argument d1.hb PDA
+	d1.b mode (set to 0 for SASI-HD)
+		d1.b = 0 Seek to track 0
+			-1 Inspection in forced ready state
+
+Return value SASI-HD: Status (abnormal termination with negative number)
+	2HD-FD: FDC status
+		bit 31-24 Result status 0 (ST0)
+		bit 23-16 Cylinder number (C)
+
+	Seek to track 0 or inspect in forced ready state.
+	If bit 4 (EQUIPMENT CHECK) of ST0 is 1 after executing the latter
+	The specified drive does not exist.
+	The presence or absence of a 2HD-FD drive can only be checked with this IOCS call.
+
+================================================= ============================
+
+$ 48 _B_ASSIGN Hard disk alternative track settings
+
+Argument d1.hb PDA (2HD-FD: $ 90- $ 93 cannot be specified)
+	d2.l record number
+	d3.l interleaved code
+	a1.l Address of alternate track specified data
+		(0, a1) Alternate track number high-order byte
+		(1, a1) 〃Medium〃
+		(2, a1) 〃Lower 〃
+		(3, a1) Always 0
+
+Return status (abnormal termination with negative number)
+
+	Set an alternative track for your hard disk.
+
+================================================= ============================
+
+$ 49 _B_WRITED Write corrupted data to 2HD
+
+Argument d1.hb PDA (SASI-HD: $ 80- $ 8f cannot be specified)
+	d1.b mode
+	d2.l Target writing position
+	d3.l Number of bytes to write
+	a1.l Address of data to write
+
+The return value d2 / d3 / a1 is not guaranteed.
+	FDC status (-1 abnormal parameter)
+		bit 31-24 Result status 0 (ST0)
+		bit 23 ~ 16 〃 1 (ST1)
+		bit 15-8 〃 2 (ST2)
+		bit 7 ~ 0 Cylinder number (C)
+
+	Write corrupted data to disk. Not used for normal writing.
+
+================================================= ============================
+
+$ 4a _B_READID 2Read ID information for HD
+
+Argument d1.hb PDA (SASI-HD: $ 80- $ 8f cannot be specified)
+	d1.b mode
+	d2.l Target readout position (track and surface specifications only)
+		Set bit 31 to 1 to get the detection ID.
+
+Return value d0.l FDC status
+		bit 31-24 Result status 0 (ST0)
+		bit 23 ~ 16 〃 1 (ST1)
+		bit 15-8 〃 2 (ST2)
+		bit 7 ~ 0 Cylinder number (C)
+	d2.l Read ID (only when bit 31 = 1 of d2.l)
+
+	2 Read the ID information of HD-FD.
+
+================================================= ============================
+
+$ 4b _B_BADFMT Disable Hard Disk Corruption Track
+
+Argument d1.hb PDA (2HD-FD: $ 90- $ 93 cannot be specified)
+	d2.l record number
+	d3.b interleaved code (1 or 6)
+
+Return status (abnormal termination with negative number)
+
+	Disable the hard disk corruption track.
+
+================================================= ============================
+
+Read corrupted data from $ 4c _B_READDL 2HD
+
+Argument d1.hb PDA (SASI-HD: $ 80- $ 8f cannot be specified)
+	d1.b mode
+	d2.l Target reading position
+	d3.l Number of bytes to read
+	a1.l Address of the buffer to read
+
+The return value d2 / d3 / a1 is not guaranteed.
+	FDC status (-1 abnormal parameter)
+		bit 31-24 Result status 0 (ST0)
+		bit 23 ~ 16 〃 1 (ST1)
+		bit 15-8 〃 2 (ST2)
+		bit 7 ~ 0 Cylinder number (C)
+
+	Read corrupted data from disk. Not used for normal reading.
+
+================================================= ============================
+
+$ 4d _B_FORMAT Disk format
+
+Argument d1.hb PDA
+	d1.b mode (meaningless for SASI-HD)
+	d2.l Target format position (record number for SASI-HD)
+		bit 31-24 Sector length 0:128 1:256 2:512 3:1024 (bytes)
+		bit 23-16 tracks (0-76)
+		bit 15-8 side (0/1)
+		bit 7 to 0 Value to be written to the data part of each sector
+	d3.l SASI-HD: Interleaved code (1 or 6)
+		2HD-FD: Number of bytes of ID data
+	a1.l ID data address (meaningless for SASI-HD)
+
+Return value SASI-HD: Status (abnormal termination with negative number)
+	2HD-FD: FDC status (-1 is incorrect parameter)
+		bit 31-24 Result status 0 (ST0)
+		bit 23 ~ 16 〃 1 (ST1)
+		bit 15-8 〃 2 (ST2)
+		bit 7 ~ 0 Cylinder number (C)
+
+	Physically format the disc.
+	2 The contents of the ID data used when formatting the HD-FD are shown in the table below.
+	Repeated for the number of sectors.
+
+offset size
+0 1.b Track number
+1 1.b Side (0/1)
+2 1.b sector number
+3 1.b Sector length (128x2 bytes)
+
+	Normally, the track number is 0 to 76, the sector number is 1 to 8, and the sector length is 0 to 3.
+
+================================================= ============================
+
+$ 4e _B_DRVCHK 2HD drive status settings
+
+Argument d1.hb PDA (SASI-HD: $ 80- $ 8f cannot be specified)
+	d2.w function number
+		d2.w = 0 Condition check
+			1 Emission (cannot be discharged when emission is prohibited)
+			2 Emission prohibited 1
+			3 〃 Permission 1
+			4 LED blinks when no disc is loaded
+			5 〃 Off
+			6 Emission prohibited 2 (Users are prohibited because it is for OS)
+			7 〃 Permission 2 (〃)
+			8 Emission inspection (〃)
+			9 Condition inspection 2
+
+Disk status when the return value d2.w = 0-7,9
+		bit 7 LED blinking
+		bit 6 emission prohibited
+		bit 5 Ejection prohibited 2 (with OS buffer)
+		bit 4 〃 1 (user specified)
+		bit 3 write-protected
+		bit 2 knot lady
+		bit 1 media insertion
+		bit 0 Media misinsertion
+		Not ready and write protect are only valid when d2.w = 0.
+		Also, if no media is inserted at this time, both bits will be 1.
+	When d2.w = 8, was it discharged after the previous inspection (1: not -1: was done)
+
+	2 Refer / set the status of HD-FD.
+
+================================================= ============================
+
+$ 4f _B_EJECT Disk Ejection / Shipping
+
+Argument d1.hb PDA
+
+Return value Exit code (abnormal termination if negative)
+	It doesn't make sense for 2HD-FD
+
+	2 Eject HD-FD or ship SASI-HD.
+	It can be discharged even in the discharge prohibited state, but it operates regardless of the buffering process of the OS.
+	Therefore, if the OS holds data in the buffer, ejecting it will dissipate it.
+	Do not discharge as the contents of the box will not be guaranteed.
+
+================================================= ============================
+
+$ 50 _DATEBCD Date data binary → BCD conversion
+
+Argument d1.l Date data (binary)
+		$ 0y_yy_mm_dd
+		bit 27-16 year binary (1980-2079)
+		bit 15-August 〃 (1-12)
+		bit 7-0 days 〃 (1-31)
+
+Return value Converted date data (BCD)
+		$ uw_yy_mm_dd
+		bit 31-28 Leap year counter (0: This year is a leap year 1: 3 years later 2: 2 years later 3: 1 year later)
+		bit 27-24 day counter (0: Sunday 1: Monday… 6: Saturday)
+		bit 23-16 years BCD 2 digits ($ 00- $ 99)
+		bit 15-August 〃 ($ 01- $ 12)
+		bit 7-0 days 〃 ($ 01- $ 31)
+	However, if the date is abnormal, -1 is returned.
+
+	Convert dates from binary to BCD.
+	The leap year counter is incremented with the year counter.
+
+================================================= ============================
+
+$ 51 _DATESET Date setting
+
+Argument date data (BCD)
+
+Return value is always 0
+
+	Set the date on the clock, but it is not checked for the correct date specification.
+	The X680x0 clock IC (RTC) must be configured with BCD format data
+	So this code after converting the binary date to BCD with IOCS DATEBCD ($ 50)
+	Set with
+
+================================================= ============================
+
+$ 52 _TIMEBCD Time data binary → BCD conversion
+
+Argument d1.l Time data (binary)
+		$ 00_hh_mm_ss
+		bit 23-16 o'clock binary (0-23)
+		bit 15-8 minutes 〃 (0-59)
+		bit 7 ~ 0 seconds 〃 (0 ~ 59)
+
+Return value Time data (BCD)
+		$ 0t_hh_mm_ss
+		bit 27-24 1 (System regulation: Indicates that it is a 24-hour counter)
+		bit 23:00 to 16:00 BCD 2 digits (0 to 23)
+		bit 15-8 minutes 〃 (0-59)
+		bit 7 ~ 0 seconds 〃 (0 ~ 59)
+	However, if the time is abnormal, -1 is returned.
+
+	Convert time from binary to BCD.
+
+================================================= ============================
+
+$ 53 _TIMESET Time setting
+
+Argument time data (BCD)
+
+Return value is always 0
+
+	Set the time on the clock. However, it is not checked whether the time is specified correctly.
+
+================================================= ============================
+
+$ 54 _DATEGET Read date
+
+Return value Date data (BCD)
+		$ 0w_yy_mm_dd
+		bit 27-24 day of the week counter
+		bit 23-16 years BCD 2 digits ($ 00- $ 99)
+		bit 15-August 〃 ($ 01- $ 12)
+		bit 7-0 days 〃 ($ 01- $ 31)
+
+	Read the date from the clock.
+
+================================================= ============================
+
+$ 55 _DATEBIN BCD → binary conversion of date data
+
+Argument date data (BCD)
+		$ 0w_yy_mm_dd
+		bit 27-24 day of the week counter
+		bit 23-16 years BCD 2 digits ($ 00- $ 99)
+		bit 15-August 〃 ($ 01- $ 12)
+		bit 7-0 days 〃 ($ 01- $ 31)
+
+Return value Converted date data (binary)
+		$ wy_yy_mm_dd
+		bit 31-28 day of the week counter
+		bit 27-16 year binary (1980-2079)
+		bit 15-August 〃 (1-12)
+		bit 7-0 days 〃 (1-31)
+
+	Convert date data from BCD to binary.
+
+================================================= ============================
+
+$ 56 _TIMEGET Read time
+
+Return value Time data (BCD)
+
+	Read the time from the clock.
+
+================================================= ============================
+
+$ 57 _TIMEBIN BCD → binary conversion of time data
+
+Argument time data (BCD)
+
+Return value Converted time data (binary)
+
+	Convert time data from BCD to binary.
+
+================================================= ============================
+
+$ 58 _DATECNV Date data string → binary conversion
+
+Arguments a1.l Address of a date string (separated by either'/' or'-')
+		The format is'yyyy / mm / dd', 0 or'yy-mm-dd', 0
+
+Return value d0.l Converted date data (binary)
+		However, if the date string is abnormal, d0.l = -1 is returned.
+	a1.l End of string (content is not guaranteed if conversion fails)
+
+	Convert date data from string to binary, but with the correct date specification
+	Is not checked. If the year is 80-99 or 0-79, it is considered as the last two digits.
+	Returns the sum of 1900 and 2000, respectively.
+	Whitespace at the beginning of the number and '0' are skipped. What symbol is the delimiter actually?
+	Works fine even with.
+
+================================================= ============================
+
+$ 59 _TIMECNV Time data string → binary conversion
+
+Arguments a1.l Address of a string representing time (separated by':' only)
+		The format is'hh: mm: ss', 0
+
+Return value d0.l Converted data (binary)
+		However, if the character string representing the time is abnormal, d0.l = -1 is returned.
+	a1.l End of string (content is not guaranteed if conversion fails)
+
+	Convert time data from string to binary.
+	Whitespace at the beginning of the number and '0' are skipped. What symbol is the delimiter actually?
+	Works fine even with.
+
+================================================= ============================
+
+$ 5a _DATEASC Date data binary → string conversion
+
+Argument d1.l Date data (binary)
+		$ fy_yy_mm_dd
+		bit 31-28 string format
+				0'yyyy / mm / dd', 0
+				1'yyyy-mm-dd', 0
+				2'yy / mm / dd', 0
+				3'yy-mm-dd', 0
+		bit 27-16 year binary (1980-2079)
+		bit 15-August 〃 (1-12)
+		bit 7-0 days 〃 (1-31)
+	a1.l address of string buffer
+
+Return value d0.l = 0 Normal termination
+		-1 error
+	a1.l 0 address at the end of the string
+
+	Convert date data from binary to string.
+	The string buffer must be at least 9 or 11 bytes.
+
+================================================= ============================
+
+$ 5b _TIMEASC Time data binary → string conversion
+
+Argument d1.l Time data (binary)
+		$ 00_hh_mm_ss
+		bit 23-16 o'clock binary (0-23)
+		bit 15-8 minutes 〃 (0-59)
+		bit 7 ~ 0 seconds 〃 (0 ~ 59)
+	a1.l String buffer address (format'hh: mm: ss', 0)
+
+Return value d0.l = 0 Normal termination
+		-1 error
+	a1.l 0 address at the end of the string
+
+	Convert time data from binary to string.
+	The string buffer must be at least 9 bytes.
+
+================================================= ============================
+
+$ 5c _DAYASC Day of the week data binary → string conversion
+
+Argument d1.l Day of the week data (0: Sunday 1: Monday… 6: Saturday)
+	a1.l String buffer address (format'?', 0)
+
+Return value d0.l Always 0
+	a1.l 0 address at the end of the string
+
+	Convert day of the week data from binary to string.
+	The string buffer must be at least 3 bytes.
+
+================================================= ============================
+
+$ 5d _ALARMMOD Alarm Allow / Prohibit
+
+Argument d1.l Alarm setting
+		d1.l = 0 Prohibition
+			1 Permission
+			2 Check the current status
+
+Return value Current state (0/1)
+
+	Set alarm prohibition / permission. The setting is recorded in SRAM.
+
+================================================= ============================
+
+$ 5e _ALARMSET alarm setting
+
+Argument d1.l alarm time
+		$ 0wddhhmm
+		bit 27-24 days of the week (0: Sunday 1: Monday… 6: Saturday $ f: unspecified)
+		bit 23-16 days BCD 2 digits ($ 01- $ 31, $ ff: unspecified)
+		bit 15-8 o'clock 〃 ($ 00- $ 23, 〃)
+		bit 7 ~ 0 minutes 〃 ($ 00 ~ $ 59, 〃)
+	d2.l Time to turn off the power (minutes)
+	a1.l TV control code or processing address
+		a1.l = -1 No display control
+			0 Display power on / computer mode
+			1 to $ 3f TV control with the specified value
+			Other processing address (even address and start with $ 60: bra)
+
+Return value is always 0
+
+	Set the alarm time and processing content, and allow the alarm. The setting is recorded in SRAM.
+	Will be.
+	If you set the day of the week to $ f and the day / hour / minute to $ ff, each will be unspecified. However, all
+	Do not specify
+	If you specify 0 for the time to power off, the power will not be turned off.
+
+================================================= ============================
+
+$ 5f _ALARMGET Get alarm settings
+
+Return value d0.l Processing address
+	d1.l alarm time
+	d2.l Time to turn off the power (minutes)
+
+	Check the alarm time and processing details.
+
+================================================= ============================
+
+$ 60 _ADPCMOUT ADPCM output
+
+Argument 
+	d1.w Wait mode / Frequency / Output mode
+		bit 15 wait mode (0: normal 1: no wait)
+		bit 10-8 sampling frequency
+				(0: 3.9kHz 1: 5.2kHz 2: 7.8kHz 3: 10.4kHz 4: 15.6kHz)
+		bit 1 to 0 output mode (0: none 1: left 2: right 3: left and right)
+	d2.l Number of bytes of playback data
+	a1.l 〃 Address
+
+The content of the return value d0 / d2 / a1 is not guaranteed.
+
+	Play ADPCM. If the data is less than $ ff00 bytes, return immediately.
+	If DMA is not available, wait until it is available.
+
+================================================= ============================
+
+$ 61 _ADPCMINP ADPCM input
+
+Argument
+	d1.w Wait mode / Frequency / Output mode
+		bit 15 wait mode (0: normal 1: no wait)
+		bit 10-8 sampling frequency
+				(0: 3.9kHz 1: 5.2kHz 2: 7.8kHz 3: 10.4kHz 4: 15.6kHz)
+		bit 1 to 0 output mode (0: none 1: left 2: right 3: left and right)
+	d2.l Number of bytes in the recording buffer
+	a1.l 〃 Address
+
+The content of the return value d0 / d2 / a1 is not guaranteed.
+
+	Record ADPCM. If the data is less than $ ff00 bytes, return immediately.
+	If DMA is not available, wait until it is available.
+	The data itself is input in monaural, but the monitor output can be specified in the output mode.
+
+================================================= ============================
+
+$ 62 _ADPCMAOT ADPCM output (array chain)
+
+Argument 
+	d1.w Wait mode / Frequency / Output mode
+		bit 15 wait mode (0: normal 1: no wait)
+		bit 10-8 sampling frequency
+				(0: 3.9kHz 1: 5.2kHz 2: 7.8kHz 3: 10.4kHz 4: 15.6kHz)
+		bit 1 to 0 output mode (0: none 1: left 2: right 3: left and right)
+	d2.l Number of chain tables
+	a1.l 〃 Address
+
+Play ADPCM by array chain.
+If DMA is not available, wait until it is available.
+The contents of the array chain table are the following chain tables repeated.
+
+offset size
+	0 1.l Playback data address
+	4 1.w 〃 Number of bytes (1 to $ ffff)
+
+================================================= ============================
+
+$ 63 _ADPCMAIN ADPCM input (array chain)
+
+Argument 
+	d1.w Wait mode / Frequency / Output mode
+		bit 15 wait mode (0: normal 1: no wait)
+		bit 10-8 sampling frequency
+				(0: 3.9kHz 1: 5.2kHz 2: 7.8kHz 3: 10.4kHz 4: 15.6kHz)
+		bit 1 to 0 output mode (0: none 1: left 2: right 3: left and right)
+	d2.l Number of chain tables
+	a1.l 〃 Address
+
+Record ADPCM with an array chain.
+If DMA is not available, wait until it is available.
+The contents of the array chain table are the following chain tables repeated.
+
+offset size
+	0 1.l Recording buffer address
+	4 1.w 〃 Number of bytes (1 to $ ffff)
+
+================================================= ============================
+
+$ 64 _ADPCMLOT ADPCM output (link array chain)
+
+	Argument 
+	d1.w Wait mode / Frequency / Output mode
+		bit 15 wait mode (0: normal 1: no wait)
+		bit 10-8 sampling frequency
+				(0: 3.9kHz 1: 5.2kHz 2: 7.8kHz 3: 10.4kHz 4: 15.6kHz)
+		bit 1 to 0 output mode (0: none 1: left 2: right 3: left and right)
+	a1.l Chain table address
+
+Play ADPCM by link array chain.
+If DMA is not available, wait until it is available.
+The contents of the link array chain table are the following chain tables concatenated.
+
+offset size
+	0 1.l Playback data address
+	4 1.w 〃 Number of bytes (1 to $ ffff)
+	6 1.l Address of the next table (0 is the end of the table)
+
+================================================= ============================
+
+$ 65 _ADPCMLIN ADPCM input (link array chain)
+
+Argument 
+	d1.w Wait mode / Frequency / Output mode
+		bit 15 wait mode (0: normal 1: no wait)
+		bit 10-8 sampling frequency
+				(0: 3.9kHz 1: 5.2kHz 2: 7.8kHz 3: 10.4kHz 4: 15.6kHz)
+		bit 1 to 0 output mode (0: none 1: left 2: right 3: left and right)
+	a1.l Chain table address
+
+Record ADPCM with a link array chain.
+If DMA is not available, wait until it is available.
+The contents of the link array chain table are the following chain tables concatenated.
+
+offset size
+	0 1.l Recording buffer address
+	4 1.w 〃 Number of bytes (1 to $ ffff)
+	6 1.l Address of the next table (0 is the end of the table)
+
+================================================= ============================
+
+$ 66 _ADPCMSNS ADPCM status check
+
+Return value Execution status
+	d0.l = $ 00 Not doing anything
+	Running 
+		$ 02 IOCS ADPCMOUT ($ 60)
+		$ 04 IOCS ADPCMINP ($ 61) 〃
+		$ 12 IOCS ADPCMAOT ($ 62) 〃
+		$ 14 IOCS ADPCMAIN ($ 63) 〃
+		$ 22 IOCS ADPCMLOT ($ 64) 〃
+		$ 24 IOCS ADPCMLIN ($ 65) 〃
+
+	Check the execution status of ADPCM.
+
+================================================= ============================
+
+$ 67 _ADPCMMOD ADPCM execution control
+
+Argument d1.l Control content (0: End 1: Suspend 2: Resume)
+
+Return value d0.l = 
+		0 Normal termination
+		-1 Illegal control mode
+
+Controls the execution of ADPCM.
+In ROM IOCS, when called with a shortcut, the interrupt is disabled.
+Please be careful as you will return at.
+
+================================================= ============================
+
+$ 68 _OPMSET OPM register setting
+
+Argument d1.b register number
+	d2.b data
+
+The return value d2.b is destroyed.
+
+	Wait until it is ready to write to OPM, then write the data to the register.
+	When writing to register $ 1b, the mode of generic output cannot be changed.
+
+================================================= ============================
+
+$ 69 _OPMSNS OPM Status check
+
+Return value d0.b Status
+		bit 7 Busy flag (writable by 0)
+		bit 1 Timer A overflow (overflow occurs when 1)
+		bit 0 〃 B 〃
+
+	Read the status of OPM.
+
+================================================= ============================
+
+$ 6a _OPMINTST OPM interrupt setting
+
+Arguments a1.l Processing address (0 interrupts disabled)
+
+Return value d0.l = 0 Interrupts set / disabled
+		Other already in use
+
+	Set interrupt by OPM. Since only MFP is controlled, it is also set for OPM.
+	There is a need to.
+	In ROM IOCS version 1.3, all interrupts are prohibited when called with a shortcut.
+	Please note that you will return in a stopped state.
+	Interrupt when the processing address of the interrupt is $ 01000000 or more (the most significant byte is other than 0)
+	Is considered unused, but vbr is enabled in ROM IOCS version 1.3
+	If so, it is considered unused only when the processing address is $ 00ff0770.
+
+================================================= ============================
+
+$ 6b _TIMERDST Timer-D Interrupt setting
+
+Argument d1.hb Unit time (1: 1.0 2:2.5 3:4.0 4:12.5 5: 16.0 6: 25.0 7: 50.0 μsec unit)
+	d1.b Counter (when 0, treat as 256)
+	a1.l Processing address (0 interrupts disabled)
+
+Return value d0.l = 0 Interrupts set / disabled
+		Other already in use
+
+	Set the interrupt by Timer-D. The interrupt cycle is unit time x counter.
+	Interrupts cannot be changed if PROCESS is set in CONFIG.SYS.
+	In ROM IOCS version 1.3, all interrupts are prohibited when called with a shortcut.
+	Please note that you will return in a stopped state.
+	The condition for considering interrupts as unused is the same as _OPMINTST.
+
+================================================= ============================
+
+$ 6c _VDISPST Vertical sync interrupt setting
+
+Argument d1.hb Interrupt period (0: vertical blanking interval 1: vertical display period)
+	d1.b Counter (when 0, treat as 256)
+	a1.l Processing address (0 interrupts disabled)
+
+Return value d0.l = 0 Interrupts set / disabled
+		Other already in use
+
+	Set interrupts by vertical synchronization.
+	In ROM IOCS version 1.3, all interrupts are prohibited when called with a shortcut.
+	Please note that you will return in a stopped state.
+	The condition for considering interrupts as unused is the same as _OPMINTST.
+
+	Actually, the interrupt is set to Timer-A. The vertical display count is 31kHz for a second.
+	Approximately 55.4 times, approximately 53.0 times at 24kHz, approximately 61.3 times at 15kHz (measured value).
+	When the power is turned on or when it was set with a large counter value before, the first interrupt is
+	The timing of occurrence is delayed.	
+
+================================================= ============================
+
+$ 6d _CRTCRAS Raster interrupt setting
+
+Argument d1.w raster number
+	a1.l Processing address (0 interrupts disabled)
+
+Return value d0.l = 0 Interrupt set
+		Other already in use
+
+	Set interrupt by raster scan.
+	An interrupt occurs when CRTC starts scanning the specified raster.
+	In ROM IOCS version 1.3, all interrupts are prohibited when called with a shortcut.
+	Please note that you will return in a stopped state.
+	The condition for considering interrupts as unused is the same as _OPMINTST.
+
+================================================= ============================
+
+$ 6e _HSYNCST Horizontal sync interrupt setting
+
+Arguments a1.l Processing address (0 interrupts disabled)
+
+Return value d0.l = 0 Interrupt set
+		Other already in use
+
+	Set interrupts by horizontal synchronization.
+	An interrupt occurs when the horizontal sync signal falls.
+	In ROM IOCS version 1.3, all interrupts are prohibited when called with a shortcut.
+	Please note that you will return in a stopped state.
+	The condition for considering interrupts as unused is the same as _OPMINTST.
+
+================================================= ============================
+
+$ 6f _PRNINTST Printer interrupt setting
+
+Arguments a1.l Processing address (0 interrupts disabled)
+
+Return value d0.l = 0 Interrupt set
+		Other already in use
+
+	Set the interrupt by the printer.
+	An interrupt occurs when the printer is ready to receive data.
+	In ROM IOCS version 1.3, all interrupts are prohibited when called with a shortcut.
+	Please note that you will return in a stopped state.
+	The condition for considering interrupts as unused is the same as _OPMINTST.
+
+================================================= ============================
+
+$ 70 _MS_INIT Mouse initialization
+
+	Initialize the mouse.
+
+================================================= ============================
+
+$ 71 _MS_CURON Mouse cursor display
+
+	Show mouse cursor.
+
+================================================= ============================
+
+$ 72 _MS_CUROF Mouse cursor clear
+
+	Clear the mouse cursor.
+
+================================================= ============================
+
+$ 73 _MS_STAT Check the display status of the mouse cursor
+
+Return value d0.w = 0 Mouse cursor is not displayed
+		-1 〃 is displayed
+
+	Check the display status of the mouse cursor.
+
+================================================= ============================
+
+$ 74 _MS_GETDT Check mouse movement / button status
+
+Return value Mouse movement amount and button status
+		bit 31-24 X direction movement amount
+		bit 23 ~ 16 Y 〃
+		bit 15-8 Left button (0: OFF -1: ON)
+		bit 7 ~ 0 Right 〃 (〃)
+
+	Check the amount of mouse movement and the state of the button.
+
+================================================= ============================
+
+$ 75 _MS_CURGT Mouse cursor coordinates acquisition
+
+Return value Mouse cursor coordinates
+	d0.hw X coordinates
+	d0.w Y 〃
+
+	Examine the coordinates of the mouse cursor.
+
+================================================= ============================
+
+$ 76 _MS_CURST Mouse cursor coordinates
+
+Argument Mouse cursor coordinates
+	d1.hw X coordinates
+	d1.w Y 〃
+
+Return value d0.l = 0 Coordinates could be specified
+		-1 Coordinates are abnormal
+
+	Set the coordinates of the mouse cursor.
+
+================================================= ============================
+
+$ 77 _MS_LIMIT Mouse cursor movement range setting
+
+Argument Mouse cursor coordinates
+	d1.hw Leftmost X coordinate
+	d1.w Top Y 〃
+	d2.hw Rightmost X coordinate
+	d2.w Bottom edge Y 〃
+
+Return value d0.l = 0 Coordinates could be specified
+		-1 Coordinates are abnormal
+
+	Set the movement range of the mouse cursor.
+
+================================================= ============================
+
+$ 78 _MS_OFFTM Find out how long it takes to release the mouse button
+
+Argument d1.w Button specification (0: left button -1: right button)
+	d2.w Waiting time (when 0, wait until released)
+
+Return value d0.w = 0 Drag
+		-1 The maximum waiting time has been exceeded
+		Other waiting time
+
+	Find out how long it takes to release the mouse button.
+
+================================================= ============================
+
+$ 79 _MS_ONTM Find out how long it takes to press a mouse button
+
+Argument d1.w Button specification (0: left button -1: right button)
+	d2.w Wait time (when 0, wait until pressed)
+
+Return value d0.w = 0 Drag
+		-1 The maximum waiting time has been exceeded
+		Other waiting time
+
+	Find out how long it takes to press a mouse button.
+
+================================================= ============================
+
+$ 7a _MS_PATST Mouse cursor pattern definition
+
+Argument d1.w Cursor number (0 to 15)
+	a1.l Pattern data address
+
+	Define the mouse cursor pattern.
+	Please note that it does not work properly with ROM IOCS version 1.1.
+	The size of the mouse cursor is 16 x 16 dots, and 1 dot corresponds to 1 bit.
+	The contents of the pattern data are as follows (color codes 8 to 15 have priority over 4 to 7).
+
+offset size
+0 1.w Distance from the leftmost X coordinate of the pattern to the mouse X coordinate
+2 1.w 〃 Top Y 〃 Y 〃
+4 16.w Mask pattern (data to be shaded)
+36 16.w Mouse pattern (data to be displayed)
+
+	The distance from the left edge / top edge of the pattern to the mouse coordinates is 0 (the left corner / top corner of the pattern).
+	Specify in mouse coordinates) to 15 (set the right / bottom corners of the pattern to mouse coordinates).
+	Dots with a mask pattern of 0 are displayed with color codes 4 to 7, and dots with a mask pattern of 1.
+	Is ignored.
+	Dots with a mouse pattern of 1 are displayed with color codes 8 to 15, and dots with a mouse pattern of 0.
+	Is ignored. However, if the mask pattern is 0 and the mouse pattern is 1.
+	Color codes 8 to 15 are displayed with priority.
+
+================================================= ============================
+
+$ 7b _MS_SEL Mouse cursor pattern selection
+
+Argument d1.w Cursor number (0 to 15)
+
+	Select a mouse cursor pattern.
+
+================================================= ============================
+
+$ 7c _MS_SEL2 Mouse cursor animation
+
+Arguments a1.l Cursor number Table address
+
+	Animate using multiple mouse patterns.
+	In the cursor number table, 6 or less cursor numbers are arranged in word size, and finally
+	Set to -1.
+
+================================================= ============================
+
+$ 7d _SKEY_MOD Soft keyboard control
+
+Argument d1.l Control code
+		d1.l = 0 Soft keyboard erase
+			1 〃 Display
+			2 〃 Inspection of display status
+			-1 〃 Automatic control
+	d2.l Display coordinates (when d1.l = 1)
+		d2.hw X coordinates
+		d2.w Y 〃
+
+Return value display status (0: erase 1: display)
+
+	Control the soft keyboard.
+	If you specify automatic control, the state can be changed by pressing the right mouse button.
+	Hide → Mouse display → Keyboard / Mouse display → Mouse display → Hide
+	Changes with.
+
+================================================= ============================
+
+$ 7e _DENSNS Calculator control
+
+	Examine the calculator input. The result is returned as a key input.
+
+================================================= ============================
+
+$ 7f _ONTIME Check the elapsed time after startup
+
+Return value d0.l Hours, minutes and seconds of elapsed time (0 to 23:59:59 "99 = 8639999, 1/100 second unit)
+	d1.l 〃 Days (0-65535)
+
+	Check the time since the ROM booted.
+	In ROM IOCS, when called with a shortcut, the interrupt is disabled.
+	Please be careful as you will return at.
+
+================================================= ============================
+
+$ 80 _B_INTVCS Vector setting
+
+Argument 
+	d1.w Vector number ($0000 - $00ff: Interrupt $0100 - $01ff: IOCS call)
+	a1.l processing address
+
+Return value Processing address before change
+
+	Set the processing address of the vector.
+	The set address is called in supervisor mode.
+	The interrupt returns with rte and the IOCS call returns with rts.
+	Only ROM IOCS version 1.3 returns -1 if the vector number is abnormal.
+
+================================================= ============================
+
+$ 81 _B_SUPER Supervisor / user mode switching
+
+Argument a1.l ssp (when 0, switch from user mode to supervisor mode)
+
+Return value d0.l Returns 0 whenever switching to user mode.
+		When switching to supervisor mode, change the value of ssp before switching.
+		Returns. However, if it is already in supervisor mode, it returns -1.
+	a1.l indefinite
+
+	Switch between supervisor / user mode.
+	When switching to supervisor mode, usp is set to ssp.
+	When switching to user mode, ssp becomes the specified address and usp is previously
+	Return to the address of.
+
+================================================= ============================
+
+$ 82 _B_BPEEK Read 1 byte from the specified address
+
+Argument a1.l Read address
+
+Return value d0.b data
+	a1.l Next address
+
+	Read 1-byte data from the specified address.
+
+================================================= ============================
+
+$ 83 _B_WPEEK Read one word from the specified address
+
+Argument a1.l Read address
+
+Return value d0.w data
+	a1.l Next address
+
+	Read 1 word data from the specified address.
+
+================================================= ============================
+
+$ 84 _B_LPEEK Read 1 longword from the specified address
+
+Argument a1.l Read address
+
+Return value d0.l data
+	a1.l Next address
+
+	Read 1 longword data from the specified address.
+
+================================================= ============================
+
+$ 85 _B_MEMSTR Read multiple bytes from the specified address
+
+Argument d1.l Number of bytes transferred-1
+	a1.l Forwarding address
+	a2.l Forwarding address
+
+Return value a1.l Next address
+	a2.l 〃
+	d1.l is destroyed.
+
+	Transfer multi-byte data from the specified address.
+	The transfer direction is different from IOCS _B_MEMSET (* a2 ++ = * a1 ++).
+
+================================================= ============================
+
+$ 86 _B_BPOKE Write 1 byte to the specified address
+
+Argument d1.b data
+	a1.l write address
+
+Return value a1.l Next address
+
+	Write 1-byte data to the specified address.
+
+================================================= ============================
+
+$ 87 _B_WPOKE Write one word to the specified address
+
+Argument d1.w data
+	a1.l write address
+
+Return value a1.l Next address
+
+	Write one word data to the specified address.
+
+================================================= ============================
+
+$ 88 _B_LPOKE Write to specified address 1 longword
+
+Argument d1.l data
+	a1.l write address
+
+Return value a1.l Next address
+
+	Write 1 longword data to the specified address.
+
+================================================= ============================
+
+$ 89 _B_MEMSET Write multiple bytes to the specified address
+
+Argument d1.l Number of bytes transferred-1
+	a1.l Forwarding address
+	a2.l Forwarding address
+
+Return value a1.l Next address
+	a2.l 〃
+	d1.l is destroyed.
+
+	Transfer multi-byte data to the specified address.
+	The transfer direction is different from IOCS _B_MEMSTR (* a1 ++ = * a2 ++).
+
+================================================= ============================
+
+$ 8a _DMAMOVE DMA transfer
+
+Argument
+	d1.b mode
+		bit 7 direction (0: a1 to a2 1: a2 to a1)
+		bit 3 ~ 2 MAC (0: a1 fixed 1: a1 ++ 2: a1--3: prohibition)
+		bit 1 to 0 DAC (0: a2 fixed 1: a2 ++ 2: a2--3: specification prohibited)
+	d2.l Number of bytes transferred
+	a1.l Forwarding address
+	a2.l Forwarding destination 〃
+
+The content of the return value d0 / d2 / a1 / a2 is not guaranteed.
+
+DMA transfer in bytes.
+If you transfer more than $ ff00 bytes, it will not come back immediately.
+If DMA is not available, wait until it is available.
+
+================================================= ============================
+
+$ 8b _DMAMOV_A DMA transfer (array chain)
+
+Argument 
+	d1.b mode
+	d2.l Number of chain tables
+	a1.l 〃 Address
+	a2.l Forwarding address
+
+DMA transfer is performed in bytes by the array chain.
+If DMA is not available, wait until it is available.
+The contents of the array chain table are the following chain tables repeated.
+
+offset size
+0 1.l Address of transfer source data
+4 1.w Number of bytes transferred (1 to $ ffff)
+
+================================================= ============================
+
+$ 8c _DMAMOV_L DMA transfer (link array chain)
+
+Argument d1.b mode
+	a1.l Chain table address
+	a2.l Forwarding address
+
+	DMA transfer is performed in bytes by the link array chain.
+	If DMA is not available, wait until it is available.
+	The contents of the link array chain table are the following chain tables concatenated.
+
+offset size
+0 1.l Address of transfer source data
+4 1.w Number of bytes transferred (1 to $ ffff)
+6 1.l Address of the next table (0 is the end of the table)
+
+================================================= ============================
+
+$ 8d _DMAMODE DMA status check
+
+Return value Execution status
+	d0.l = $ 00 Not doing anything
+		Running $ 8a IOCS DMAMOVE ($ 8a)
+		$ 8b IOCS DMAMOV_A ($ 8b) 〃
+		$ 8c IOCS DMAMOV_L ($ 8c) 〃
+
+	Check the execution status of DMA.
+
+================================================= ============================
+
+$ 8e _BOOTINF Get boot information
+
+Return value Startup status
+	bit 31 ~ 24 How to start (0: power switch 1: external switch 2: timer)
+	bit 23 ~ 0 Boot information ($ 80 ~ $ 8f: SASI-HD 0 ~ 15 $ 90 ~ $ 93: 2HD-FD 0 ~ 3)
+				  ($ ed0000 ～ $ ed3ffe: SRAM Others: ROM)
+
+	Check boot information. Pointer to boot address (1.l) if booted from ROM
+	Is returned, but if booted from SRAM, the booted address itself is returned.
+	After booting from SRAM / ROM, change the boot address set in SRAM.
+	And does not return the correct address.
+
+================================================= ============================
+
+Get $ 8f _ROMVER ROM version
+
+Return Version / Creation Date (BCD)
+		bit 31-24 version
+		bit 23-16 years
+		bit 15-August
+		bit 7-0 days
+
+	Check the ROM version and date of creation.
+
+================================================= ============================
+
+$ 90 _G_CLR_ON Graphic screen initialization and display mode setting
+
+	Clear and display the graphic screen. The palette returns to the standard and the access page
+	The page is set to 0.
+
+================================================= ============================
+
+$ 91 (Unpublished) Graphic screen mode setting
+
+Argument d1.b Graphic screen mode
+		d1.b = 0 16 colors 4 screens (real screen 512)
+			1 256 〃 2 〃 (〃 512)
+			3 65536 〃 1 〃 (〃 512)
+			4 16 〃 1 〃 (〃 1024)
+			-1 Check the current mode
+
+Graphic screen mode before changing the return value
+
+	Set the graphic screen mode directly.
+	The setting data is the same as the setting of VC R0 ($ e82400).
+
+================================================= ============================
+
+$ 92 (Unpublished) Priority setting
+
+Argument d1.w Priority setting (However, when d1.w = -1, check the current setting)
+
+Settings before changing the return value
+
+	Set the priority directly.
+	The setting data is the same as the setting of VC R1 ($ e82500).
+
+================================================= ============================
+
+$ 93 (Unpublished) Screen display and special mode settings
+
+Argument d1.w Screen display and special mode setting (However, when d1.w = -1, check the current setting)
+
+Settings before changing the return value
+
+	Directly set the screen display and special mode.
+	The setting data is the same as the setting of VC R2 ($ e82600).
+
+================================================= ============================
+
+$ 94 GPALET Graphic palette settings
+
+Argument d1.w Palette code
+	d2.l color code (check the color code when d2.l = -1)
+
+Return value d0.l = 0 Normal termination
+		-1 The graphic screen is not initialized or the palette code is incorrect.
+	Returns a color code when d2.l = -1 (error if -1)
+
+	Set / acquire the graphic palette.
+	Note that ROM IOCS does not work properly in 65536 color mode.
+
+================================================= ============================
+
+$ 95 (Unpublished) Color code setting
+
+Argument d1.w Palette code
+
+	Set the palette code written in IOCS $ 9a, $ 9b, $ 9c.
+
+================================================= ============================
+
+$ 96 (Unpublished) Access page settings
+
+Argument d1.w Access page (0-3)
+
+	Directly set the page operated by Graphic IOCS.
+	Almost the same as IOCS APAGE ($ b1), but with an error even if you specify a page that does not exist
+	Please note that it does not become.
+
+================================================= ============================
+
+$ 97 (Unpublished) Graphic VRAM dot-by-dot read
+
+Argument d1.w X coordinates
+	d2.w Y 〃
+	a1.l Buffer address
+		(0, a1) Number of dots in the X direction
+		(2, a1) Y 〃
+		(4,a1) (Number of colors $ 000f: 16 colors $ 00ff: 256 colors $ ffff: 65536 colors)
+		(6, a1) (Pattern data)
+
+	Read from the graphic screen into the buffer in dot units.
+
+================================================= ============================
+
+$ 98 (Unpublished) Graphic VRAM dot-by-dot writing (with color mask)
+
+Argument d1.w X coordinates
+	d2.w Y 〃
+	d3.w Color code to mask
+	a1.l Buffer address
+		(0, a1) Number of dots in the X direction
+		(2, a1) Y 〃
+		(4, a1) Number of colors ($ 000f: 16 colors $ 00ff: 256 colors $ ffff: 65536 colors)
+		(6, a1) Pattern data
+
+Return value d0.l = 0 Normal termination
+		-1 Error (The specified number of colors differs from the actual setting)
+
+	Write dot-by-dot from the buffer to the graphic screen.
+	Dots of the specified color are not written in the color code to be masked.
+
+================================================= ============================
+
+$ 99 (Unpublished) Graphic VRAM dot-by-dot write
+
+Argument d1.w X coordinates
+	d2.w Y 〃
+	a1.l Buffer address
+		(0, a1) Number of dots in the X direction
+		(2, a1) Y 〃
+		(4, a1) Number of colors ($ 000f: 16 colors $ 00ff: 256 colors $ ffff: 65536 colors)
+		(6, a1) Pattern data
+
+Return value d0.l = 0 Normal termination
+		-1 Error (The specified number of colors differs from the actual setting)
+
+	Write dot-by-dot from the buffer to the graphic screen.
+
+================================================= ============================
+
+$ 9a (Unpublished) Write graphic VRAM bit pattern
+
+Argument d1.w X coordinates
+	d2.w Y 〃
+	a1.l Buffer address
+		(0, a1) Number of dots in the X direction
+		(2, a1) Y 〃
+		(4, a1) Bit pattern
+
+	Write a bit pattern on the graphic screen.
+	Dots with a bit of 1 are written with the color code set in IOCS $ 95.
+	No zero dot is written.
+
+================================================= ============================
+
+$ 9b (Unpublished) Graphic VRAM bit pattern write (with back color)
+
+Argument d1.w X coordinates
+	d2.w Y 〃
+	d3.w back color code
+	a1.l Buffer address
+		(0, a1) Number of dots in the X direction
+		(2, a1) Y 〃
+		(4, a1) Bit pattern
+
+	Write a bit pattern on the graphic screen.
+	Dots with a bit of 1 are written with the color code set in IOCS $ 95.
+	The back color code is written for the 0 dot.
+
+================================================= ============================
+
+$ 9c (Unpublished) Graphic VRAM Bit Pattern Enlarged Write
+
+Argument d1.w X coordinates
+	d2.w Y 〃
+	d3.w Expansion rate in the X direction
+	d4.w Y 〃
+	a1.l Buffer address
+		(0, a1) Number of dots in the X direction
+		(2, a1) Y 〃
+		(4, a1) Bit pattern
+
+	Enlarge and write the bit pattern on the graphic screen.
+	Dots with a bit of 1 are written with the color code set in IOCS $ 95.
+	No zero dot is written.
+
+================================================= ============================
+
+$ a0 _SFTJIS S-JIS → JIS code conversion
+
+Argument d1.w S-JIS kanji code
+
+Return value d0.hw = 0 Conversion successful
+		-1 error
+	d0.w JIS kanji code (usually $ 2228: * in case of error)
+	d1.l 〃
+
+	Convert S-JIS kanji code to JIS kanji code.
+
+================================================= ============================
+
+$ a1 _JISSFT JIS → S-JIS code conversion
+
+Argument d1.w JIS kanji code
+
+Return value d0.hw = 0 Conversion successful
+		-1 error
+	d0.w S-JIS Kanji code (usually $ 81a6: * in case of error)
+	d1.l 〃
+
+	Convert JIS kanji code to S-JIS kanji code.
+
+================================================= ============================
+
+$ a2 _AKCONV ANK → S-JIS code conversion
+
+Argument d1.hw Hiragana / Katakana specification (0: Convert to Hiragana 1: Convert to Katakana)
+	d1.w ANK code ($ 20-7e, $ a1-df)
+
+Return value d0.hw = 0 Conversion successful
+		-1 error
+	d0.w S-JIS Kanji code (usually $ 81a6: * in case of error)
+
+	Convert ANK code to full-width S-JIS code.
+
+================================================= ============================
+
+$ a3 _RMACNV Romaji → ANK Kana conversion
+
+Argument d1.b alphabet
+	a1.l workspace address
+	a2.l Address of the buffer to put the conversion result
+
+Return status
+	d0.l = 0 No kana characters can be returned during conversion
+			(Characters in the process of conversion remain in the work area, so discard them.
+			Do not)
+		-1 An unconvertible character was specified
+			(The first byte of the work area will be 0)
+		Others Number of characters to be converted (Characters in the process of conversion may remain in the work area)
+			Don't discard it because there is)
+
+	Convert romaji to kana. Romaji usually uses uppercase letters, such as sokuon and yoon.
+	Small kana uses lowercase letters for Roman vowels.
+	Before the first conversion, set the first byte of the work area to 0.
+
+================================================= ============================
+
+$ a4 _DAKJOB Dakuten processing
+
+Argument a1.l Address of the end (0) of double-byte character string
+
+Return value d0.l Increased number of bytes in the string
+		d0.l = 0 When a dakuten is added to the last double-byte character
+			2 When a dakuten is added at the end of a character string
+	a1.l Address of the end of the double-byte character string after processing
+
+	Performs dakuten processing for double-byte character strings.
+
+================================================= ============================
+
+$ a5 _HANJOB Semi-voiced sound mark processing
+
+Argument a1.l Address of the end (0) of double-byte character string
+
+Return value d0.l Increased number of bytes in the string
+		d0.l = 0 When a semi-voiced sound mark is added to the last double-byte character
+			2 When a semi-voiced sound mark is added to the end of a character string
+	a1.l Address of the end of the double-byte character string after processing
+
+	Performs semi-voiced sound processing of full-width character strings.
+
+================================================= ============================
+
+$ ac _SYS_STAT System state setting
+
+Argument d1.l mode
+		d1.l = 0 Obtaining MPU state
+			1 Obtaining the cache status
+			2 Set the cache to the SRAM setting
+			3 Clear cache
+			4 Cache settings
+	d2.l cache enable / disable flag (only when d1.l = 4)
+		bit 1 data cache (0: invalid 1: valid)
+		bit 0 instruction 〃 (〃)
+
+MPU status when return value d1.l = 0
+		bit 31-16 Clock speed (0.1MHz unit)
+		bit 15 Floating Point Coprocessor (0: None 1: Yes)
+		bit 14 MMU (0: None 1: Yes)
+		bit 7 ~ 0 MPU type (0: 68000 1:68010 2:68020 3:68030)
+	When d1.l = 1,2,4, cache enable / disable flag before change
+
+	Set the system status.
+	This IOCS call is only available in ROM IOCS version 1.3.
+
+================================================= ============================
+
+$ ad _B_CONMOD Cursor and scroll settings
+
+Argument d1.l mode
+		d1.w = 0 Allow cursor blinking
+			1 Cursor blinking prohibited
+			2 Cursor pattern specification
+			3 Cursor pattern definition
+			16 Specifying smooth scroll
+			17 Specify raster copy scroll
+			18 software 〃
+	When d2.l d1.w = 2, the cursor pattern
+		d2.w = 0 Draw with the pattern defined in the internal buffer.
+			Others Considering d2.hw as the starting line, d2.b / d2.hb
+				Is exclusive-ORed with plane 0/1.
+		Pattern address when d1.w = 3
+		Scroll specification when d1.w = 16
+		d2.l = 0 Jump scroll
+			1 4 dot scroll
+			2 8 〃
+			3 16 〃
+
+	Set the cursor and scroll.
+	If you prohibit the blinking of the cursor, the cursor remains displayed. Allowed state
+	If so, it will be reversed at regular intervals.
+
+	To specify the cursor pattern, use d2.b to invert the plane 0 and d2.hb to specify the cursor pattern.
+	Set the inversion pattern for lane 1 and bottom from the line position specified in d2.hw
+	Exclusive OR is taken up to the line of. $ 0000_ffff is the same as the conventional pattern
+	If d2.w is 0, the pattern set by d1.w = 3 is used.
+
+	The cursor pattern definition considers d2.l as the cursor pattern address.
+	Copy to internal buffer. Patterns are plain 0/1, 16 bytes each
+	Line up.
+
+	When using smooth scrolling, if you do not output characters continuously, scrolling
+	The screen is distorted at the time of operation. Ending 1-line output during vertical synchronization (16ms).
+	Also, soft copy scrolling over a wide area slows down the display speed.
+
+	Use this IOCS call only when ROM IOCS version 1.3 or IOCS.X is resident
+	Possible. However, in the former case, d2.l = 0 by specifying the cursor pattern of d1.w = 2.
+	In the case of, the standard cursor is displayed. Also, the cursor pattern of d2.w = 3 is set.
+	Please note that righteousness cannot be used.
+
+================================================= ============================
+
+$ ae _OS_CURON Cursor display
+
+	Display the cursor. Used when outputting ESC [> 5l to the console.
+	Valid for IOCS $ 20- $ 2f.
+
+================================================= ============================
+
+$ af _OS_CUROF Cursor erase
+
+	Do not display cursor. Used when ESC [> 5h is output to the console.
+	Valid for IOCS $ 20- $ 2f.
+
+================================================= ============================
+
+$ b0 _DRAWMODE Graphic drawing mode setting
+
+Argument d1.w Drawing mode (0: Normal 1: Invert -1: Check current mode)
+
+Mode before change of return value
+
+	Set the drawing mode for graphic drawing.
+	When drawing in inversion mode, draw with the NOT value of the color of the dot to be written.
+	If you draw twice in this mode, the screen will return to its original state. After use, the normal drawing mode
+	To return to.
+	_LINE, _BOX, _FILL, _SYMBOL are the only IOCS calls with inverted mode enabled.
+	Other calls are always drawn in normal mode.
+	This IOCS call is ROM IOCS version 1.3 or IOCS.X, HIOCS.X resident
+	It can be used only when, but it does not work properly with the previous two.
+
+================================================= ============================
+
+$ b1 _APAGE Graphic drawing page settings
+
+Argument d1.b Write page (when 0 to 3, -1, check the current setting)
+
+Current write page when return value d1.b = -1
+	Otherwise, the status
+		d0.l = 0 Normal termination
+			-1 Graphics not available
+			-2 pages not specified (4 or more)
+			-3 The specified page cannot be used in the current mode
+
+	Set the writing page of the graphic screen.
+
+================================================= ============================
+
+$ b2 _VPAGE Graphic screen display page settings
+
+Argument d1.b Display page (bits 0 to 3 correspond to pages 0 to 3)
+
+Return value d0.l = 0 Normal termination
+		-1 Graphics not available
+		-2 page not specified
+		-3 The specified page cannot be used in the current mode
+
+	Set the display page of the graphic screen.
+
+================================================= ============================
+
+$ b3 _HOME Graphic screen display position setting
+
+Argument d1.b Page to set the display position (bits 0 to 3 correspond to pages 0 to 3, 0 is all pages)
+	d2.w X coordinates
+	d3.w Y 〃
+
+Return value d0.l = 0 Normal termination
+		-1 Graphics not available
+		-2 pages or coordinates are not specified
+		-3 Specified page or coordinates cannot be used in current mode
+
+	Set the display position of the graphic screen.
+	When d1.b = 0, all valid pages are changed.
+
+================================================= ============================
+
+$ b4 _WINDOW Graphic drawing window settings
+
+Argument d1.w Leftmost X coordinate
+	d2.w Top Y 〃
+	d3.w Right end X 〃
+	d4.w Bottom edge Y 〃
+
+Return value d0.l = 0 Normal termination
+		-1 Graphics not available
+		-2 Coordinate specification is abnormal
+		-3 Specified coordinates cannot be used in the current mode
+
+	Set the clipping range of the graphic screen. Valid for IOCS $ b5 to $ bf.
+	Must be d1.w ≤ d3.w and d2.w ≤ d4.w.
+
+================================================= ============================
+
+$ b5 _WIPE Clear graphic screen
+
+Return value d0.l = 0 Normal termination
+		-1 Graphics not available
+
+	Clear the graphic screen.
+
+================================================= ============================
+
+$ b6 _PSET Graphic screen point set
+
+Argument a1.l Address of the parameter buffer
+		(0, a1) X coordinate
+		(2, a1) Y 〃
+		(4, a1) Palette code
+
+Return value d0.l = 0 Normal termination
+		-1 Graphics not available
+		-2 Specified palette code cannot be used in the current mode
+
+	Draw dots on the graphic screen.
+
+================================================= ============================
+
+$ b7 _POINT Get points on the graphic screen
+
+Argument a1.l Address of the parameter buffer
+		(0, a1) X coordinate
+		(2, a1) Y 〃
+		(4, a1) (Palette code)
+
+Return value d0.l = 0 Normal termination
+		-1 Graphics not available
+
+	Check the palette code of the specified point on the graphic screen.
+	If the specified coordinates are outside the clipping range, the palette code will always return 0.
+
+================================================= ============================
+
+$ b8 _LINE Graphic screen line
+
+Argument a1.l Address of the parameter buffer
+		 (0, a1) Start point X coordinate
+		 (2, a1) 〃 Y 〃
+		 (4, a1) End point X 〃
+		 (6, a1) 〃 Y 〃
+		 (8, a1) Palette code
+		(10, a1) Line style
+
+Return value d0.l = 0 Normal termination
+		-1 Graphics not available
+		-2 Specified palette code cannot be used in the current mode
+
+	Draw a line on the graphic screen.
+
+================================================= ============================
+
+$ b9 _BOX Graphic screen box
+
+Argument a1.l Address of the parameter buffer
+		 (0, a1) Start point X coordinate
+		 (2, a1) 〃 Y 〃
+		 (4, a1) End point X 〃
+		 (6, a1) 〃 Y 〃
+		 (8, a1) Palette code
+		(10, a1) Line style
+
+Return value d0.l = 0 Normal termination
+		-1 Graphics not available
+		-2 Specified palette code cannot be used in the current mode
+
+	Draw a rectangle on the graphic screen.
+
+================================================= ============================
+
+$ ba _FILL Graphic screen box fill
+
+Argument a1.l Address of the parameter buffer
+		(0, a 1) Start point X coordinate
+		(2, a1) 〃 Y 〃
+		(4, a1) End point X 〃
+		(6, a1) 〃 Y 〃
+		(8, a1) Palette code
+
+Return value d0.l = 0 Normal termination
+		-1 Graphics not available
+		-2 Specified palette code cannot be used in the current mode
+
+	Draw a filled rectangle on the graphic screen.
+
+================================================= ============================
+
+$ bb _CIRCLE Graphic screen circle
+
+Argument a1.l Address of the parameter buffer
+		 (0, a1) Center X coordinate
+		 (2, a1) 〃 Y 〃
+		 (4, a1) Radius
+		 (6, a1) Palette code
+		 (8, a1) Arc start angle (draw a sector with a negative number)
+		(10, a1) 〃 End 〃 (〃)
+		(12, a1) Ratio
+
+Return value d0.l = 0 Normal termination
+		-1 Graphics not available
+		-2 Specified palette code cannot be used in the current mode
+
+	Draw an ellipse on the graphic screen.
+	The arc start / end angle is 0 to 360, and if a negative number is specified, it is fan-shaped (the angle is the absolute value of the value).
+	To draw.
+	The ratio (hereinafter P) is 0 to $ ff00, and the shape of the ellipse to be drawn is as follows.
+
+	  0 ≤ P <256 Horizontal ellipse Rx = R; Ry = R * P / 256
+	256 <P ≤ $ ff00 Vertical ellipse Ry = R; Rx = R * P / $ ff00 (P is rounded down to the nearest 256)
+	       P = 256 perfect circle Rx = Ry = R
+
+================================================= ============================
+
+$ bc _PAINT Graphic screen paint
+
+Argument a1.l Address of the parameter buffer
+		 (0, a1) X coordinate
+		 (2, a1) Y 〃
+		 (4, a1) Palette code
+		 (6, a1) Work area start address
+		(10, a1) 〃 End 〃
+
+Return value d0.l = 0 Normal termination
+		-1 Graphics not available
+		-2 Specified palette code cannot be used in the current mode
+
+	Fill the graphic screen.
+	The work area must start at an even address, and if there is a shortage, it will return in the middle of painting.
+
+================================================= ============================
+
+$ bd _SYMBOL Graphic screen symbol
+
+Argument a1.l Address of the parameter buffer
+
+Return value d0.l = 0 Normal termination
+		-1 Graphics not available
+		-2 Specified palette code cannot be used in the current mode
+
+	Enlarge and draw the character string on the graphic screen.
+	The coordinates specify the upper left / lower left / lower right / upper right corner when the rotation angle is 0,90,180,270, respectively.
+	The contents of the parameter buffer are as follows.
+
+offset size
+ 0 1.w X coordinates
+ 2 1.w Y 〃
+ 4 1.l string address
+ 8 1.b X Magnification
+ 9 1.b Y 〃
+10 1.w palette code
+12 1.b Size of character pattern (0:12 dot system 1:16 〃 2:24 〃)
+13 1.b Rotation angle (0: 0 ° 1: 90 ° 2: 180 ° 3: 270 °)
+
+================================================= ============================
+
+$ be _GETGRM Graphic screen dot-by-dot reading
+
+Argument a1.l Address of the parameter buffer
+
+Return value d0.l = 0 Normal termination
+		-1 Graphics not available
+		-2 Coordinate specification is abnormal
+		-3 Buffer capacity is too small
+
+	Read from the graphic screen into the buffer in dot units.
+	The contents of the parameter buffer are as follows.
+
+offset size
+ 0 1.w Start point X coordinate
+ 2 1.w 〃 Y 〃
+ 4 1.w End point X 〃
+ 6 1.w 〃 Y 〃
+ 8 1.l Buffer start address
+12 1.l 〃 Finish 〃
+
+================================================= ============================
+
+$ bf _PUTGRM Graphic screen dot-by-dot writing
+
+Argument a1.l Address of the parameter buffer
+
+Return value d0.l = 0 Normal termination
+		-1 Graphics not available
+		-2 Coordinate specification is abnormal
+		-3 Buffer capacity is too small
+
+	Write dot-by-dot from the buffer to the graphic screen.
+	The contents of the parameter buffer are as follows.
+
+offset size
+ 0 1.w Start point X coordinate
+ 2 1.w 〃 Y 〃
+ 4 1.w End point X 〃
+ 6 1.w 〃 Y 〃
+ 8 1.l Buffer start address
+12 1.l 〃 Finish 〃
+
+================================================= ============================
+
+$ c0 _SP_INIT Sprite initialization
+
+Return value d0.l = 0 Normal termination
+		-1 Illegal screen mode
+
+	Initialize the sprite screen.
+
+================================================= ============================
+
+$ c1 _SP_ON Sprite display
+
+Return value d0.l = 0 Normal termination
+		-1 Illegal screen mode
+
+	Display the sprite screen.
+
+================================================= ============================
+
+$ c2 _SP_OFF ​​Sprite Erase
+
+Return value d0.l = 0 Normal termination
+		-1 Illegal screen mode
+
+	Do not show sprite screen.
+
+================================================= ============================
+
+$ c3 _SP_CGCLR Clear sprite pattern
+
+Argument d1.l Pattern code (0 to 255)
+
+Return value d0.l = 0 Normal termination
+		-1 Illegal screen mode
+
+	Clears the specified PCG. The size of the pattern to clear is 128 bytes.
+
+================================================= ============================
+
+$ c4 _SP_DEFCG Sprite pattern definition
+
+Argument d1.l Pattern code (0 to 255)
+	d2.l Pattern size (0: 8x8 1: 16x16)
+	a1.l Pattern data address
+
+Return value d0.l = 0 Normal termination
+		-1 Illegal screen mode
+
+	Define the pattern for the specified PCG.
+	The size of the pattern is 32 bytes when d2.l = 0 and 128 bytes when d2.l = 1.
+
+================================================= ============================
+
+$ c5 _SP_GTPCG Sprite pattern loading
+
+Argument d1.l Pattern code (0 to 255)
+	d2.l Pattern size (0: 8x8 1: 16x16)
+	a1.l Buffer address
+
+Return value d0.l = 0 Normal termination
+		-1 Illegal screen mode
+
+	Load the specified PCG pattern.
+	The buffer requires 32 bytes when d2.l = 0 and 128 bytes when d2.l = 1.
+
+================================================= ============================
+
+$ c6 _SP_REGST Sprite register settings
+
+Argument d1.l Vertical blanking interval detection / sprite number
+		bit 31 0: Vertical blanking interval detection post-setting 1: Not detected
+		bit 6-0 sprite number (0-127)
+	d2.l X coordinates (0-1023 16 displayed on the far left)
+	d3.l Y 〃 (〃 〃 Top 〃)
+	d4.l pattern code
+		bit 15 Vertical inversion specification (0: Do not invert 1: Do)
+		bit 14 horizontal 〃 (〃)
+		bit 11-8 Palette block specification (0-15)
+		bit 7 ~ 0 Pattern code (0 ~ 255)
+	d5.l priority
+		d5.l = 0 Don't show sprites
+			1 BG0 <BG1 <SP
+			2 BG0 <SP <BG1
+			3 SP <BG0 <BG1
+
+Return value d0.l = 0 Normal termination
+		-1 Illegal screen mode
+
+	Set the sprite register.
+	Setting d2.l/d3.l/d4.l/d5.l to -1 does not change the setting, but when setting for the first time
+	Must not specify -1.
+
+================================================= ============================
+
+$ c7 _SP_REGGT Read sprite register
+
+Argument d1.l Sprite number (0 to 127)
+
+Return value d0.l = 0 Normal termination
+		-1 Illegal screen mode
+	d2.l X coordinates
+	d3.l Y 〃
+	d4.l pattern code
+	d5.l priority
+
+	Read the sprite register.
+
+================================================= ============================
+
+$ c8 _BGSCRLST Background scroll register setting
+
+Argument d1.l Vertical blanking interval detection / background specification
+		bit 31 0: Vertical blanking interval detection post-setting 1: Not detected
+		bit 0 BG number (0/1)
+	d2.l X coordinates (0-1023)
+	d3.l Y 〃 (〃)
+
+Return value d0.l = 0 Normal termination
+		-1 Illegal screen mode
+
+	Set the background scroll register. Setting d2.l / d3.l to -1
+	Do not change the setting, but do not specify -1 when setting for the first time.
+
+================================================= ============================
+
+$ c9 _BGSCRLGT Reading background scroll register
+
+Argument d1.l Background specification (0/1)
+
+Return value d0.l = 0 Normal termination
+		-1 Illegal screen mode
+	d2.l X coordinates
+	d3.l Y 〃
+
+	Read the background scroll register.
+
+================================================= ============================
+
+$ ca _BGCTRLST Background control register settings
+
+Argument d1.l Background specification (0/1)
+	d2.l Specifying a text page (0/1)
+	d3.l Show / Hide specification (0: Hide 1: Show)
+
+Return value d0.l = 0 Normal termination
+		-1 Illegal screen mode
+
+	Set the background control register. Set d2.l / d3.l to -1.
+	Do not change the setting, but do not specify -1 when setting for the first time.
+
+================================================= ============================
+
+$ cb _BGCTRLGT Read background control register
+
+Argument d1.l Background specification (0/1)
+
+Return value d0.l = 0 Text page 0, hidden
+		1 〃 0, display
+		2 〃 1, hidden
+		3 〃 1, display
+		-1 Illegal screen mode
+
+	Read the background control register.
+
+================================================= ============================
+
+$ cc _BGTEXTCL Clear background text
+
+Argument d1.l Specify text page (0/1)
+	d2.l pattern code
+
+Return value d0.l = 0 Normal termination
+		-1 Illegal screen mode
+
+	Fill the specified text page on the background screen with a pattern code.
+
+================================================= ============================
+
+$ cd _BGTEXTST Background text setting
+
+Argument d1.l Specify text page (0/1)
+	d2.l X coordinates (0-63)
+	d3.l Y 〃 (〃)
+	d4.l pattern code
+
+Return value d0.l = 0 Normal termination
+		-1 Illegal screen mode
+
+	Set a pattern code on the text page of the background screen.
+
+================================================= ============================
+
+$ ce _BGTEXTGT Reading background text
+
+Argument d1.l Specify text page (0/1)
+	d2.l X coordinates (0-63)
+	d3.l Y 〃 (〃)
+
+Return value d0.l = -1 Incorrect screen mode
+		Other pattern codes
+
+	Read the pattern code from the text page of the background screen.
+
+================================================= ============================
+
+$ cf _SPALET Sprite palette settings
+
+Argument d1.l Vertical blanking interval detection / palette code
+		bit 31 0: Vertical blanking interval detection post-setting 1: Not detected
+		bit 3 to 0 Palette code (0 to 15 or 16 to 255)
+	d2.l Palette block (1-15 or 0)
+	d3.l color code (check the color code when d3.l = -1)
+
+Return value d0.l = -1 Incorrect screen mode
+		-2 Attempted to set / acquire pallet block 0
+		Other settings before change
+
+	Set the sprite palette.
+	If 0 is specified for the palette block, is the palette code at the beginning of the palette?
+	It can be specified by these serial numbers. However, palette block 0 can be specified.
+	Since it cannot be used, the palette code is limited to 16 or more.
+	If you set the palette without detecting the vertical blanking interval, the screen will flicker.
+
+================================================= ============================
+
+$ d3 _TXXLINE Horizontal line on the text screen
+
+Argument a1.l Address of the parameter buffer
+		(0, a1) Text plane (0-3)
+		(2, a1) X coordinate
+		(4, a1) Y 〃
+		(6, a1) Length in the X direction
+		(8, a1) Line style (valid only for low-order bytes)
+
+	Draw a vertical line on the text screen.
+	Specify text plane when ROM IOCS version 1.3 or IOCS.X is resident
+	By setting the most significant bit to 1, it draws on multiple planes at the same time.
+	Bits 0 to 3 correspond to planes 0 to 3. Also, when called
+	If the simultaneous text access function is enabled, specify the text plane.
+	Is ignored and drawn on the set plane.
+
+================================================= ============================
+
+$ d4 _TXYLINE Vertical line on the text screen
+
+Argument a1.l Address of the parameter buffer
+		(0, a1) Text plane (0-3)
+		(2, a1) X coordinate
+		(4, a1) Y 〃
+		(6, a1) Length in Y direction
+		(8, a1) Line style (valid only for low-order bytes)
+
+	Draw a horizontal line on the text screen.
+	Specifying the text plane is the same as _TXXLINE.
+
+================================================= ============================
+
+$ d5 _TXLINE Text screen line
+
+Argument a1.l Address of the parameter buffer
+		 (0, a1) Text plane (0-3)
+		 (2, a1) Start point X coordinates
+		 (4, a1) 〃 Y 〃
+		 (6, a1) Length in the X direction
+		 (8, a1) Y 〃
+		(10, a1) Line style (valid only for low-order bytes)
+
+	Draw a line on the text screen.
+	Specifying the text plane is the same as _TXXLINE.
+	I'm using CRTC's bitmask feature, so turn off the mouse cursor
+	Call this call.
+	Use this IOCS call only when ROM IOCS version 1.3 or IOCS.X is resident
+	Possible.
+
+================================================= ============================
+
+$ d6 _TXBOX Text screen box
+
+Argument a1.l Address of the parameter buffer
+		 (0, a1) Text plane (0-3)
+		 (2, a1) X coordinate
+		 (4, a1) Y 〃
+		 (6, a1) Length in the X direction
+		 (8, a1) Y 〃
+		(10, a1) Line style (valid only for low-order bytes)
+
+	Draw a rectangle on the text screen.
+	Specifying the text plane is the same as _TXXLINE.
+
+================================================= ============================
+
+$ d7 _TXFILL Text screen box fill
+
+Argument a1.l Address of the parameter buffer
+		 (0, a1) Text plane (0-3)
+		 (2, a1) X coordinate
+		 (4, a1) Y 〃
+		 (6, a1) Length in the X direction
+		 (8, a1) Y 〃
+		(10, a1) Line style
+
+	Draw a filled rectangle on the text screen.
+	Specifying the text plane is the same as _TXXLINE.
+	The line style is the even-numbered line and the odd-numbered line in the upper and lower bytes, respectively.
+	Specifies the horizontal line style of.
+
+================================================= ============================
+
+$ d8 _TXREV Text screen inversion
+
+Argument a1.l Address of the parameter buffer
+		 (0, a1) Text plane (0-3)
+		 (2, a1) X coordinate
+		 (4, a1) Y 〃
+		 (6, a1) Length in the X direction
+		 (8, a1) Y 〃
+
+	Invert the specified range of the text screen.
+	ROM IOCS version 1.3 or IOCS.X resident, text when called
+	If the concurrent access feature is enabled, the text plane specification will be ignored.
+	It is drawn on the set plane.
+
+================================================= ============================
+
+$ df _TXRASCPY Raster copy of text screen
+
+Argument d1.hb Copy source raster number
+	d1.b Copy destination 〃
+	d2.w Number of copy rasters
+	d3.hb Pointer movement direction (0: downward -1: upward)
+	d3.b Text plane (bits 0 to 3 correspond to planes 0 to 3)
+
+	Raster copy the specified range of the text screen.
+
+================================================= ============================
+
+$ f0 _OPMDRV OPMDRV control
+
+Argument d1.l Function number
+
+	Call the function call added by the sound source driver OPMDRV.X.
+	The argument / return value depends on the function number.
+
+================================================= ============================
+
+$ f1 _RSDRV Extended RS-232C control
+
+Argument d2.hb AUX number (0-5)
+	d2.b Function number ($ 30- $ 39)
+		d2.b = $ 30- $ 35 IOCS $ 30- $ 35 directly on the specified port
+					Perform the function.
+			$ 36, $ 37 d1.l = Buffer size
+					a1.l = buffer address
+					Set the receive buffer for the specified port.
+			$ 38, $ 39 Unanalyzed.
+
+Return value
+	When d2.b = $ 36, $ 37
+		d1.w = Buffer size before change
+		a1.l = buffer address before change
+
+	Call the function call added in RSDRV.SYS.
+	details unknown.
+
+================================================= ============================
+
+$ f2 _A_JOYGET Analog joystick control
+
+Argument d1.l Function number
+	d2.w mode (when d1.l = 1)
+		d2.w = 0 digital
+			1 analog
+			-1 Check the current settings
+	d2.w Communication speed (when d1.l = 2)
+		d2.w = 0 Maximum speed
+			1 1/2 of the maximum speed
+			2 〃 1/3
+			3 〃 1/4
+			-1 Find out the current speed
+	a1.l buffer address (only when d1.l = 0)
+
+Status (error with -1) when return value d1.l = 0
+		When 1, the mode before change
+		At 2, the speed before the change
+
+	Functions added in the analog joystick driver AJOY.X
+	Call the call.
+
+	When d1.l = 0, the analog joystick data is stored in the buffer specified by a1.l.
+	Read the data. The contents of the joystick data are as follows.
+
+offset size
+0 1.w Stick up and down (0: top to 255: bottom)
+2 1.w 〃 Left and right (0: left to 255: right)
+4 1.w Throttle
+6 1.w option
+8 1.w Trigger (bit becomes 0 when pressed down)
+		bit 11 A
+		bit 10 B
+		bit 9 A'
+		bit 8 B'
+		bit 7 A or A'(0 if either is pressed)
+		bit 6 B or B'(〃)
+		bit 5 C
+		bit 4 D
+		bit 3 E1
+		bit 2 E2
+		bit 1 start
+		bit 0 select
+
+	Change the joystick mode when d1.l = 1.
+
+	When d1.l = 2, change the communication speed of the joystick. Set to the maximum speed.
+	If so, you will not be able to change to another speed unless you reset the joystick.
+
+================================================= ============================
+
+$ f3 _MUSICDRV MUSICDRV control
+
+Argument d1.l Function number
+
+	Call the function call added by the sound source driver MUSICDRV.X.
+	The argument / return value depends on the function number.
+
+================================================= ============================
+
+$ f5 _SCSIDRV SCSI IOCS
+
+Argument d1.l Function number
+
+	Invokes function calls added with SCSI IOCS.
+	The argument / return value depends on the function number.
+
+================================================= ============================
+
+$ fd _ABORTRST Reconfigure environment to abort
+
+	Reconfigure the environment for aborting. Use with the OS.
+
+================================================= ============================
+
+$ fe _IPLERR Reboot
+
+	Used when restarting with a startup error. Normally not used.
+
+================================================= ============================
+
+$ ff _ABORTJOB Abort
+
+	Abort. Use with OS.
+
+================================================= ============================
