@@ -1,7 +1,7 @@
 AR.X:				X68k Archiver v1.00 				Copyright 1987 SHARP/Hudson
 AS.X:				X68k Assembler v3.00 				Copyright 1987,88,89,90,91,92,93 SHARP/Hudson
 BIND.X:				X68k Binder v1.00 					Copyright 1989 SHARP/Hudson
-has000.x, has309.x:	X68k High-speed Assembler v3.09 	Copyright 1990-94 by Y.Nakamura
+has309.x, has000.x:	X68k High-speed Assembler v3.09 	Copyright 1990-94 by Y.Nakamura
 HAS060.X:			X68k High-speed Assembler v3.09+87 	Copyright 1990-94/96-99 Y.Nakamura/M.Kamada
 has234.x:			X68k High-speed Assembler v2.34 	Copyright 1990,91 by Y.Nakamura
 has250.x: 			X68k High-speed Assembler v2.50 	Copyright 1990,91,92 by Y.Nakamura
