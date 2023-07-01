@@ -4,19 +4,19 @@
 
 - List of DOS calls
 
-$ff00   _EXIT           void _dos_exit() 											End program
-$ff01   _GETCHAR        int _dos_getchar()											Keyboard input (with echo)
-$ff02   _PUTCHAR        void _dos_putchar(int code)									Display character
-$ff03   _COMINP         int _dos_cominp()											Read byte from RS-232C
-$ff04   _COMOUT         void _dos_comout(int code)									Write byte to RS-232C
-$ff05   _PRNOUT         void _dos_prnout(int code)									Write character to printer
-$ff06   _INPOUT         int _dos_inpout(int code)									Character I/O
-$ff07   _INKEY          int _dos_inkey()											Get character from keyboard (no break check)
-$ff08   _GETC           int _dos_getchar()											Get character from keyboard (with break check)
-$ff09   _PRINT          void _dos_print(const char *string)							Print character string
-$ff0a   _GETS           int _dos_gets (struct _inpptr *ptr)							Get character string (with break check)
-$ff0b   _KEYSNS         int _dos_keysns(void)										Inspect key input status
-$ff0c   _KFLUSH         int _dos_kflushgp()											Get key input after flushing buffer
+$ff00   _EXIT           End program											void _dos_exit() 
+$ff01   _GETCHAR        Keyboard input (with echo)							int _dos_getchar()	
+$ff02   _PUTCHAR        Display character									void _dos_putchar(int code)
+$ff03   _COMINP         Read byte from RS-232C								int _dos_cominp()
+$ff04   _COMOUT         Write byte to RS-232C								void _dos_comout(int code)
+$ff05   _PRNOUT         Write character to printer							void _dos_prnout(int code)
+$ff06   _INPOUT         Character I/O										int _dos_inpout(int code)
+$ff07   _INKEY          Get character from keyboard (no break check)		int _dos_inkey()
+$ff08   _GETC           Get character from keyboard (with break check)		int _dos_getchar()
+$ff09   _PRINT          Print character string								void _dos_print(const char *string)
+$ff0a   _GETS           Get character string (with break check)				int _dos_gets (struct _inpptr *ptr)
+$ff0b   _KEYSNS         Inspect key input status							int _dos_keysns(void)
+$ff0c   _KFLUSH         Get key input after flushing buffer					int _dos_kflushgp()
 $ff0d   _FFLUSH         Disk reset
 $ff0e   _CHGDRV         Select working drive
 $ff0f   _DRVCTRL        Inspect/select drive status
@@ -27,7 +27,7 @@ $ff12   _CINSNS         Inspect RS-232C input status
 $ff13   _COUTSNS        Inspect RS-232C output status
 $ff17   _FATCHK         Inspect file allocation status
 $ff18   _HENDSP         Kanji conversion control
-$ff19   _CURDRV         Get working drive
+$ff19   _CURDRV         Get working drive									_dos_curdrv()
 $ff1a   _GETSS          Get character string (no break check)
 $ff1b   _FGETC          Read byte from file
 $ff1c   _FGETS          Read character string from file
@@ -35,13 +35,13 @@ $ff1d   _FPUTC          Write byte to file
 $ff1e   _FPUTS          Write character string to file
 $ff1f   _ALLCLOSE       Close all files
 
-$ff20   _SUPER          int _dos_super(long stack)									Set supervisor/user mode
+$ff20   _SUPER          Set supervisor/user mode							int _dos_super(long stack)
 $ff21   _FNCKEY         Get/set redefinable keys
 $ff22   _KNJCTRL        Function call for kana-kanji conversion
 $ff23   _CONCTRL        Console control / direct output
 $ff24   _KEYCTRL        Inspect console status / direct input
-$ff25   _INTVCS         void* _dos_intvcs(int intno, void* jobadr)					Set vector handling address
-$ff26   _PSPSET         void _dos_pspset (struct _psp *pspadr)						Make process stack pointer
+$ff25   _INTVCS         Set vector handling address							void* _dos_intvcs(int intno, void* jobadr)
+$ff26   _PSPSET         Make process stack pointer							void _dos_pspset (struct _psp *pspadr)
 $ff27   _GETTIM2        Get time (longword)
 $ff28   _SETTIM2        Set time (longword)
 $ff29   _NAMESTS        Expand filename
@@ -53,7 +53,7 @@ $ff2e   _VERIFY         Set verify flag
 $ff2f   _DUP0           Force-copy file handle
 
 $ff30 	_VERNUM 		Get OS version
-$ff31   _KEEPPR         Terminate and stay
+$ff31   _KEEPPR         Terminate and stay									void _dos_keeppr (int prglen, int code)
 $ff32   _GETDPB         Get drive parameter block
 $ff33   _BREAKCK        Set break check
 $ff34   _DRVXCHG        Drive exchange
@@ -76,25 +76,25 @@ $ff44   _IOCTRL         Device driver ioctrl direct I/O
 $ff45   _DUP            Copy file handle
 $ff46   _DUP2           Force-copy file handle
 $ff47   _CURDIR         Get working directory
-$ff48   _MALLOC         void* _dos_malloc(int size)											Reserve memory
-$ff49   _MFREE          int _dos_mfree(void* memptr) 										Relinquish memory block
-$ff4a   _SETBLOCK       int _dos_setblock(void* memptr, int newlen)							Modify memory block
+$ff48   _MALLOC         Reserve memory										void* _dos_malloc(int size)
+$ff49   _MFREE          Relinquish memory block								int _dos_mfree(void* memptr) 
+$ff4a   _SETBLOCK       Modify memory block									int _dos_setblock(void* memptr, int newlen)
 $ff4b   _EXEC           Load and execute program
 $ff4c   _EXIT2          End program with exit code
 $ff4d   _WAIT           Get process exit code
 $ff4e   _FILES          Find file
 $ff4f   _NFILES         Find next file
 
-$ff80   _SETPDB         struct _psp* _dos_setpdb(struct _psp* pdbadr)							Modify process data block
-$ff81   _GETPDB         struct _psp* _dos_getpdb()												Get process data block
-$ff82   _SETENV         int _dos_setenv (const char* name, const char* env, const char* buffer)	Set environment variable
-$ff83   _GETENV         int _dos_getenv (const char* name, const char* env, char* buffer)		Get environment variable
+$ff80   _SETPDB         Modify process data block							struct _psp* _dos_setpdb(struct _psp* pdbadr)
+$ff81   _GETPDB         Get process data block								struct _psp* _dos_getpdb()
+$ff82   _SETENV         Set environment variable							int _dos_setenv (const char* name, const char* env, const char* buffer)
+$ff83   _GETENV         Get environment variable							int _dos_getenv (const char* name, const char* env, char* buffer)
 $ff84   _VERIFYG        Get verify flag
 $ff85   _COMMON         Control common region
 $ff86   _RENAME         Rename/move file
 $ff87   _FILEDATE       Get/set file modified date
-$ff88   _MALLOC2        void* _dos_malloc2 (int md, int size)									Reserve memory
-						void* _dos_malloc0 (int md, int size, struct _psp *pspadr)
+$ff88   _MALLOC2        Reserve memory										void* _dos_malloc2 (int md, int size)
+																			void* _dos_malloc0 (int md, int size, struct _psp *pspadr)
 $ff8a   _MAKETMP        Make temporary file
 $ff8b   _NEWFILE        Make new file
 $ff8c   _LOCK           Lock file
@@ -103,9 +103,9 @@ $ff8f   _ASSIGN         Get/set/delete virtual drive/directory allocation
 $ffaa   (unlisted)      Set FFLUSH mode (unlisted)
 $ffab   _OS_PATCH       Update internal OS handler (unlisted)
 $ffac   _GETFCB         Get file control block pointer (unlisted)
-$ffad   _S_MALLOC       void* _dos_s_malloc(int md, int size)									Reserve memory block under main memory manager
-						void* _dos_s_malloc0(int md, int size, struct _psp *pspadr)
-$ffae   _S_MFREE        int _dos_s_mfree(void* memptr)											Relinquish memory block under main memory manager
+$ffad   _S_MALLOC       Reserve memory block under main memory manager		void* _dos_s_malloc(int md, int size)
+																			void* _dos_s_malloc0(int md, int size, struct _psp *pspadr)
+$ffae   _S_MFREE        Relinquish memory block under main memory manager	int _dos_s_mfree(void* memptr)
 $ffaf   _S_PROCESS      Set sub-memory manager
 
 $fff0   _EXITVC         (address to execute at end of program)
@@ -115,16 +115,16 @@ $fff2   _ERRJVC         (address to execute at error abort)
 $fff3   _DISKRED        Block device direct input
 $fff4   _DISKWRT        Block device direct output
 $fff5   _INDOSFLG       Get pointer to OS' work area
-$fff6   _SUPER_JSR      Subroutine call
+$fff6   _SUPER_JSR      Subroutine call										void _dos_super_jsr(void (*func)(), struct _dregs *inregs, struct _dregs *outregs)
 $fff7   _BUS_ERR        Inspect bus error occurrence
 $fff8   _OPEN_PR        Register background task
-$fff9   _KILL_PR        Kill this process
+$fff9   _KILL_PR        Kill this process									int _dos_kill_pr()
 $fffa   _GET_PR         Get thread management info
-$fffb   _SUSPEND_PR     Force-sleep thread
-$fffc   _SLEEP_PR       Sleep
-$fffd   _SEND_PR        Send thread commands/data
+$fffb   _SUSPEND_PR     Force-sleep thread									int _dos_suspend_pr(int tid)
+$fffc   _SLEEP_PR       Sleep												int _dos_sleep_pr(long time)
+$fffd   _SEND_PR        Send thread commands/data							int _dos_send_pr(int my_id, int your_id, int command, char *buff, long length)
 $fffe   _TIME_PR        Get timer counter value
-$ffff   _CHANGE_PR      Yield execution time
+$ffff   _CHANGE_PR      Yield execution time								void _dos_change_pr()
 
 CAUTION: Calls listed as $ff50-$ff7f in Human68k version 2 were moved to
          $ff80-$ffaf in version 3
@@ -1012,9 +1012,9 @@ RETURN  Previous handling address of selected vector
         INTNO = $ff00-$ffff	DOS calls
 
         When addresses for trap #10-14 or _EXITVC are changed, the work area in PSP
-        changes as well. Also, when further aborting in _ERRJVC, its sr and ssp are
+        changes as well. Also, when further aborting in _ERRJVC, its SR and SSP are
         changed to that of the moment this DOS call was executed. In the case of
-        _CTRLVC, in addition to the _ERRJVC treatment, the sr and ssp from aborting
+        _CTRLVC, in addition to the _ERRJVC treatment, the SP and SSP from aborting
         via CTRL-C also change.
 
         head (JOBADR)
@@ -1214,7 +1214,8 @@ Return value version number
 
 $ ff31 _KEEPPR Resident end
 
-Argument PRGLEN.l Number of resident bytes
+Argument 
+	PRGLEN.l Number of resident bytes
 	CODE.w Exit code
 
 	End the process leaving the PRGLEN byte (not including the PSP part). Specified

@@ -115,95 +115,95 @@ List 2 is a background structure/constant definition file, which is commonly use
 
 Listing 1 RENICE.X
 ────────────────────────────────────────────────────────────────────────────────
-1:	*			Change thread execution level
-
-				.include		doscall.mac
-				.include		ioscall.mac
-	*			.include		fefunc.h
-				.include		bg.h
-				.include		const.h
-	*
-	FPACK		macro	callno
+01:	*			Change thread execution level
+02
+03				.include		doscall.mac
+04				.include		ioscall.mac
+05	*			.include		fefunc.h
+06				.include		bg.h
+07				.include		const.h
+08	*
+09	FPACK		macro	callno
 10:				.dc.w	callno
-				.endm
-	*
-	__STOL		equ		$fe10
-	*
-				.text
-				.even
-	*
-	ent:
-				lea.l	inisp(pc),07
+11				.endm
+12	*
+13	__STOL		equ		$fe10
+14	*
+15				.text
+16				.even
+17	*
+18	ent:
+19				lea.l	inisp(pc),07
 20:				
-				tst.b	(a2)+
-				beq		usage
-				
-				movea.l	a2,a0
-				FPACK	__STOL
-				bcs		usage
-				move.w	d0,d2				* d2.w = thread ID
-				
-				FPACK	__STOL
+21				tst.b	(a2)+
+22				beq		usage
+23				
+24				movea.l	a2,a0
+25				FPACK	__STOL
+26				bcs		usage
+27				move.w	d0,d2				* d2.w = thread ID
+28				
+29				FPACK	__STOL
 30:				bcs		usage
-				move.b	d0,d1				* d1.b = level
-				subq.b	#2,d0
-				bcc		do
-				moveq.l	#2,d1
-				
-	do:			lea.l 	thinfo(pc),a1		* have a specified ID
-				pea.l 	(a1)				* get thread management information
-				move.w 	d2,-(sp)			*
-				DOS 	_GET_PR				*
+31				move.b	d0,d1				* d1.b = level
+32				subq.b	#2,d0
+33				bcc		do
+34				moveq.l	#2,d1
+35				
+36	do:			lea.l 	thinfo(pc),a1		* have a specified ID
+37				pea.l 	(a1)				* get thread management information
+38				move.w 	d2,-(sp)			*
+39				DOS 	_GET_PR				*
 40:	*			addq.l 	#6.sp				*
-				tst.l 	d0					*
-				bmi		nfound				*
-				
-				move.l	(a1),d3				* d3 = Next Thread Management Information
-				
-				move.l	d3,d0				* Thread management information
-				moveq.l #thNMAX-1,d4		*  kidnap the main body
-	sealp:		movea.l d0,a1				*
-				IOCS	_B_BPEEK			*
+41				tst.l 	d0					*
+42				bmi		nfound				*
+43				
+44				move.l	(a1),d3				* d3 = Next Thread Management Information
+45				
+46				move.l	d3,d0				* Thread management information
+47				moveq.l #thNMAX-1,d4		*  kidnap the main body
+48	sealp:		movea.l d0,a1				*
+49				IOCS	_B_BPEEK			*
 50:				cmp.l 	d3,d0				*
-				dbeq	d4,sealp			*
-				bne		nfound				*
-				
-											* al = Body of thread management information +4
-				addq.l 	#thLeVEL-4,a1		* Change execution priority level
-				subq.b 	#1,d1				*
-				IOSC	_B_BPOKE			*
-				
-				DOS		_EXIT
+51				dbeq	d4,sealp			*
+52				bne		nfound				*
+53				
+54											* al = Body of thread management information +4
+55				addq.l 	#thLeVEL-4,a1		* Change execution priority level
+56				subq.b 	#1,d1				*
+57				IOSC	_B_BPOKE			*
+58				
+59				DOS		_EXIT
 60:	*
-	usage:		lea.l	usgmes(pc),a0
-				bra		error
-	nfound		lea.l 	errmes(pc),a0
-				*
-	error:		move.w	#STDERR,-(sp)
-				pea.l 	(a0)
-				DOS		_FPUTS
-	*			addq.l 	#6,sp
-
+61	usage:		lea.l	usgmes(pc),a0
+62				bra		error
+63	nfound		lea.l 	errmes(pc),a0
+64				*
+65	error:		move.w	#STDERR,-(sp)
+66				pea.l 	(a0)
+67				DOS		_FPUTS
+68	*			addq.l 	#6,sp
+69
 70:				move.w 	#1,-(sp)
-				DOS		_EXIT2
-	*
-	usgmes:		.dc.b 	'Feature: Thread execution top level'
-				.dc.b 	'change',CB,LF
-				.dc.b 	'use： RENICE Thread ID (0-31)'
-				.dc.b 	'level(2 - 255) ',CR,LF,0
-	errmes:		.dc.b   'fragile thread not found',CR,LF,0
-	*
-				.bss
+71				DOS		_EXIT2
+72	*
+73	usgmes:		.dc.b 	'Feature: Thread execution top level'
+74				.dc.b 	'change',CB,LF
+75				.dc.b 	'use： RENICE Thread ID (0-31)'
+76				.dc.b 	'level(2 - 255) ',CR,LF,0
+77	errmes:		.dc.b   'fragile thread not found',CR,LF,0
+78	*
+79				.bss
 80:				.even
-	*
-	thinfo:		.ds.b  	SIZEofTHREADINFO
-	*
-				.stack
-				.even
-	*
-				.ds.l	256
-	inisp:
-
+81	*
+82	thinfo:		.ds.b  	SIZEofTHREADINFO
+83	*
+84				.stack
+85				.even
+86	*
+87				.ds.l	256
+88	inisp:
+89
 90:				.end	ent
 ────────────────────────────────────────────────────────────────────────────────
 
@@ -258,72 +258,72 @@ However, the (FFxx h) command codes are reserved by the system, and some of them
 
 Listing 2 BG.H
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-*		constant / structure definitions for background process
-
-thMAX			equ		32		* max threads	
-*
-thUSER			equ		$0000	* run in user mode
-thSUPER			equ		$2000	* run in supervisor mode
-
-*
-*	 thread management information
-*
-				.offset 0
-*
-thNEXT:			.ds.l 	1		* next thread
-thWAITFLAG:		.ds.b 	1		* flag whether in sleep or not
-								* 00h ... awake
-								* FEh ... during forced sleep
-								* FFh ... in sleep
-thCOUNT:		.ds.b 	1		* counter of execution priority
-thLEVEL: 		.ds.b 	1		* execution priority level -1
-thDOSCOMMAND:	.ds.b 	1		* DOS call number that was in progress
-thPSP:			.ds.l 	1		* psp
-thUSP:			.ds.l 	1		* usp
-thDREG:			.ds.l 	8		* d0 - d7
-thAREG:			.ds.l 	7		* a0 - a6
-thSR:			.ds.w	1		* sr
-thPC:			.ds.l 	1		* pc
-thSSP:			.ds.l 	1		* ssp
-thINDOSF:		.ds.w 	1		* (DOS call nesting level)
-thINDOSP:		.ds.w 	1		* (ssp during DOS call processing)
-thBUFF:			.ds.l	1		* inner thread communication buffer
-thNAME:			.ds.b   16		* thread name
-thWAITTIME:		.ds.l 	1		* remaninning sleep time
-SIZEofTHREADINFO:
-				.text
-*
-thNAMED			equ 	-1		* specify by thread name
-thMYSELF		equ		-2		* myself
-
-*
-*	innter thread communication buffer
-*
-				.offset 0		* inner thread communication buffer
-*
-thCOMMDATALEN:	.ds.l	1		* buffer bytes
-								* (number of data bytes during communication)
-thCOMMDATA:		.ds.l	1		* data area start address
-thCOMMCOMMAND:	.ds.w 	1		* command
-thCOMMID:		.ds.w	1		* sender ID
-SIZEofCOMMBUFF:
-				.text
-thEMPTY			equ 	-1 		* no data thread communication buffer
-
-*
-*		inner-thread communication commands
-*
-thKILL			equ 	$fff9	* discard request
-thWAKEUP		equ		$fffb	* active
-thSLEEP			equ		$fffc	* sleep request
-thISBUSY		equ		$ffff	* check if inner-thread communication is possible.
-
-*
-*		-----
-*
-thCONFLICT		equ		-27		* there is a thread with the same name
-thBUSY			equ		-28		* inner-thread communication not accepted
-thNOMORE		equ		-29		* cannot register any more threads
+01	*		constant / structure definitions for background process
+02
+03	thMAX			equ		32		* max threads	
+04	*
+05	thUSER			equ		$0000	* run in user mode
+06	thSUPER			equ		$2000	* run in supervisor mode
+07
+08	*
+09	*	 thread management information
+10:	*
+11					.offset 0
+12	*
+13	thNEXT:			.ds.l 	1		* next thread
+14	thWAITFLAG:		.ds.b 	1		* flag whether in sleep or not
+15								* 00h ... awake
+16								* FEh ... during forced sleep
+17								* FFh ... in sleep
+18	thCOUNT:		.ds.b 	1		* counter of execution priority
+19	thLEVEL: 		.ds.b 	1		* execution priority level -1
+20:	thDOSCOMMAND:	.ds.b 	1		* DOS call number that was in progress
+21	thPSP:			.ds.l 	1		* psp
+22	thUSP:			.ds.l 	1		* usp
+23	thDREG:			.ds.l 	8		* d0 - d7
+24	thAREG:			.ds.l 	7		* a0 - a6
+25	thSR:			.ds.w	1		* sr
+26	thPC:			.ds.l 	1		* pc
+27	thSSP:			.ds.l 	1		* ssp
+28	thINDOSF:		.ds.w 	1		* (DOS call nesting level)
+29	thINDOSP:		.ds.w 	1		* (ssp during DOS call processing)
+30:	thBUFF:			.ds.l	1		* inner thread communication buffer
+31	thNAME:			.ds.b   16		* thread name
+32	thWAITTIME:		.ds.l 	1		* remaninning sleep time
+33	SIZEofTHREADINFO:
+34					.text
+35	*
+36	thNAMED			equ 	-1		* specify by thread name
+37	thMYSELF		equ		-2		* myself
+38	
+39	*
+40:	*	innter thread communication buffer
+41	*
+42					.offset 0		* inner thread communication buffer
+43	*
+44	thCOMMDATALEN:	.ds.l	1		* buffer bytes
+45								* (number of data bytes during communication)
+46	thCOMMDATA:		.ds.l	1		* data area start address
+47	thCOMMCOMMAND:	.ds.w 	1		* command
+48	thCOMMID:		.ds.w	1		* sender ID
+49	SIZEofCOMMBUFF:
+50:					.text
+51	thEMPTY			equ 	-1 		* no data thread communication buffer
+52
+53	*
+54	*		inner-thread communication commands
+55	*
+56	thKILL			equ 	$fff9	* discard request
+57	thWAKEUP		equ		$fffb	* active
+58	thSLEEP			equ		$fffc	* sleep request
+59	thISBUSY		equ		$ffff	* check if inner-thread communication is possible.
+60:	
+61	*
+62	*		-----
+63	*
+64	thCONFLICT		equ		-27		* there is a thread with the same name
+65	thBUSY			equ		-28		* inner-thread communication not accepted
+66	thNOMORE		equ		-29		* cannot register any more threads
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 
@@ -376,277 +376,277 @@ It's a completely useless program, but it's a pack ground processing program.
 
 Listing 4 BGTEST.S
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-1:	*		background process test program
-2:	
-3:					.include			doscall.mac
-4:					.include			iocscall.mac
-5:					.include			bg.h
-6:					.include			const.h
-7:	*
-8:					.offset 0							* resident work structure
-9:	*
-10:	combuf:			.ds.b 		SIZEofCOMMBUFF			* communication buffer
-	a6sav:			.ds.l 		1						* for saving A6
-	spsav:			.ds.l 		1						* for saving SP
-	SIZEofWORK:
-	*
-					.text
-					.even
-	*
-	*	---
-	*
-20:	keepst:
-	bgent:			lea.l 		work(pc), a6			* for work process
-					movem.l		a6/sp,a6sav(a6)			* prepare interruptions
-														* save a6 and sp
-
-					pea.l		break(pc)				* set interrupt
-					move.w		#_CTRLVC,-(sp)			* processing address
-					DOS			_INTVCS					*
-					move.w		#_ERRJVC,(sp)			*
-					DOS			_INTVCS					*
-30:					addq.l		#6,sp					*
-					
-	loop:			cmpi.w		#thEMPTY,combuf+thCOMMID(a6)
-					beq			main					* in inter-thread comunication
-														* do you have data?
-													
-					move.w		combuf+thCOMMCOMMAND(a6),d0
-														* d0 = command
-					move.w		#thEMPTY,combuf+thCOMMID(a6)
-														* allow communication
-40:
-					cmpi.w		#thKILL,d0				* discard request?
-					bne 		nkill
-					
-					DOS			_KILL_PR,d0				* destroy itself
-					bra 		loop
-					
-	nkill:			cmpi.w 		@thSLEEP.d0				* sleep request?
-					bne 		main
-					
-50:					clr.l 		-(sp)					* sleep
-					DOS			_SLEEP_PR				*
-					addq.lea	#4,sp					*
-					bra			loop
-
-	main:			moveq.l		#3,d1					* on the button left of the screen
-					moveq.l		#0,d2					* 'A' - 'Z'を
-					moveq.l 	#31,d3					* display in order
-					moveq.l 	#1-1，d4					*
-					lea.l 		char(pc)，a1				*
-60:					addq.b 		#1， (a1)				*
-					cmpi.b 		#'Z'+1(a1)				*
-					bcs			put						*
-					move.d0		#'A',(a1)				*
-	put:			IOCS		_B_PUTMES				*
-
-	wait:			pea.l		100,w					* sleep for
-					DOS			_SLEEP_PR				* about 1 millisecond
-					addq.l		#4,sp					*
-					bra			loop
-70:					
-	char:			.dc.b 		'@',0
-
-	*
-	*	suspend processing
-	*
-	break:			movem.l		work+a6sav(pc),a6/sp	* register
-					bra			loop
-
-	*
-80:	*	permanent block work
-	*
-	work:			.dc.l 		0						* inter-thread communication buffer
-					.dc.l		0						*
-					.dc.w		0						*
-					.dc.w 		thEMPTY					*
-					.dc.b		SIZEofWORK-SIZEofCOMMBUFF
-	*
-	iniusp			equ 		*+1024					* end of user stack
-	inissp			equ			iniusp+1024*6			* tail of supervisor stack
-90:	keeped			equ			inissp					* end of resident part
-	KEEPSIZ			equ			keeped-keepst			* number of bytes in resident part
-
-	*************************************************************************
-	*
-	*		part-time block
-	*
-	ent:
-					lea.l 		inisp(pc),sp
-					
+001:	*		background process test program
+02:	
+003:					.include			doscall.mac
+004:					.include			iocscall.mac
+005:					.include			bg.h
+006:					.include			const.h
+007:	*
+008:					.offset 0							* resident work structure
+009:	*
+010:combuf:			.ds.b 		SIZEofCOMMBUFF			* communication buffer
+011	a6sav:			.ds.l 		1						* for saving A6
+012	spsav:			.ds.l 		1						* for saving SP
+013	SIZEofWORK:
+014	*
+015					.text
+016					.even
+017	*
+018	*	---
+019	*
+020:keepst:
+021	bgent:			lea.l 		work(pc), a6			* for work process
+022					movem.l		a6/sp,a6sav(a6)			* prepare interruptions
+023														* save a6 and sp
+024
+025					pea.l		break(pc)				* set interrupt
+026					move.w		#_CTRLVC,-(sp)			* processing address
+027					DOS			_INTVCS					*
+028					move.w		#_ERRJVC,(sp)			*
+029					DOS			_INTVCS					*
+030:				addq.l		#6,sp					*
+031					
+032	loop:			cmpi.w		#thEMPTY,combuf+thCOMMID(a6)
+033					beq			main					* in inter-thread comunication
+034														* do you have data?
+035													
+036					move.w		combuf+thCOMMCOMMAND(a6),d0
+037														* d0 = command
+038					move.w		#thEMPTY,combuf+thCOMMID(a6)
+039														* allow communication
+040:
+041					cmpi.w		#thKILL,d0				* discard request?
+042					bne 		nkill
+043					
+044					DOS			_KILL_PR,d0				* destroy itself
+045					bra 		loop
+046					
+047	nkill:			cmpi.w 		@thSLEEP.d0				* sleep request?
+048					bne 		main
+049					
+050:				clr.l 		-(sp)					* sleep
+051					DOS			_SLEEP_PR				*
+052					addq.lea	#4,sp					*
+053					bra			loop
+054
+055	main:			moveq.l		#3,d1					* on the button left of the screen
+056					moveq.l		#0,d2					* 'A' - 'Z'を
+057					moveq.l 	#31,d3					* display in order
+058					moveq.l 	#1-1，d4					*
+059					lea.l 		char(pc)，a1				*
+060:				addq.b 		#1， (a1)				*
+061					cmpi.b 		#'Z'+1(a1)				*
+062					bcs			put						*
+063					move.d0		#'A',(a1)				*
+064	put:			IOCS		_B_PUTMES				*
+065
+066	wait:			pea.l		100,w					* sleep for
+067					DOS			_SLEEP_PR				* about 1 millisecond
+068					addq.l		#4,sp					*
+069					bra			loop
+070:					
+071	char:			.dc.b 		'@',0
+072
+073	*
+074	*	suspend processing
+075	*
+076	break:			movem.l		work+a6sav(pc),a6/sp	* register
+077					bra			loop
+078
+079	*
+080:*	permanent block work
+081	*
+082	work:			.dc.l 		0						* inter-thread communication buffer
+083					.dc.l		0						*
+084					.dc.w		0						*
+085					.dc.w 		thEMPTY					*
+086					.dc.b		SIZEofWORK-SIZEofCOMMBUFF
+087	*
+088	iniusp			equ 		*+1024					* end of user stack
+089	inissp			equ			iniusp+1024*6			* tail of supervisor stack
+090:keeped			equ			inissp					* end of resident part
+091	KEEPSIZ			equ			keeped-keepst			* number of bytes in resident part
+092
+093	*************************************************************************
+094	*
+095	*		part-time block
+096	*
+097	ent:
+098					lea.l 		inisp(pc),sp
+099					
 100:				DOS			_VERNUM					* check Human68k
-					cmpi.w 		#0200,d0				* version
-					bcs			vererr					*
-	*				cmpi.w		#$0232,d0				*
-	*				bcc			vererr					*
-
-					tst.b		(a2)+					* if there is no argument
-					beq			keep					* to send to the resident process...
-	skippsp:		move.b		(a2)+,d0				*
-					beq			keep					*
+101					cmpi.w 		#0200,d0				* version
+102					bcs			vererr					*
+103	*				cmpi.w		#$0232,d0				*
+104	*				bcc			vererr					*
+105
+106					tst.b		(a2)+					* if there is no argument
+107					beq			keep					* to send to the resident process...
+108	skippsp:		move.b		(a2)+,d0				*
+109					beq			keep					*
 110:				cmpi.b		#SPACE,d0				*
-					beq			skipsp					*
-					cmpi.b		#TAB,d0					*
-					beq			skipsp					*
-					
-					cmpi.b		#'-',d0					* check whether there is
-					beq			chkopt					* any param from command line
-					cmpi.b		#'/',d0					*
-					bne			usage					*
-														*
+111					beq			skipsp					*
+112					cmpi.b		#TAB,d0					*
+113					beq			skipsp					*
+114					
+115					cmpi.b		#'-',d0					* check whether there is
+116					beq			chkopt					* any param from command line
+117					cmpi.b		#'/',d0					*
+118					bne			usage					*
+119														*
 120:chkopt:			moveq.l 	#$20,d0					*
-					or.b 		(a2)+,d0				*
-					cmpi.b 		#'r',d0					* was the option 'r' found?
-					bne			usage
-
-	*
-	*		cancelling resident process
-	*
-	remove:			lea.l		myname(pc), a0			* is there any thread
-					lea.l		thinfo+thNAME(pc),a1	*  with the same name as mine?
+121					or.b 		(a2)+,d0				*
+122					cmpi.b 		#'r',d0					* was the option 'r' found?
+123					bne			usage
+124
+125	*
+126	*		cancelling resident process
+127	*
+128	remove:			lea.l		myname(pc), a0			* is there any thread
+129					lea.l		thinfo+thNAME(pc),a1	*  with the same name as mine?
 130:cpylp:			move.b		(a0)+,(a1)+				*
-					bne			cpylp					*
-														*
-					pea.l		thinfo(pc)				*
-					move.w		#thNamed,-(sp)			*
-					DOS			_GET_PR					*
-	*				addq.l		#6,sp					*
-					tst.l		d0						*
-					bmi			rmerr1					* didn't
-					move.w		d0,d1					* d1 = Thread ID
+131					bne			cpylp					*
+132														*
+133					pea.l		thinfo(pc)				*
+134					move.w		#thNamed,-(sp)			*
+135					DOS			_GET_PR					*
+136	*				addq.l		#6,sp					*
+137					tst.l		d0						*
+138					bmi			rmerr1					* didn't
+139					move.w		d0,d1					* d1 = Thread ID
 140:				
-					pea.l		thinfo(pc)				* get your thread ID
-					move.w		#thMYSELF, -(sp)		*
-					DOS			_GET_PR					*
-					addq.l		#6,sp					* d0 = your thread ID
-					
-					clr.l		-(sp)					* wake up for now
-					clr.l		-(sp)					*
-					move.w		#thWAKEUP,-(sp)			*
-					move.w		d1,-(sp)				*
+141					pea.l		thinfo(pc)				* get your thread ID
+142					move.w		#thMYSELF, -(sp)		*
+143					DOS			_GET_PR					*
+144					addq.l		#6,sp					* d0 = your thread ID
+145					
+146					clr.l		-(sp)					* wake up for now
+147					clr.l		-(sp)					*
+148					move.w		#thWAKEUP,-(sp)			*
+149					move.w		d1,-(sp)				*
 150:				move.w		d0,-(sp)				*
-					DOS			_SEND_PR				*
-					
-					move.w		#thKILL,4(sp)			* discard thread
-					moveq.l		#thBUSY,d2				* until a valid send
-					bra			send					*
-														*
-	sendlp:			DOS			_CHANGE_PR				*
-														*
-	send:			DOS			_SEND_PR				*
+151					DOS			_SEND_PR				*
+152					
+153					move.w		#thKILL,4(sp)			* discard thread
+154					moveq.l		#thBUSY,d2				* until a valid send
+155					bra			send					*
+156														*
+157	sendlp:			DOS			_CHANGE_PR				*
+158														*
+159	send:			DOS			_SEND_PR				*
 160:				cmp.l		d2,d0					*
-					beq			sendlp					*
-	*				lea.l		14(sp),sp				*
-
-					tst.l		d0						* adnormal event
-					bmi			rmerr2					*
-					
-					pea.l		thinfo(pc)				* confiming it's dead
-					move.w		d1,-(sp)				*
-	waitlp:			DOS			_CHANGE_PR				*
+161					beq			sendlp					*
+162	*				lea.l		14(sp),sp				*
+163
+164					tst.l		d0						* adnormal event
+165					bmi			rmerr2					*
+166					
+167					pea.l		thinfo(pc)				* confiming it's dead
+168					move.w		d1,-(sp)				*
+169	waitlp:			DOS			_CHANGE_PR				*
 170:													*
-					DOS			_GET_PR					*
-					tst.l		d0						*
-					bpl			waitlp					*
-					addq.l		#6,sp					*
-
-					pea.l		remmes(pc)				* output release message
-					DOS			_PRINT					*
-					addq.l		#4,sp					*
-					
+171					DOS			_GET_PR					*
+172					tst.l		d0						*
+173					bpl			waitlp					*
+174					addq.l		#6,sp					*
+175
+176					pea.l		remmes(pc)				* output release message
+177					DOS			_PRINT					*
+178					addq.l		#4,sp					*
+179					
 180:				DOS			_EXIT
-
-	*
-	*			Resident processing
-	*
-	keep:										* register background task
-					pea.l		1.w						* sleep time 1ms
-					pea.l		work+combuf(pc)			* inter-thread communication buffer
-					pea.l		bgent(pc)				* init PC (execution start address)
-					move.w		#thUSER,-(sp)			* init SR (user mode)
+181
+182	*
+183	*			Resident processing
+184	*
+185	keep:												* register background task
+186					pea.l		1.w						* sleep time 1ms
+187					pea.l		work+combuf(pc)			* inter-thread communication buffer
+188					pea.l		bgent(pc)				* init PC (execution start address)
+189					move.w		#thUSER,-(sp)			* init SR (user mode)
 190:				pea.l		inissp(pc)				* init SSP
-					pea.l		iniusp(pc)				* INIT USP
-					move.w		#2,-(sp)				* execution priority (2 highest)
-					pea.l		myname(pc)				* thread name
-					DOS			_OPEN_PR				*
-	*				lea.l		28(sp),sp				*
-					tst.l		d0						*
-					bmi			kperr					* registration failed
-					
-					pea.l		keepms(pc)				* resdicent process also output
+191					pea.l		iniusp(pc)				* INIT USP
+192					move.w		#2,-(sp)				* execution priority (2 highest)
+193					pea.l		myname(pc)				* thread name
+194					DOS			_OPEN_PR				*
+195	*				lea.l		28(sp),sp				*
+196					tst.l		d0						*
+197					bmi			kperr					* registration failed
+198					
+199					pea.l		keepms(pc)				* resdicent process also output
 200:				DOS			_PRINT					*
-	*				addq.l		#4,sp					*
-
-					clr.w		-(sp)					* resident end
-					move.l		#KEEPSIZ,-(sp)			*
-					DOS			_KEEPPR					*
-
-	*
-	*			Error exit
-	*
+201	*				addq.l		#4,sp					*
+202
+203					clr.w		-(sp)					* resident end
+204					move.l		#KEEPSIZ,-(sp)			*
+205					DOS			_KEEPPR					*
+206
+207	*
+208	*			Error exit
+209	*
 210:kperr:			lea.l		errms1(pc),a0			* diplicate attempt to reside
-					moveq.l		#thCONFLICT,d1			*
-					cmp.l		d1, d0					*
-					beq			error
-					*
-					lea.l		errms2(pc),a0			* thread count limit
-					moveq.l		#thNOMORE,d1			*
-					cpm.l		d1,d0					*
-					beq			error					*
-					*
+211					moveq.l		#thCONFLICT,d1			*
+212					cmp.l		d1, d0					*
+213					beq			error
+214					*
+215					lea.l		errms2(pc),a0			* thread count limit
+216					moveq.l		#thNOMORE,d1			*
+217					cpm.l		d1,d0					*
+218					beq			error					*
+219					*
 220:				lea.l		errms0(pc),a0			* process is not set
-					bra			error					*
-	*
-	rmerr1:			lea.l		errms3(pc),a0			* although it isn't resident
-					bra			error					* you tried to cancel it
-	*
-	rmerr2:			lea.l		errms4(pc),a0			* fail to cancel resident process
-					bra			error					*
-	*
-	vererr:			lea.l		verrms(pc),a0			* incorrect Human68k
+221					bra			error					*
+222	*
+223	rmerr1:			lea.l		errms3(pc),a0			* although it isn't resident
+224					bra			error					* you tried to cancel it
+225	*
+226	rmerr2:			lea.l		errms4(pc),a0			* fail to cancel resident process
+227					bra			error					*
+228	*
+229	vererr:			lea.l		verrms(pc),a0			* incorrect Human68k
 230:				bra			error					* version
-	*
-	usage:			lea.l		usgmes(pc),a0			* show usage
-					*
-	error:			move.w		#STDERR,-(sp)			* print message 
-					pea.l		(a0)					* in stderr
-					DOS			_FPUTS					*
-	*				addq.l		#6.sp					*
-
-					move.w		#1,-(sp)				* error exit
+231	*
+232	usage:			lea.l		usgmes(pc),a0			* show usage
+233					*
+234	error:			move.w		#STDERR,-(sp)			* print message 
+235					pea.l		(a0)					* in stderr
+236					DOS			_FPUTS					*
+237	*				addq.l		#6.sp					*
+238
+239					move.w		#1,-(sp)				* error exit
 240:				DOS			_EXIT2					*
-	*
-	myname:			.dc.b		'BGTEST',0				* my thread name
-	*
-	keepms			.dc.b		'BGTEST is now resident'，CR，LF，0
-	remmes: 		.dc.b		'BGTEST is not longer resident'，CR，LF，0
-	*
-	errms0: 		.dc.b		'CONFIG.SYSのPROCESSが'
-					.dc.b		'doesnt seem to be set' CR， LF， 0
-	errmsl: 		.dc.b		'BGTES is already resident', CR, LF， 0
+241	*
+242	myname:			.dc.b		'BGTEST',0				* my thread name
+243	*
+244	keepms			.dc.b		'BGTEST is now resident'，CR，LF，0
+245	remmes: 		.dc.b		'BGTEST is not longer resident'，CR，LF，0
+246	*
+247	errms0: 		.dc.b		'CONFIG.SYSのPROCESSが'
+248					.dc.b		'doesnt seem to be set' CR， LF， 0
+249	errmsl: 		.dc.b		'BGTES is already resident', CR, LF， 0
 250:errms2: 		.dc.b		'No more background processes', CR, LF, 0
-					.dc.b		'cant be started', CR, LF, 0
-	errms3: 		.dc.b		'BGTEST not built yet'，CR，LF，0
-	errms4: 		.dc.b		'BGTEST cannot be unresident'，CR， LF ，0
-	verrms:			.dc.b		'wrong Human68k version'，CR， LF， 0
-	*
-	usages:			.dc.b		'feature: background process test'，CR， LF
-					.dc.b		'BGTEST [/r]'，CR，LF
-					.dc.b		TAB，'./R' ，TAB， ' to exit'， CR，LF, 0
-	*
+251					.dc.b		'cant be started', CR, LF, 0
+252	errms3: 		.dc.b		'BGTEST not built yet'，CR，LF，0
+253	errms4: 		.dc.b		'BGTEST cannot be unresident'，CR， LF ，0
+254	verrms:			.dc.b		'wrong Human68k version'，CR， LF， 0
+255	*
+256	usages:			.dc.b		'feature: background process test'，CR， LF
+257					.dc.b		'BGTEST [/r]'，CR，LF
+258					.dc.b		TAB，'./R' ，TAB， ' to exit'， CR，LF, 0
+259	*
 260:				.bss
-					.even
-	*
-	thinfo:			.ds.b		SIZEofTHREADINFO		* thread information storage area
-	*
-					.stack
-					.even
-	*
-					.ds.l		2048
-	inisp:
+261					.even
+262	*
+263	thinfo:			.ds.b		SIZEofTHREADINFO		* thread information storage area
+264	*
+265					.stack
+266					.even
+267	*
+268					.ds.l		2048
+269	inisp:
 270:
-					.end		ent
+271					.end		ent
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 
 Let's look at it from the non-resident department.

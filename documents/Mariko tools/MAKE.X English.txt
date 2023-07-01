@@ -1,0 +1,25 @@
+X68k Make v1.10 Copyright 1990,91,92 SHARP/Hudson
+Usage: make [switch|macro definition|goal target name]...
+         /a Ignore timestamps and check
+         /c path change directory
+         /d display debug information
+         /D Show database after every update exam
+         /e Allow environment variables to cover definitions in files
+         /f file read 'file' as makefile
+         /h Show this message (do nothing else)
+         /i ignore command errors
+         /I path add 'path' to list of include paths
+         /k continue other tests even if an error occurs
+         /n do not update
+         /N do not test
+         /o do not check name 'name'
+         /p show database
+         /q Do not update, return test result as exit code
+         /r do not use built-in rules
+         /R name 'name' must be updated
+         /s don't show command line
+         /S cancel previous /k switch
+         /t update timestamp only
+         /v display version information
+         /w display current directory
+         /W name 'name' as brand new

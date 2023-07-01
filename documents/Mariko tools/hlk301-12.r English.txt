@@ -1,0 +1,27 @@
+HLK evolution version 3.01+12 Copyright 1989-94 SALT, 1999/07/16 Eriko Tachibana.
+usege: hlk [switch] file [+file] ...
+         -a / -an Do not add .x when omitting extension of executable file
+         -b num set base address
+         -d label=num define symbol
+         -e num set alignment value
+         -g num Load mode setting (0 to 2)
+         -i file specify indirect file
+         -l use environment variable lib as library path
+         -l<lib> link lib<lib>.a
+         -L path Specify library search path
+         -o file Specify execution file name
+         -p[file] create map file
+         -r / -rn Create .r format executable
+         -s embed section information in executable
+         -t show title on startup
+         -w disable warning output
+         -x disable output of symbol table
+         -0 / -1 Do not/do .ctor/.dtor
+
+         --help (-h) display usage
+         Cancel the --quiet (-z) --verbose (-v) option
+         --verbose (-v) verbose
+         --version display version
+
+         The contents of the environment variable HLK are inserted before the command line.
+         Link the object with + at the beginning of the file name to the beginning.

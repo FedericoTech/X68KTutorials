@@ -1,0 +1,22 @@
+X68k SILK Hi-Speed Linker v2.29 Copyright 1989-93 SALT
+   modified for GCC Lv.3 Exp.3 (c)1993,94 by Charlie / KYA soft
+Usage: lk [switch] file [file...]
+         -a Do not add .x when omitting extension of executable file
+         -d label=nn label declaration (hexadecimal)
+         -t show title on startup
+         -i file specify indirect file
+         -l use environment variable lib as library path
+         -m nn maximum number of symbols (201 < nn < 65536)
+         -o file name of executable file
+         -p [file] create map file
+         -s embed section information in executable
+         -v verbose mode
+         -w disable output of warnings
+         -x disable output of symbol table
+         -z cancel the -v option
+         -0 don't do anything for GCC 2
+
+         The contents of the environment variable G2LK are appended to the end of the command line
+         If the beginning of the object file name is '+', the string after that is
+         Link to the top of the program assuming it as a file name
+         -m option is ignored even if specified

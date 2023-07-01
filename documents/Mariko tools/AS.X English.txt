@@ -1,0 +1,15 @@
+X68k Assembler v3.00 Copyright 1987,88,89,90,91,92,93 SHARP/Hudson
+Usage: as [switch] filename
+         /t path Temporary path specification
+         /o name object file name
+         /i path include path specification
+         /p [file] create list file
+         /n disable optimization
+         /w disable warning error output
+         /u make undefined symbols external references
+         /d make all symbols external definitions
+         /8 Set symbol identification length to 8 bytes
+         /m nn maximum number of symbols (270<nn<32768)
+         /s symbol define symbol
+         /x [file] print symbols
+         /a Absolute short address format compatible mode

@@ -1,0 +1,22 @@
+X68k High-speed Assembler v2.50 Copyright 1990,91,92 by Y.Nakamura
+Usage: as [switch] filename
+         /t path Specify temporary path
+         /o name object file name
+         /i path include path specification
+         /p [file] create list file
+         /n disable optimization
+         /w [n] Specify warning level (0 to 4)
+         /u make undefined symbols external references
+         /d make all symbols external definitions
+         /8 Set symbol identification length to 8 bytes
+         /m nn maximum number of symbols (1000<nn<32768)
+         /s symbol[=num] symbol definition
+         /x [file] print symbols
+         /a Absolute short address format compatible mode
+         /q disable conversion to quick immediate format
+         /f [f,m,w,p] format specification of list file
+         /l don't show title on startup
+         /z Disable warning output to HAS original instruction
+         /r allow relative section instructions
+
+         The contents of the environment variable HAS will be appended to the end of the command line

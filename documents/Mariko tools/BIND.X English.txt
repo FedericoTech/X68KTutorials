@@ -1,0 +1,12 @@
+X68k Binder v1.00 Copyright 1989 SHARP/Hudson
+Usage: bind [switch] filename [filename...]
+         /u file update (default)
+         /x extract X file
+         /d delete X file
+         /l list output
+         /o file specify bind file name
+         /t path Temporary path name specification
+
+         Specify one of the /u /x /d /l switches
+         Specify only the bind file when the /l switch is attached
+         Omit the /o switch to operate on the first file

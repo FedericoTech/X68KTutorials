@@ -1,0 +1,10 @@
+X68k Archiver v1.00 Copyright 1987 SHARP/Hudson
+Usage: ar [switch] library [file...]
+         /a ASCII file mode
+         /b create backup file
+         /u file update (default)
+         /x extract file
+         /d file deletion
+         /l list output
+         /i file specify indirect file
+         /v verbose mode

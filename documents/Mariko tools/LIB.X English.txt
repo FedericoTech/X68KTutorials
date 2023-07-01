@@ -1,0 +1,10 @@
+X68k Librarian v1.10 Copyright 1990,91,92 SHARP/Hudson
+Usage: lib [switch] file [file...]
+         /m nn maximum number of symbols (201<nn<65536)
+         /b create backup file
+         /u file update (default)
+         /x extract file
+         /d file deletion
+         /l list output
+         /i file specify indirect file
+         /v verbose mode

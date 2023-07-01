@@ -1,0 +1,22 @@
+X68k High-speed Assembler v3.09 Copyright 1990-94 by Y.Nakamura
+Usage: as [switch] filename
+         -t path Temporary path specification
+         -o name object file name
+         -i path Include path specification
+         -p [file] create list file
+         -n disable optimization
+         -w [n] Specify warning level (0 to 4)
+         -u Make undefined symbols external references
+         -d make all symbols external definitions
+         -8 Set symbol identification length to 8 bytes
+         -s symbol[=num] symbol definition
+         -x [file] output symbols
+         -f [f,m,w,p] List file format specification
+         -l show title on startup
+         -e defaults to longwords for xref offsets
+         -b Make longword PC indirection absolute long
+         -g output debugging information for SCD
+         -c Optimize for HAS v2.x compatibility
+         -m 680x0 Specify CPU to assemble
+
+         The contents of the environment variable HAS will be appended to the end of the command line

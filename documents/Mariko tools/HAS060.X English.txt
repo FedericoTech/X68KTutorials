@@ -1,0 +1,28 @@
+X68k High-speed Assembler v3.09+87 Copyright 1990-94/96-99 Y.Nakamura/M.Kamada
+Usage: as [switch] filename
+         -1 absolute long → PC indirect (with -b1 and -e)
+         -8 Set symbol identification length to 8 bytes
+         -b[n] PC indirect → absolute long (0=[prohibited], [1]=68000,2=MEM,3=1+2,4=ALL,5=1+4)
+         -c[n] optimizations (0=disallow (with -k1), 1=disallow (d,An), [2]=v2 compatible, 3=[v3 compatible], 4=allow)
+         -c<mnemonic> Expand software emulation instructions (FScc/MOVEP)
+         -d make all symbols external definitions
+         -e defaults to longwords for xref offsets
+         -f[f,m,w,p] List file format specification (Page break[1], Macro expansion[0], Width[136], Number of page lines[58])
+         -g output debugging information for SCD
+         -i <path> include path specification
+         -j[n] Enhanced symbol overwrite prohibition condition (bit0:[1]=SET,bit1:[1]=OFFSYM)
+         -k[n] 68060 errata countermeasures (0=[Yes] (-n is disabled), [1]=No)
+         -l show title on startup
+         -m <680x0|5x00> Specify CPU to assemble ([68000] to 68060/5200 to 5400)
+         -n omit indeterminate size optimizations in pass 1 (with -k1)
+         -o <name> object file name
+         -p [file] create list file
+         -s <n> Specifies the maximum number of digits for numeric local labels (1 to [4])
+         -s <symbol>[=n] symbol definition
+         -t <path> Temporary path specification
+         -u Make undefined symbols external references
+         -w[n] Specify warning level (0=all suppression, 1,[2],3,4=[all notifications])
+         -x [file] output symbols
+         -y[n] pre-defined symbols (0=[disabled], [1]=allowed)
+     The contents of the environment variable HAS are inserted before the command line
+     Don't consider '/' as a switch when HAS environment variable starts with '*'
