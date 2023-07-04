@@ -79,25 +79,65 @@ $ff47   _CURDIR         Get working directory
 $ff48   _MALLOC         Reserve memory										void* _dos_malloc(int size)
 $ff49   _MFREE          Relinquish memory block								int _dos_mfree(void* memptr) 
 $ff4a   _SETBLOCK       Modify memory block									int _dos_setblock(void* memptr, int newlen)
-$ff4b   _EXEC           Load and execute program
-$ff4c   _EXIT2          End program with exit code
-$ff4d   _WAIT           Get process exit code
+$ff4b   _EXEC           Load and execute program							geneal commad: int _dos_exec2(int md, 		  const char *file,  const char *p1, 				 const char *p2)
+																			0 load and run:				int _dos_loadexec (const char *file, const struct _comline *comline, const char *envptr)
+																			1 load only:				int _dos_load     (const char *file, const struct _comline *comline, const char *envptr)
+																			2 Find command path:		int_ _dos_pathchk (const char *file, const struct _comline *comline, const char *envp)
+																			3 Special load:				int _dos_loadonly (const char *file, const void *loadadr, 			 const void *limitadr)
+																			4 Exec only:				int _dos_execonly(void *jmpaddr)
+																			5 get the module number:	int_ _dos_bindno (const char *file1, const char *file2)	
+
+$ff4c   _EXIT2          End program with exit code							void _dos_exit2(int code)
+$ff4d   _WAIT           Get process exit code								int _dos_wait()
 $ff4e   _FILES          Find file
 $ff4f   _NFILES         Find next file
 
 $ff80   _SETPDB         Modify process data block							struct _psp* _dos_setpdb(struct _psp* pdbadr)
-$ff81   _GETPDB         Get process data block								struct _psp* _dos_getpdb()
+$ff81   _GETPDB         Get process data block. same as [extern int _PSP;]	struct _psp* _dos_getpdb()
 $ff82   _SETENV         Set environment variable							int _dos_setenv (const char* name, const char* env, const char* buffer)
 $ff83   _GETENV         Get environment variable							int _dos_getenv (const char* name, const char* env, char* buffer)
 $ff84   _VERIFYG        Get verify flag
-$ff85   _COMMON         Control common region
+$ff85   _COMMON         Control common region								
+																			Search common areas
+																			common(0,NAME)
+																			int _dos_common_ck(const char *name)
+																				return _di_common_ck (0, name);
+
+																			Read from common area
+																			common(1,NAME,POS,BUFFER,LEN)
+																			int _dos_common_rd(const char *name, int pos, char *buffer, int len)
+																				return _di_common_rd (1, name, (short) pos, buffer, (short) len);
+																				
+																			Writing to common area
+																			Securing common areas
+																			common(2,NAME,POS,BUFFER,LEN)
+																			int _dos_common_wt(const char *name, int pos, const char *buffer, int len)
+																				return _di_common_wt (2, name, (short) pos, buffer, (short) len);
+																				
+																			
+																			Lock common area
+																			common(3,NAME,POS,ID_PSP,LEN)
+																			int _dos_common_lk(const char *name, int pos, int id_psp, int len)
+																				return _di_common_lk (3, name, (short) pos, (short) id_psp, (short) len);
+						
+																			Unlock the common area
+																			common(4,NAME,POS,ID_PSP,LEN)
+																			int _dos_common_fre(const char *name, int pos, int id_psp, int len)
+																				return _di_common_fre (4, name, (short) pos, (short) id_psp, (short) len);
+																				
+																			Delete common area
+																			common(5,NAME)
+																			int _dos_common_del(const char *name)
+																				return _di_common_del (5, name);
+																			
 $ff86   _RENAME         Rename/move file
 $ff87   _FILEDATE       Get/set file modified date
 $ff88   _MALLOC2        Reserve memory										void* _dos_malloc2 (int md, int size)
 																			void* _dos_malloc0 (int md, int size, struct _psp *pspadr)
 $ff8a   _MAKETMP        Make temporary file
 $ff8b   _NEWFILE        Make new file
-$ff8c   _LOCK           Lock file
+$ff8c   _LOCK           Lock file											int _dos_lock(int fno, int offset, int len)
+																			int _dos_unlock (int fno, int offset, int len)
 $ff8f   _ASSIGN         Get/set/delete virtual drive/directory allocation
 
 $ffaa   (unlisted)      Set FFLUSH mode (unlisted)
@@ -117,7 +157,8 @@ $fff4   _DISKWRT        Block device direct output
 $fff5   _INDOSFLG       Get pointer to OS' work area
 $fff6   _SUPER_JSR      Subroutine call										void _dos_super_jsr(void (*func)(), struct _dregs *inregs, struct _dregs *outregs)
 $fff7   _BUS_ERR        Inspect bus error occurrence
-$fff8   _OPEN_PR        Register background task
+$fff8   _OPEN_PR        Register background task							int _dos_open_pr (const char *name, int counter, int usp, int ssp, int sr, int pc, struct _prcctrl *buff, long sleep_time)
+
 $fff9   _KILL_PR        Kill this process									int _dos_kill_pr()
 $fffa   _GET_PR         Get thread management info
 $fffb   _SUSPEND_PR     Force-sleep thread									int _dos_suspend_pr(int tid)
@@ -1218,11 +1259,12 @@ Argument
 	PRGLEN.l Number of resident bytes
 	CODE.w Exit code
 
-	End the process leaving the PRGLEN byte (not including the PSP part). Specified
-	If the number of bytes cannot be secured, the current memory block size remains resident.
-	Exit. Opened file handles are closed.
-	The size that actually resides in memory is the specified number of resident bytes + memory management point.
-	16 bytes + process management pointer 240 bytes.
+	Terminate the process leaving PRGLEN bytes (not including the PSP part).
+	If the specified number of bytes cannot be secured, the current memory 
+	block size remains resident and terminated.
+	An open filehandle is closed.
+	The size that actually resides in memory is the specified resident 
+	byte count + 16 bytes of memory management pointer + 240 bytes of process management pointer.
 
 	move	CODE,-(sp)
 	move.l	PRGLEN,-(sp)
@@ -1887,114 +1929,121 @@ Return error code
 
 ==============================================================================
 
-$ ff4b _ EXEC program loading / running
+$ff4b _EXEC Load/execute program
 
-Argument MD.w Module number and mode (MODULE.b × 256 + MODE.w)
-	FILE.l Filename pointer
+Argument 
+	MD.w Module number and mode (MODULE.b×256+MODE.w)
+	FILE.l file name pointer
 	CMDLINE.l command line pointer
 	LOADADR.l load address
-	EXECADR.l Execution address
-	FILE2.l Filename in the overlay X file
-	ENVPTR.l Environment pointer
-	LIMIT.l Limit address
-	TYPE.b file type (upper 8 bits of FILE)
+	EXECADR.l execution address
+	FILE2.l file name in overlay X file
+	ENVPTR.l environment pointer
+	LIMIT.l limit address
+	TYPE.b File type (upper 8bit of FILE)
 
-Return value MODE = 0,4
+Return value 
+	MODE = 0,4 	(load and run / Exec only) (_dos_loadexec / _dos_execonly)
 		Process exit code (error code if negative)
-		When the process ends, d1-d7 / a1-a6 is undefined.
-	MODE = 1
-		d0.l Program execution address (error code if negative)
-		a0.l Memory management pointer
-		a1.l End of program
+		d1-d7/a1-a6 are undefined when the process ends.
+
+	MODE = 1 	(load only) (_dos_load)
+		d0.l program execution address (error code if negative)
+		a0.l memory management pointer
+		a1.l end of program
 		a2.l command line
-		a3.l Environment pointer
-		a4.l Execution address
-	MODE = 2
+		a3.l environment pointer
+		a4.l execution address
+
+	MODE = 2	(Find command path) (_dos_pathchk)
 		Error code
-	MODE = 3
-		Program length (error code if negative)
-	MODE = 5
+
+	MODE = 3	(Special load) (_dos_loadonly)
+		program length (error code if negative)
+
+	MODE = 5 	(get the module number) (_dos_bindno)
 		Module number x 256 (error code if negative)
 
-	Load / execute the file specified by FILE according to the value of mode MODE.
+Load/execute the file specified by FILE according to the value of mode MODE.
 
-	MODE = 0
-		Use CMDLINE to specify the command line, ENVPTR to specify the environment, and FILE to specify the environment.
-		Load and execute the specified file.
-	MODE = 1
-		Use CMDLINE to specify the command line, ENVPTR to specify the environment, and FILE to specify the environment.
-		Load the specified file. If it ends normally, set MODE = 4
-		To do.
-	MODE = 2
-		Search for path from the environment specified by ENVPTR, and the frame specified by FILE.
-		Separate the end line into the full path filename and command line, FILE and
-		Set to each pointer of CMDLINE.
-		File name buffer FILE must be 90 bytes or more, command line buff
-		CMDLINE requires 256 bytes or more.
-	MODE = 3
-		Specify the load address with LOADADR and the limit address with LIMIT.
-		Load the file specified by FILE.
-	MODE = 4
+	MODE = 0 	(load and run) (_dos_loadexec)
+		Specify the command line with CMDLINE, the environment with ENVPTR, 
+		load the file specified with FILE, and execute it.
+
+	MODE = 1	(load only) (_dos_load)
+		Specify the command line with CMDLINE, the environment with ENVPTR, 
+		and load the file specified with FILE.If the command ends normally, 
+		be sure to execute MODE = 4.
+	
+	MODE = 2	(Find command path) (_dos_pathchk)
+		Searches path from the environment specified by ENVPTR, divides the 
+		command line specified by FILE into a full path file name and command line, 
+		and sets the FILE and CMDLINE pointers.
+		The file name buffer FILE must be 90 bytes or more, and the command line 
+		buffer CMDLINE must be 256 bytes or more.
+	
+	MODE = 3	(Special load) (_dos_loadonly)
+		Specify the load address with LOADADR, the limit address with LIMIT, 
+		and load the file specified with FILE.
+	
+	MODE = 4	(Exec only) (_dos_execonly)
 		Execute the program from the address specified by EXECADR.
 		Used when executing after loading with MD = 1.
-	MODE = 5
-		The overlay specified by FILE in the overlay X file specified by FILE2.
-		Find out the module number of the file.
-		A file whose offset from the beginning of the bind list is greater than $ fffff00
-		Returns the number of bit-inverted offset values ​​as the module number.
-		However, files with negative offset values ​​like this cannot be loaded.
-		Does not work properly with Human68k version 3.02 (specified by FILE2)
-		Searched for the file name with the first byte extension of the file name changed to X
-		Ru).
+	
+	MODE = 5	(get the module number) (_dos_bindno)
+		Find the module number of the file specified by FILE2 in the overlay X file specified by FILE.
+		For files whose offset from the beginning of the bind list is greater than $fffff00, 
+		the number obtained by bit-reversing the offset value is returned as the module number.
+		However, such files with negative offset values cannot be loaded.
+		It does not work properly with Human68k version 3.02.
 
-	When MODE = 0 to 2, if 0 is specified for ENVPTR, the own environment is used.
-	When MODE = 0,1,3, MODULE modifies each file in the overlay X file.
-	Joule number (0 to 255) can be specified. Also, the extension of the executable file name
-	If is neither .X .Z .R, then the file type is in the upper 8 bits of FILE.
-	Specify TYPE, thereby specifying the format of the file.
+When MODE = 0 (load and exec) to 2 (Find command path), if ENVPTR is set to 0, use your own environment.
+When MODE = 0 (load and exec), 1 (load only), 3 (Special load), MODULE can specify the module number (0 to 255) of each file in 
+	the overlay X file. If it is neither, specify the file type TYPE in the upper 8 bits of FILE, 
+	and specify the format of the file accordingly.
 
-	TYPE = 1	.R
-	TYPE = 2	.Z
-	TYPE = 3	.X
+	TYPE = 1 .R
+	TYPE = 2 .Z
+	TYPE = 3 .X
 
 MD = 0,1
-	pea	(ENVPTR)
-	pea	(CMDLINE)
+	pea (ENVPTR)
+	pea (CMDLINE)
 	pea (FILE)
-	move.b	TYPE,(sp)
-	move	MD,-(sp)
-	DOS _EXEC
-	lea	(14,sp),sp
+	move.b TYPE,(sp)
+	move MD,-(sp)
+	DOS_EXEC
+	lea (14,sp),sp
 
 MD = 2
-	pea	(ENVPTR)
-	pea	(CMDLINE)
+	pea (ENVPTR)
+	pea (CMDLINE)
 	pea (FILE)
-	move	MD,-(sp)
-	DOS _EXEC
-	lea	(14,sp),sp
+	move MD,-(sp)
+	DOS_EXEC
+	lea (14,sp),sp
 
 MD = 3
-	pea	(LIMIT)
-	pea (LOADADR)
+	pea (LIMIT)
+	pea (LOAD ADR)
 	pea (FILE)
-	move.b	TYPE,(sp)
-	move	MD,-(sp)
-	DOS _EXEC
-	lea	(14,sp),sp
+	move.b TYPE,(sp)
+	move MD,-(sp)
+	DOS_EXEC
+	lea (14,sp),sp
 
 MD = 4
-	pea	(EXECADR)
-	move	MD,-(sp)
-	DOS _EXEC
-	addq.l #6,sp
+	pea (EXECADR)
+	move MD,-(sp)
+	DOS_EXEC
+	addq.l#6,sp
 
 MD = 5
-	pea	(FILE2)
+	pea (FILE2)
 	pea (FILE)
-	move	MD,-(sp)
-	DOS _EXEC
-	lea	(10,sp),sp
+	move MD,-(sp)
+	DOS_EXEC
+	lea (10,sp),sp
 
 ==============================================================================
 
@@ -2090,7 +2139,8 @@ Return error code
 
 $ ff80 _SETPDB Move management process
 
-Argument PDBADR.l Process management pointer
+Argument 
+	PDBADR.l Process management pointer
 
 Process management pointer before the return value
 
@@ -2113,7 +2163,8 @@ Return value Current process management pointer
 
 $ ff82 _SETENV Setting environment variables
 
-Argument ENVNAME.l Pointer to environment variable name
+Argument 
+	ENVNAME.l Pointer to environment variable name
 	ENVPTR.l Environment pointer
 	A pointer to the value of the ENVVAL.l variable
 
@@ -2136,7 +2187,8 @@ Return error code
 
 Get the contents of the $ ff83 _GETENV environment variable
 
-Argument ENVNAME.l Pointer to environment variable name
+Argument 
+	ENVNAME.l Pointer to environment variable name
 	ENVPTR.l Environment pointer
 	BUFFER.l Buffer pointer
 
@@ -2363,7 +2415,8 @@ Return value File handle of the created file (error code if negative)
 
 $ ff8c _LOCK File locking
 
-Argument MD.w control mode
+Argument 
+	MD.w control mode
 	FILENO.w file handle
 	OFFSET.l Offset from the beginning of the file
 	LEN.l Number of bytes to lock / unlock

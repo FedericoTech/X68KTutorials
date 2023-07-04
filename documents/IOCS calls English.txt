@@ -1,11 +1,11 @@
 	--IOCS CALL MANUAL -
 
-================================================= ============================
+==============================================================================
 
 ・ IOCS call list
 
-$ 00 _B_KEYINP Read key data
-$ 01 _B_KEY SNS key input inspection
+$ 00 _B_KEYINP 	Read key data												int _iocs_b_keyinp() 					
+$ 01 _B_KEYSNS 	key input inspection										int _iocs_b_keysns()
 $ 02 _B_SFTSNS Obtaining shift key status
 $ 03 _KEY_INIT Initialization of input relations
 $ 04 _BITSNS Key status acquisition
@@ -26,7 +26,7 @@ $ 12 _HSVTORGB HSV → RGB conversion
 $ 13 _TPALET Text palette setting
 $ 14 _TPALET2 Text palette independent setting
 $ 15 _TCOLOR Text plane specification
-Obtaining $ 16 _FNTADR font address
+$ 16 _FNTADR Obtaining font address
 $ 17 _VRAMGET Text VRAM byte read
 $ 18 _VRAMPUT Text VRAM byte-by-byte write
 $ 19 _FNTGET Font loading
@@ -39,7 +39,7 @@ $ 1f _B_CUROFF Cursor pause
 $ 20 _B_PUTC character display
 $ 21 _B_PRINT String display
 $ 22 _B_COLOR Display color setting
-$ 23 _B_LOCATE Move cursor
+$ 23 _B_LOCATE Move cursor													int _iocs_b_locate(int x, int y)
 $ 24 _B_DOWN_S Move cursor down one line
 $ 25 _B_UP_S Move cursor up one line
 $ 26 _B_UP Move the cursor up by the specified number of lines
@@ -80,7 +80,7 @@ $ 48 _B_ASSIGN Hard disk alternative track settings
 $ 49 _B_WRITED Write corrupted data to 2HD
 $ 4a _B_READID 2Read ID information for HD
 $ 4b _B_BADFMT Disable Hard Disk Corruption Track
-Read corrupted data from $ 4c _B_READDL 2HD
+$ 4c _B_READDL Read corrupted data from 2HD
 $ 4d _B_FORMAT Disk format
 $ 4e _B_DRVCHK 2HD drive status settings
 $ 4f _B_EJECT Disk Ejection / Shipping
@@ -111,18 +111,18 @@ $ 67 _ADPCMMOD ADPCM execution control
 $ 68 _OPMSET OPM register setting
 $ 69 _OPMSNS OPM Status check
 $ 6a _OPMINTST OPM interrupt setting
-$ 6b _TIMERDST Timer-D Interrupt setting
+$ 6b _TIMERDST Timer-D Interrupt setting									int _iocs_timerdst(const void *addr, int mode, int cnt)	
 $ 6c _VDISPST Vertical sync interrupt setting
 $ 6d _CRTCRAS Raster interrupt setting
 $ 6e _HSYNCST Horizontal sync interrupt setting
 $ 6f _PRNINTST Printer interrupt setting
 $ 70 _MS_INIT Mouse initialization
-$ 71 _MS_CURON Mouse cursor display
-$ 72 _MS_CUROF Mouse cursor clear
+$ 71 _MS_CURON Mouse cursor display											void _iocs_ms_curon(void)
+$ 72 _MS_CUROF Mouse cursor clear											void _iocs_ms_curof(void)
 $ 73 _MS_STAT Check the display status of the mouse cursor
 $ 74 _MS_GETDT Check mouse movement / button status
-$ 75 _MS_CURGT Mouse cursor coordinates acquisition
-$ 76 _MS_CURST Mouse cursor coordinates
+$ 75 _MS_CURGT Mouse cursor coordinates acquisition							int _iocs_ms_curgt(void)
+$ 76 _MS_CURST Mouse cursor coordinates										int _iocs_ms_curst(int x, int y)
 $ 77 _MS_LIMIT Mouse cursor movement range setting
 $ 78 _MS_OFFTM Find out how long it takes to release the mouse button
 $ 79 _MS_ONTM Find out how long it takes to press a mouse button
@@ -132,8 +132,8 @@ $ 7c _MS_SEL2 Mouse cursor animation
 $ 7d _SKEY_MOD Soft keyboard control
 $ 7e _DENSNS Calculator control
 $ 7f _ONTIME Check the elapsed time after startup
-$ 80 _B_INTVCS Vector setting
-$ 81 _B_SUPER Supervisor / user mode switching
+$ 80 _B_INTVCS Vector setting												int _iocs_b_intvcs(int vector, int addr)
+$ 81 _B_SUPER Supervisor / user mode switching								int _iocs_b_super(long b_ssp)
 $ 82 _B_BPEEK Read 1 byte from the specified address
 $ 83 _B_WPEEK Read one word from the specified address
 $ 84 _B_LPEEK Read 1 longword from the specified address
@@ -141,7 +141,7 @@ $ 85 _B_MEMSTR Read multiple bytes from the specified address
 $ 86 _B_BPOKE Write 1 byte to the specified address
 $ 87 _B_WPOKE Write one word to the specified address
 $ 88 _B_LPOKE Write to specified address 1 longword
-$ 89 _B_MEMSET Write multiple bytes to the specified address
+$ 89 _B_MEMSET Write multiple bytes to the specified address 				void _iocs_b_memset(void *addr, const void *buf, int_ cnt)	
 $ 8a _DMAMOVE DMA transfer
 $ 8b _DMAMOV_A DMA transfer (array chain)
 $ 8c _DMAMOV_L DMA transfer (link array chain)

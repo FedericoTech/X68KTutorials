@@ -152,52 +152,52 @@
 
 	(1) Securing common areas
 		common(2,NAME,POS,BUFFER,LEN)
-		NAME : Name given to the newly secured common area
-		POS : Position from the beginning to write the data to be initialized
-		BUFFER : Address where the data to be initialized is stored
-		LEN : Number of bytes of data to initialize
-	The return value is the number of bytes of data actually written, or an error code.
+			NAME : Name given to the newly secured common area
+			POS : Position from the beginning to write the data to be initialized
+			BUFFER : Address where the data to be initialized is stored
+			LEN : Number of bytes of data to initialize
+		The return value is the number of bytes of data actually written, or an error code.
 
 	(2) Search common areas
 		common(0,NAME)
-		NAME : Name of common area to search
-	The return value is the number of bytes in the common area if found, or an error if not found.
+			NAME : Name of common area to search
+		The return value is the number of bytes in the common area if found, or an error if not found.
 		
 		la code
 
 	(3) Read from common area
 		common(1,NAME,POS,BUFFER,LEN)
-		NAME : the name of the target common area
-		POS : Position from the beginning of the data to read
-		BUFFER : Address to store read data
-		LEN : Number of bytes of data to read
-	The return value is the number of bytes of data actually read or an error code.
+			NAME : the name of the target common area
+			POS : Position from the beginning of the data to read
+			BUFFER : Address to store read data
+			LEN : Number of bytes of data to read
+		The return value is the number of bytes of data actually read or an error code.
 
 	(4) Writing to common area
 		common(2,NAME,POS,BUFFER,LEN)
-		NAME : the name of the target common area
-		POS : Position from the beginning of the data to be written
-		BUFFER : Address where the data to be written is stored
-		LEN : Number of bytes of data to write
-	The return value is the number of bytes of data actually written, or an error code.
+			NAME : the name of the target common area
+			POS : Position from the beginning of the data to be written
+			BUFFER : Address where the data to be written is stored
+			LEN : Number of bytes of data to write
+		The return value is the number of bytes of data actually written, or an error code.
 
 	(5) Lock common area
 		common(3,NAME,POS,ID_PSP,LEN)
-		NAME : the name of the target common area
-		POS : Position from the beginning of the area to be locked
-		ID_PSP : ID assigned when locking
-		LEN : Number of bytes in the locked area
-	
-	Return value is error code
-	Note: Locking prevents access by anyone but the process or thread with ID_PSP.
+			NAME : the name of the target common area
+			POS : Position from the beginning of the area to be locked
+			ID_PSP : ID assigned when locking
+			LEN : Number of bytes in the locked area
+		
+		Return value is error code
+		Note: Locking prevents access by anyone but the process or thread with ID_PSP.
 
 	(6) Unlock the common area
 		common(4,NAME,POS,ID_PSP,LEN)
-		NAME : the name of the target common area
-		POS : Position from the beginning of the unlocked area
-		ID_PSP : ID assigned when locking
-		LEN : Number of bytes in the unlocked area
-	Return value is error code
+			NAME : the name of the target common area
+			POS : Position from the beginning of the unlocked area
+			ID_PSP : ID assigned when locking
+			LEN : Number of bytes in the unlocked area
+		Return value is error code
 
 	(7) Delete common area
 		common(5,NAME)
@@ -239,11 +239,11 @@
 
 	File locking uses the DOS call lock($ff8c).
 	lock(MD,FILENO,OFFSET,LEN)
-	MD :1 = file lock
-		0 = 〃 release
-	FILENO : File handle of file to lock
-	OFFSET : offset from the beginning of the part to be locked
-	LEN ;number of bytes to lock
+		MD :1 = file lock
+			0 = 〃 release
+		FILENO : File handle of file to lock
+		OFFSET : offset from the beginning of the part to be locked
+		LEN ;number of bytes to lock
 
 8.4 Overlay X files and binding
 

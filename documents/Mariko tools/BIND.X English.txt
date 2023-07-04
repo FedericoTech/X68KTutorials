@@ -10,3 +10,11 @@ Usage: bind [switch] filename [filename...]
          Specify one of the /u /x /d /l switches
          Specify only the bind file when the /l switch is attached
          Omit the /o switch to operate on the first file
+		 
+Examples:
+
+//List files
+run68 bind /l %cd%\container.X
+
+//add files to the container
+run68 bind /u %cd%\program1.x %cd%\program2.X /o %cd%\container.X
