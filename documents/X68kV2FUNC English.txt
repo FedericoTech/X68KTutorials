@@ -547,18 +547,450 @@ However, in the sample program, we let the thread self-destruct instead of reque
 
 8.5.5 Sample program list
 
-  omit
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
+Listing 1; makefile
+────────────────────────────────────────────────────
+hide.x: hidem.x hidesp.x
+		bind /o hide.x hidem.x hidesp.x
+hidem.x: hidem.s
+		as hidem.s
+		lk hidem.o
+hidesp.x: hidesp.s
+		as hidesp.s
+		lk hidesp.o
+
+Listing 2; hidem.s
+────────────────────────────────────────────────────
+*---------------------------------------------------------
+*	Manual sample parent process (hidem.s)
+*	Runs once at the beginning and becomes the parent process of the background process
+*	Also runs when sending a password to stop the thread
+*
+*---------------------------------------------------------
+	.include		doscall.mac
+	.text
+	.even
+start:
+	lea		stkptr,sp			* user stack setting
+	bsr		version_chk			* DOS version check
+	bsr		cl_cpy				* copy commandline
+	bsr		get_id				* Are there threads?
+	tst		d0
+	bmi		exec_pr				* if not, run child process
+	bra		pw_send				* if thre is, pass the password to the thread
+exit_ok:
+	DOS		_EXIT
+exec_pr:						* child process execution
+	bsr		m_free
+	bsr		psp_read			* copy of your file name
+	clr.l	-(sp)				* environment
+	pea		cl_buff				* command line
+	pea		(a0)				* child process file name
+	move.w	d1, -(sp)			* mode
+	DOS		_EXEC
+	lea		14(sp),sp
+	bsr		exec_chk
+	bra		act_pr
+m_free:							* free memory behind parent process
+	lea		start-$100,a0
+	lea		start-$100+$38,a1
+	lea		$10(a0),a0
+	move.l	(a1),a1
+	sub.l	a0,a1
+	move.l	a1,-(sp)
+	move.l	a0,-(sp)
+	DOS		_SETBLOCK
+	addq.l	#8,sp
+psp_read:						* copy filename from PSP
+	move.b	start-$100+$60,d1
+	add.b	#1,d1
+	asl.w	#8,d1
+	clr.b	d1
+	lea		team_work,a1
+	lea		start-$100+$80,a2
+	bsr		str_cpy
+	lea		start-$100+$c4,a2
+	bsr		str_cpy
+	lea		team_work,a0
+	rts
+exec_chk:
+	cmp.l	#$10000,d0
+	blt		exec_err
+	bsr		get_id				* get thread id 
+	tst		d0
+	bmi		nf_err
+	rts
+act_pr:
+	move.l	#0,d5
+	move.w	#$fffb,d6			* active thread
+	bsr		send_cmd
+	tst		d0
+	bmi		send_err
+	bra		exit_ok
+pw_send:
+	cmp.b	#4,(a3)				* is the command line 4 characters?
+	bne		thd_err
+	addq.l	#1,a3
+	bsr		num_chk				* Is the commandline a number?
+	move.l	#4,d5				* Send the password to the thread
+	move.w	#$1000,d6
+	bsr		send_cmd
+	DOS		_CHANGE_PR
+	move.l	#0,d5				* Send password to thread
+	move.w	#$1000,d6
+	bsr		send_cmd
+	tst.l	d0
+	bpl		send_err
+	bra		end_msg
+* Common subrutine
+version_chk:
+	DOS		_VERNUM				* Get DOS version
+	cmp.w	#$200,d0			* Error before version 1.99
+	blt		ver_err
+	cmp.w	#$231,d0			* Version 2.50 and above
+	bhi		ver_err				* 2.50 is judget to be equivalent to 3.00
+	clr.l	d0					* Others are recognized as 2.00
+	rts
+cl_cpy:						* copy command line
+	move.l	start-$100+$20,a2
+	move.l	a2,a3
+	cmp.b	#0,(a2)
+	beq		use_disp
+	lea		cl_buff,a1
+str_cpy:						* string copy
+	move.b	(a2)+,(a1)+
+	tst.b	(a2)
+	bne		str_cpy
+	rts
+send_wait:
+	DOS		_CHANGE_PR
+send_cmd:
+	move.l	d5,-(sp)			* send command to thread
+	lea		cl_buff,a0
+	addq.l	#1,a0
+	move.l	a0,-(sp)
+	move.w	d6,-(sp)
+	move.w	thd_id,-(sp)
+	move.w	my_id,-(sp)
+	DOS		_SEND_PR
+	lea		14(sp),sp
+	cmp.l	#-28,d0
+	beq		send_wait
+	rts
+get_id:							* Subrutine for ID
+	pea		my_tbl				* Find my ID
+	move.w	#-2,-(sp)
+	DOS		_GET_PR
+	addq.l	#6,sp
+	move.w	d0,my_id
+gets_id:
+	pea		thd_tbl				* get thread ID
+	move.w	#-1,-(sp)
+	DOS		_GET_PR
+	addq.l	#6,sp
+	move.w	d0,thd_id
+	rts
+num_chk:						* Is it a number?
+	move.w	#3,d4
+n_cmp:
+	cmp.b	#$30,(a3)
+	blt		thd_err
+	cmp.b	#$39,(a3)+
+	bhi		thd_err
+	dbra	d4,n_cmp
+	rts
+
+* error messages
+end_msg:	pea		end_mes
+			bra		err_msg
+exec_err:	pea		exr_msg
+			bra		err_msg
+nf_err:     pea     nfr_msg
+            bra     err_msg
+use_disp:	pea		use_msg
+			bra		err_msg
+par_err:	pea		par_msg
+			bra		err_msg
+thd_err:	pea		thd_msg
+			bra		err_msg
+send_err:	pea		sdr_msg
+			bra		err_msg
+ver_err		pea		ver_msg
+			bra		err_msg
+err_msg:	DOS		_PRINT
+			addq.l	#4,sp
+			bra		exit_ok
+			.data
+end_mes:	dc.b	'File released!',$0d,$0a,0
+nfr_msg:	dc.b	'Failed to register file',$0d,$0a,0
+exr_msg:	dc.b	'execute child process',$0d,$0a,0
+use_msg:	dc.b	'Usageï¼š hide [filename]',$0d,$0a
+			dc.b	'Prohibits access to files until an arbitrary time.',$0d,$0a
+			dc.b	'You will be asked for to enter'
+			dc.b	'a password and time',$0d,$0a
+			dc.b	'to unlock the command, follow the password'
+			dc.b	'Please enter',$0d,$0a,$0d,$0a
+			dc.b	'>hide XXXX (X is a half-width number)',$0d,$0a,$0d,$0a,0
+thd_msg:	dc.b	'The file is already registered',$0d,$0a,0
+sdr_msg:	dc.b	'communicate',$0d,$0a,0
+par_msg:	dc.b	'Wrong parameters',$0d,$0a,0
+ver_msg:	dc.b	'The DOS version is different',$0d,$0a,0
+crlf:		dc.b	$0d,$0a,0
+team_work:	ds.b	50
+cl_buff:	ds.b	16			* commandline buffer
+my_id		dc.w	-1			* my ID
+thd_id:		dc.w	-1			* Thread ID
+my_tbl		ds.b	116			* my management table
+thd_tbl:	ds.b	96			* Thread management table
+			dc.b	'NEWZ',0	* Thread name
+			dc.l	0
+			ds.l	1024
+stkptr:
+			.end	start
+			
+
+Listing 3; hidesp.s
+────────────────────────────────────────────────────
+*----------------------------------------------------------
+*
+*	Backgroun processing sample		child process (hidsp.s)
+*
+*	The part from startp to endp is the resident part (background processing body)
+*	and the rest is the non-resident part that is executed only once.
+*
+*-----------------------------------------------------------
+	.include		doscall.mac
+	.text
+	.even
+* Beginning of resident division
+startp:
+	move.l	sp,sp_work
+	bsr		vect_set			* change destination of error report
+send_chk:
+	bsr		time_chk
+	cmp.l	#-1,d0
+	beq		fin
+	lea		mes_buff,a3
+	move.w	10(a3),d1			* Check for communication
+	cmp.w	#$-1,d1
+	beq		no_send
+	move.w	8(a3),d2			* Communication command
+	cmp.w	#$1000,d2			* Check receive password command
+	beq		pw_clr
+	cmp.w	#$fff9,d2			* abandon Thread request
+	bne		no_com_send
+exit:							* abandon Thread
+	DOS		_KILL_PR
+no_com_send:					* initialize communication buffer
+	move.w	#0,8(a3)
+	move.w	#-1,10(a3)
+no_send:
+	move.l	#100,-(sp)
+	DOS		_SEEP_PR			* sleep and wait
+	addq.l	#4,sp
+	bra		send_chk
+* comment
+*
+vect_set:						* Setting the processing destination when importing
+	pea		ctrl_c
+	move.w	#_CTRLVC,-(sp)
+	DOS		_INTVCS
+	addq.l	#6,sp
+	rts
+ctrl_c:							* Error abort rutine
+	move.l	sp_work,sp			* current SP for abort temporarily
+	bra		no_send				* give up execution right and go to main
+*	comment long comment
+time_chk:						* time comparison
+	DOS		_GETTIM2
+	tst		d0
+	bmi		exit
+	move.l	d0,d1
+	clr.w	d0
+	swap	d0
+	cmp.b	hour,d0
+	bne		exit_ts
+	move.l	d1,d0
+	lsr		#8,d0
+	cmp.b	min,d0
+	bne		exit_ts
+	move.l	#-1,d0
+exit_ts:
+	rts
+pw_clr:
+	move.w	#1,d0				* Read common area
+	bsr		com_rw
+	lea.l	com_buff,a0
+	lea.l	mes_data,a1
+	addq.l	#2,a0
+	move.l	#3,d1
+pw_cmp:							* password comparison
+	cmp.b	(a0)+,(a1)+
+	bne		break
+	dbra	d1,pw_cmp
+	sub.l	#6,a0				* file close
+	move.w	(a0),-(sp)
+	DOS		_CLOSE
+	addq.l	#2,sp
+fin:
+	pea		com_name			* Discard common name
+	move.w	#5,-(sp)
+	DOS		_COMMON
+	addq.l	#6,sp
+	DOS		_CHANGE_PR
+	bra		exit
+break:
+	bra		no_com_send
+com_rw:							* Common read/write subrutines
+	move.l	#20,-(sp)
+	pea		com_buff
+	move.l	#0,-(sp)
+	pea		com_name
+	move.w	d0,-(sp)
+	DOS		_COMMON
+	lea		18(sp),sp
+	rts
+* Thread data
+*	.data
+com_name:
+			dc.b	'GT-R',0
+* Thread work area
+*	.bss
+hour		ds.b	1
+min			ds.b	1
+sp_work:	ds.l	1
+com_buff:	ds.b	20
+mes_buff:						* inter-thread communication management buffer
+			dc.l	4			*
+			dc.l	mes_data
+			dc.w	0
+			dc.w	-1
+mes_data:						* actual message
+			ds.b	4
+*			.stack
+			ds.l	2048		* system stack for threads
+ssp1:
+			ds.l	512			* user stack for threads
+usp1:
+endp:
+* Temporary from here
+*	.text
+main:
+	lea		user,sp
+	lea		com_buff,a0			* Common buffer
+	bsr		fopen				* pointer file open
+	bsr		get_pw				* password input
+	bsr		get_tm				* time input
+	bsr		com_w				* write common area
+	bsr		thred_open			* create new thread
+	bmi		exit_ok
+	bra		keep				* end of residency
+fopen:
+	move.w	#$0,-(sp)			* Disable file access via sharing
+	addq.l	#1,a2
+	move.l	a2,-(sp)
+	DOS		_OPEN
+	addq.l	#6,sp
+	tst		d0
+	bmi		open_err
+	move.w	d0,(a0)+
+	rts
+get_pw:
+	lea		pw_msg,a1			* password input
+	bsr		disp
+	move.w	#$39,d3
+	move.w	#3,d1
+i_pw:	bsr		i_num
+		add.b	#$30,d5
+		move.b	d5,(a0)+
+		dbra	d1,i_pw
+		lea		clrf,a1
+		bsr		disp
+		rts
+get_tm:
+	lea		tm_msg,a1			* time input
+	bsr		disp
+	move.w	#$32,d3
+	bsr		i_num
+	move.b	#$39,d3
+	cmp.b	#2,d5
+	beq		13
+	bra		12
+13:	move.b	#$33,d3
+12:	bsr		11
+	move.b	d4,hour
+	move.w	#$3a,-(sp)
+	DOS		_PUTCHAR
+	addq.l	#2,sp
+	move.b	#$35,d3
+	bsr		i_num
+	move.b	#$39,d3
+	bsr		11
+	move.b	d4,min
+	lea		clrf,a1
+	bsr		disp
+	rts
+11:
+	mulu	#10,d5
+	move.b	d5,d4
+	bsr		i_num
+	add.b	d5,d4
+	rts
+i_num:
+	DOS		_GETC
+	cmp.b	#$30,d0
+	blt		i_num
+	cmp.b	d3,d0
+	bhi		i_num
+	move.b	d0,d5
+	sub.b	#$30,d5
+	move.w	d0,-(sp)
+	DOS		_PUTCHAR
+	addq.l	#2,sp
+	rts
+com_w:
+	move.l	#2,d0				* write file handle in common area
+	bsr		com_rw
+	tst		d0
+	bmi		exit_ok
+	rts
+thred_open:						* spawn a thread
+	clr.l	-(sp)
+	pea		mes_buff
+	pea		startp
+	move.w	#0,-(sp)
+	pea		ssp1
+	pea		usp1
+	move.w	#$10,-(sp)
+	pea		thd_name
+	DOS		_OPEN_PR
+	lea		28(sp),sp
+	tst		d0
+	bmi		exit_ok
+	rts
+keep:
+	move.l	#endp,a0			* terminate the thread
+	sub.l	#startp,a0
+	move.l	a0,-(sp)
+	DOS		_KEEPPR
+*
+exit_ok
+	DOS		_EXIT
+open_err:
+	lea		or_msg,a1
+	bsr		disp
+	bra		exit_ok
+disp:	move.l	a1,-(sp)
+		DOS		_PRINT
+		addq.l	#4,sp
+		rts
+		.data
+clrf:		dc.b	$0d,$0a,0
+thd_name:	dc.b	'NEWZ',0
+pw_msg:		dc.b	'Please enter password(XXXX;X single-byte number) >',0
+tm_msg:		dc.b	'Please enter time(HH:MM; H:hour,M:minute) >',0
+start_thd:	dc.b	'Denied access',$0d,$0a,0
+or_msg:		dc.b	'File can not be opened.',$0d,$0a,0
+		.stack
+		ds.l	256
+user:
+		.end	main			* run from main.

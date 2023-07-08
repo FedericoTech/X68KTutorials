@@ -57,7 +57,7 @@ $ff31   _KEEPPR         Terminate and stay									void _dos_keeppr (int prglen,
 $ff32   _GETDPB         Get drive parameter block
 $ff33   _BREAKCK        Set break check
 $ff34   _DRVXCHG        Drive exchange
-$ff35   _INTVCG         Get vector handling address
+$ff35   _INTVCG         Get vector handling address							void* _dos_intvcg(int intno)
 $ff36   _DSKFRE         Get remaining disk space
 $ff37   _NAMECK         Expand filename
 $ff39   _MKDIR          Make subdirectory
@@ -79,13 +79,13 @@ $ff47   _CURDIR         Get working directory
 $ff48   _MALLOC         Reserve memory										void* _dos_malloc(int size)
 $ff49   _MFREE          Relinquish memory block								int _dos_mfree(void* memptr) 
 $ff4a   _SETBLOCK       Modify memory block									int _dos_setblock(void* memptr, int newlen)
-$ff4b   _EXEC           Load and execute program							geneal commad: int _dos_exec2(int md, 		  const char *file,  const char *p1, 				 const char *p2)
-																			0 load and run:				int _dos_loadexec (const char *file, const struct _comline *comline, const char *envptr)
-																			1 load only:				int _dos_load     (const char *file, const struct _comline *comline, const char *envptr)
-																			2 Find command path:		int_ _dos_pathchk (const char *file, const struct _comline *comline, const char *envp)
-																			3 Special load:				int _dos_loadonly (const char *file, const void *loadadr, 			 const void *limitadr)
-																			4 Exec only:				int _dos_execonly(void *jmpaddr)
-																			5 get the module number:	int_ _dos_bindno (const char *file1, const char *file2)	
+$ff4b   _EXEC           Load and execute program							general command: int _dos_exec2(int md, 		 const char *file,	const char *p1, 				const char *p2)
+																			0 load and run:				int _dos_loadexec 	(const char *file, 	const struct _comline *comline,	const char *envptr)
+																			1 load only:				int _dos_load     	(const char *file, 	const struct _comline *comline, const char *envptr)
+																			2 Find command path:		int _dos_pathchk	(const char *file, 	const struct _comline *comline, const char *envp)
+																			3 Special load:				int _dos_loadonly 	(const char *file, 	const void *loadadr, 			const void *limitadr)
+																			4 Exec only:				int _dos_execonly	(void *jmpaddr)
+																			5 get the module number:	int _dos_bindno 	(const char *file1, const char *file2)	
 
 $ff4c   _EXIT2          End program with exit code							void _dos_exit2(int code)
 $ff4d   _WAIT           Get process exit code								int _dos_wait()
@@ -146,7 +146,7 @@ $ffac   _GETFCB         Get file control block pointer (unlisted)
 $ffad   _S_MALLOC       Reserve memory block under main memory manager		void* _dos_s_malloc(int md, int size)
 																			void* _dos_s_malloc0(int md, int size, struct _psp *pspadr)
 $ffae   _S_MFREE        Relinquish memory block under main memory manager	int _dos_s_mfree(void* memptr)
-$ffaf   _S_PROCESS      Set sub-memory manager
+$ffaf   _S_PROCESS      Set sub-memory manager								int _dos_s_process(int tid, int start, int size, int i_len)
 
 $fff0   _EXITVC         (address to execute at end of program)
 $fff1   _CTRLVC         (address to execute at CTRL+C abort)
@@ -1260,11 +1260,10 @@ Argument
 	CODE.w Exit code
 
 	Terminate the process leaving PRGLEN bytes (not including the PSP part).
-	If the specified number of bytes cannot be secured, the current memory 
-	block size remains resident and terminated.
+	If the specified number of bytes cannot be secured, 
+	the current memory block size remains resident and terminated.
 	An open filehandle is closed.
-	The size that actually resides in memory is the specified resident 
-	byte count + 16 bytes of memory management pointer + 240 bytes of process management pointer.
+	The size that actually resides in memory is the "specified resident byte count" + 16 bytes of memory management pointer + 240 bytes of process management pointer.
 
 	move	CODE,-(sp)
 	move.l	PRGLEN,-(sp)
@@ -2226,32 +2225,38 @@ Argument
 
 Return value 
 	MD = 0 Number of bytes in common area (error code if negative)
-	MD = 1,2 Number of bytes actually read / written (error code if negative)
+	MD = 1, 2 Number of bytes actually read / written (error code if negative)
 	MD = 3～5 Error code
 
 	Control the common area according to the value of mode MD.
 	Interprocess communication can be easily realized by this DOS call.
 
-	MD = 0
-		Check if the common area specified by NAME exists, and if it exists, the area
-		Returns the size of.
-	MD = 1
-		Point with LEN from the position specified by POS in the common area specified by NAME.
-		Reads the specified number of bytes into the buffer specified by BUFFER.
-	MD = 2
-		Point to the common area specified by NAME with LEN from the position specified by POS.
-		Writes a specified number of bytes from the buffer specified by BUFFER.
-		If the common area specified by NAME does not exist, create it.
+	MD = 0 [int _dos_common_ck(const char *name)]
+		Checks if the common area specified by NAME exists, 
+		and returns the size of the area if it exists.
+
+	MD = 1 [int _dos_common_rd(const char *name, int pos, char *buffer, 	 int len)]
+		Reads the number of bytes specified by LEN from the position 
+		specified by POS in the common area specified by NAME into 
+		the buffer specified by BUFFER.
+
+	MD = 2 [int _dos_common_wt(const char *name, int pos, const char *buffer, int len)]
+		Writes the number of bytes specified by LEN from the position specified by 
+		POS to the common area specified by NAME from the buffer specified by BUFFER.
+		Create the common area specified by NAME if it does not exist.
 		Specify 0 for LEN to truncate.
-	MD = 3
-		Point with LEN from the position specified by POS in the common area specified by NAME.
-		Lock the specified number of bytes by specifying the process with ID_PSP.
-		Access to processes other than those specified by ID_PSP is prohibited.
-	MD = 4
-		Point with LEN from the position specified by POS in the common area specified by NAME.
-		Unlock the specified number of bytes by specifying the process with ID_PSP.
-		Access to processes other than those specified by ID_PSP is allowed.
-	MD = 5
+
+	MD = 3 [int _dos_common_lk(const char *name, int pos, int id_psp, int len)]
+		Locks the number of bytes specified by LEN from the position 
+		specified by POS in the common area specified by NAME by specifying the process by ID_PSP.
+		Access by processes other than those specified by ID_PSP is prohibited.
+
+	MD = 4 [int _dos_common_fre(const char *name, int pos, int id_psp, int len)]
+		Unlocks the number of bytes specified by LEN from the position 
+		specified by POS in the common area specified by NAME by specifying the process by ID_PSP.
+		Access by processes other than those specified by ID_PSP is permitted.
+
+	MD = 5 [int _dos_common_del(const char *name)]
 		Delete the common area specified by NAME.
 
 MD = 0,5
@@ -2661,7 +2666,8 @@ Return error code
 
 $ ffaf _S_PROCESS Sub memory management settings
 
-Argument ID.w Thread ID
+Argument
+	ID.w Thread ID
 	START.l Sub memory management pointer
 	LENGTH.l Number of bytes in the entire memory block
 	I_LEN.l Number of bytes in the first block
@@ -2670,11 +2676,10 @@ Pointer of the memory block (size I_LEN) at the beginning of the return value
 		d0.l = $ ffff00 ?? ID error ($ ?? is the maximum ID)
 		d0.l = -14 LENGTH is less than I_LEN + 16
 
-	Sub memo with the start address specified by START and the number of bytes specified by LENGTH
-	Set re-management. When setting new sub-memory management, be sure to start from the beginning.
-	Since only one block is automatically allocated, specify the number of bytes I_LEN.
-	Subsequent memory allocation requests from threads with the specified ID will be the memory of this sub.
-	Limited to control.
+	Sets the sub memory management with the start address specified by START 
+	and the number of bytes specified by LENGTH. Specify the number of bytes I_LEN.
+	Memory allocation requests from threads with the specified ID hereafter 
+	are limited to memory management of this sub.
 
 	move.l	I_LEN,-(sp)
 	move.l	LENGTH,-(sp)
@@ -2825,7 +2830,8 @@ offset	size
 
 $ fff6 _SUPER_JSR Program subroutine call in supervisor mode
 
-Argument JOBADR.l Processing address
+Argument 
+	JOBADR.l Processing address
 	d0-d7 / a0-a6 Depends on processing
 
 Return value 

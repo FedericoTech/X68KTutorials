@@ -690,7 +690,194 @@ DOS コールの vernum($ff30)を用います。
 
 ８.５.５ サンプルプログラム・リスト
 
-  省略
+リス 卜 1; makefile
+────────────────────────────────────────────────────
+hide.x: hidem.x hidesp.x
+		bind /o hide.x hidem.x hidesp.x
+hidem.x: hidem.s
+		as hidem.s
+		lk hidem.o
+hidesp.x: hidesp.s
+		as hidesp.s
+		lk hidesp.o
 
+リス 卜 2; hidem.s
+────────────────────────────────────────────────────
+	.include		doscall.mac
+	.text
+	.even
+start:
+	lea		stkptr,sp			* ュー ザー スタ ッ クのお ま
+	bsr		version_chk			* DOS の バージ a ン チェ ヴク
+	bsr		cl_cpy				* 3 マンドラ インの コビー
+	bsr		get_id				*  レッ ドは みる か？
+	tst		d0
+	bmi		exec_pr				* 無ければ 予 ブロ セス そ 夕行
+	bra		pw_send				* 11 ればバ スウ— ドそス レヴ ドに att
+exit_ok:
+	DOS		_EXIT
+exec_pr:						*  子 ブロ セスの 実 巧
+	bsr		m_free
+	bsr		psp_read			* 自分の ファイル 名の コビー
+	clr.l	-(sp)				*  境
+	pea		cl_buff				* コマンド 巧
+	pea		(a0)				*  子 プロセス ファイル 名
+	move.w	d1, -(sp)			* 巧— ド
+	DOS		_EXEC
+	lea		14(sp), sp
+	bsr		exec_chk
+	bra		act_pr
+m_free:							* « プロセスの 话 ろの メモリを 解 »
+	lea		start-$100,a0
+	lea		start-$100+$38,a1
+	lea		$10(a0),a0
+	move.l	(a1),a1
+	sub.l	a0,a1
+	move.l	a1,-(sp)
+	move.l	a0,-(sp)
+	DOS		_SETBLOCK
+	addq.l	#8,sp
+psp_read:						* ?5?からフ1^ィルちをコビー
+	move.b	start-$100+$60,d1
+	add.b	#1,d1
+	asl.w	#8,d1
+	clr.b	d1
+	lea		temp_work,a1
+	lea		start-$100+$80,a2
+	bsr		str_cpy
+	lea		start-$100+$c4,a2
+	bsr		str_cpy
+	lea		team_work,a0
+	rts
+exec_chk:
+	cmp.l	#$10000,d0
+	blt		exec_err
+	bsr		get_id				* ス レツ ドの I D を 巧め 
+	tst		d0
+	bmi		nf_err
+	rts
+act_pr:
+	move.l	#0,d5
+	move.w	#$fffb,d6			* ス レツ ドを アクティブ じする
+	bsr		send_cmd
+	tst		d0
+	bmi		send_err
+	bra		exit_ok
+pw_send:
+	cmp.b	#4,(a3)				* コマンド ラインが 4 义 ホかク
+	bne		thd_err
+	addq.l	#1,a3
+	bsr		num_chk				* コマンド ライ ンが R 宇 か マ
+	move.l	#4,d5				* ス レツ ドに バス ワー ドを をる
+	move.w	#$1000,d6
+	bsr		send_cmd
+	DOS		_CHANGE_PR
+	move.l	#0,d5				* スレツ ドに バ スワー ドを まる
+	move.w	#$1000,d6
+	bsr		send_cmd
+	tst.l	d0
+	bpl		send_err
+	bra		end_msg
+* 巧 通 サブルーチン
+version_chk:
+	DOS		_VERNUM				* D O S バー ジ 9 ン の B 巧
+	cmp.w	#$200,d0			* バージ a ン 1， 9 9W 巧は エラー
+	blt		ver_err
+	cmp.w	#$231,d0			* くー ジ a ン 2. SOW 上は エラー
+	bhi		ver_err				* 2.50 は 3.00 巧 当と 巧 »
+	clr.l	d0					* それ W みを 2. 00 と B 謙す る
+	rts
+cl_copy:						*コ ブンド ライ ンの コビー
+	move.l	start-$100+$20,a2
+	move.l	a2,a3
+	cmp.b	#0,(a2)
+	beq		use_disp
+	lea		cl_buff,a1
+ctr_cpy:						* タネ 巧の コ ビー
+	move.b	(a2)+,(a1)+
+	tst.b	(a2)
+	bne		str_cpy
+	rts
+send_wait:
+	DOS		_CHANGE_PR
+send_cmd:
+	move.l	d5,-(sp)			*  ス レッ ドへ コマンドを 送る
+	lea		cl_buff,a0
+	addq.l	#1,a0
+	move.l	a0,-(sp)
+	move.w	d6,-(sp)
+	move.w	thd_id,-(sp)
+	move.w	my_id,-(sp)
+	DOS		_SEND_PR
+	lea		14(sp),sp
+	cmp.l	#-28.d0
+	beq		send_wait
+	rts
+get_id:							* I D を ホめ る サブ ルー チン
+	pea		my_tbl				* 自 々の I D を 巧め る
+	move.w	#-2,-(sp)
+	DOS		_GET_PR
+	addq.l	#6,sp
+	move.w	d0,my_id
+gets_id:
+	pea		thd_tbl				* スレッドの I D を夕 める
+	move.w	#-1,-(sp)
+	DOS		_GET_PR
+	addq.l	#6.sp
+	move.w	d0,thd_id
+	rts
+num_check:						*R ホ か？
+	move.w	#3,d4
+n_cmp
+	cmp.b	#$30,(a3)
+	blt		thd_err
+	cmp.b	#$39,(a3)+
+	bhi		thd_err
+	dbra	d4,n_cmp
+	rts
 
-==============================================================================
+* エラー メ ツセー ジ
+end_msg:	pea		end_mes
+			bra		err_msg
+exec_err:	pea		exr_msg
+			bra		err_msg
+use_disp:	pea		use_msg
+			bra		err_msg
+par_err:	pea		par_msg
+			bra		err_msg
+thd_err:	pea		thd_msg
+			bra		err_msg
+send_err:	pea		sdr_msg
+			bra		err_msg
+ver_err		pea		ver_msg
+			bra		err_msg
+err_msg:	DOS		_PRINT
+			addq.l	#4,sp
+			bra		exit_ok
+			.data
+end_mes:	dc.b	'> ファイル そ M 技し ミした',$0d,$0a,0
+nfr_msg:	dc.d	'フ 7 イ ルを 宜 » で * ませんで しを',$0d,$0a,0
+exr_msg:	dc.d	'子 プロセスの 実 巧に 失 板し » しを',$0d,$0a,0
+use_msg:	dc.d	'使用 ホ： hid6 【ファイルを]',$0d,$0a
+			dc.d	'巧 意の 巧扣 まで フ y イル への アクセス そ 禁止し ます',$0d,$0a
+			dc.d	'バ スウー ド 及び 巧 H を B いて S ますので、 半角 »ネ で'
+			dc.d	'入力して < ださい，',$0d,$0a
+			dc.d	'する じは 巧の ようじ、 コマンド のかに バス ワード '
+			dc.d	'を 入力し で ください，',$0d,$0a,$0d,$0a,0
+			dc.d	'>hide XXXX (X は 半角 R ホ) ',$0d,$0a,$0d,$0a,0
+thd_msg:	dc.d	'R じフ 7 イルが Stt されて いまず',$0d,$0a,0
+sdr_msg:	dc.d	' 巧 できえ せん',$0d,$0a,0
+par_msg:	dc.d	'バ ラメー タが 違います',$0d,$0a,0
+ver_msg:	dc.d	'DOSのバージ 9 ンが違いまず',$0d,$0a,0
+crlf:		dc.d	$0d,$0a,0
+temp_work:	ds.b	50
+cl_buff:	ds.b	16			* コマンド ライ ン のバッ ファ
+my_id		dc.w	-1			* 目々 の I D
+thd_id:		dc.w	-1			* スレッドめ I D
+my_tbl		ds.b	116			*自 々の 音理 チー ブル
+thd_tbl:	ds.b	96			*ス レッ ドの 管 a チー ブル
+			dc.b	'NEWZ',0	*ス レッ ドのを 抗
+			dc.l	0
+			cs.l	1024
+stkptr:
+			.end	start
