@@ -1,0 +1,7 @@
+run68 has309 %cd%\hidem.s
+run68 silk301 %cd%\hidem.o
+
+run68 has309 %cd%\hidesp.s
+run68 silk301 %cd%\hidesp.o
+
+run68 bind /o %cd%\hide.x %cd%\hidem.x %cd%\hidesp.x
