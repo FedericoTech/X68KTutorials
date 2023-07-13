@@ -156,6 +156,8 @@ printf("_PSP: %d\n", _PSP);
 printf("_PSP + size: %d\n", _PSP + sizeof(struct _psp));
 printf("_PSP - OFFSET_PROCESS: %d\n", _PSP - OFFSET_PROCESS);
 printf("_PSP - OFFSET_PROCESS + OFFSET_PROGRAM: %d\n", _PSP - OFFSET_PROCESS + OFFSET_PROGRAM);
+printf("_PSP - OFFSET_PROCESS + OFFSET_PROGRAM: [%d]\n", _PSTA);
+printf("_HEND: [%d]\n", _HEND);
 
 //printf("_PSP - 16 == _PSTA ? [%d]\n", (_PSP - 16) == _PSTA);
 
@@ -165,7 +167,7 @@ printf("_PSP - OFFSET_PROCESS + OFFSET_PROGRAM: %d\n", _PSP - OFFSET_PROCESS + O
 
 
     //pspadr = (void*)_PSP;
-	addr = (int*)(_PSP - OFFSET_PROCESS);	/* previous memory management pointer */
+	addr = (int*)(_PSP - OFFSET_PROCESS);	/* before memory management pointer */
 	oldvector = 0;
 
 	while( addr != NULL ){		/* NULL then it's over */
