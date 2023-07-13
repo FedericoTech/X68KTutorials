@@ -1,0 +1,122 @@
+Here's a brief explanation of each instruction you mentioned in M68000 assembly language:
+
+1. BSR: Branch to Subroutine
+   - It performs a subroutine call by branching to a specified label or address.
+   - Syntax: `bsr destination`
+
+2. CMP.L: Compare Long
+   - It compares two long (32-bit) values and sets condition codes based on the result.
+   - Syntax: `cmp.l source, destination`
+
+3. BEQ: Branch if Equal
+   - It branches to a specified label or address if the previous comparison resulted in an equal condition.
+   - Syntax: `beq destination`
+
+4. LEA: Load Effective Address
+   - It loads the address of a specified operand into a register.
+   - Syntax: `lea source, destination`
+
+5. BNE: Branch if Not Equal
+   - It branches to a specified label or address if the previous comparison resulted in a not equal condition.
+   - Syntax: `bne destination`
+
+6. ADDQ: Add Quick
+   - It performs quick addition by adding an immediate value to a specified operand.
+   - Syntax: `addq #immediate, destination`
+
+7. RTS: Return from Subroutine
+   - It returns from a subroutine by branching back to the caller's address.
+   - Syntax: `rts`
+
+8. BMI: Branch if Minus
+   - It branches to a specified label or address if the previous operation resulted in a negative result.
+   - Syntax: `bmi destination`
+
+9. CLR.W: Clear Word
+   - It sets a specified word-sized operand to zero.
+   - Syntax: `clr.w destination`
+
+10. SWAP: Swap Words
+    - It swaps the high and low bytes of a specified word-sized operand.
+    - Syntax: `swap destination`
+
+11. LSR: Logical Shift Right
+    - It performs a logical right shift operation on a specified operand.
+    - Syntax: `lsr #count, destination`
+
+12. TST: Test Operand
+    - It tests a specified operand and sets condition codes based on the result.
+    - Syntax: `tst source`
+
+13. DBRA: Decrement and Branch if Not Zero
+    - It decrements a specified register and branches to a specified label or address if the result is not zero.
+    - Syntax: `dbra destination, register`
+
+14. SUB.L: Subtract Long
+    - It subtracts a specified value from a destination and sets condition codes based on the result.
+    - Syntax: `sub.l source, destination`
+
+15. PEA: Push Effective Address
+    - It pushes the address of a specified operand onto the stack.
+    - Syntax: `pea source`
+
+16. BRA: Branch Always
+    - It unconditionally branches to a specified label or address.
+    - Syntax: `bra destination`
+
+17. DC.B: Define Constant Byte(s)
+    - It reserves memory and initializes it with the specified byte values.
+    - Syntax: `label: dc.b byte1, byte2, ...`
+
+18. DS.L: Define Storage (Long)
+    - It reserves a specified number of bytes of memory without initializing them.
+    - Syntax: `label: ds.l size`
+	
+19. BLT: branch if less than
+	It branches to the specified label or address if the previous comparison or operation resulted in a less than condition. In other words, it tests if the previous comparison indicated that the source value is less than the destination value.
+	
+20. BHI: branch if higher.
+	It branches to the specified label or address if the previous comparison or operation resulted in a higher condition. It tests if the previous comparison indicated that the source value is higher (greater) than the destination value.
+
+21. move.l sp, sp_work:
+	language copies the value of the stack pointer (SP) register into another register or memory location called sp_work.
+	
+22. moveq.l #__B_INTVCS,d0
+	moves an immediate 32-bit value into register b. this is to then do "trap #15" so that the OS executes that instruction.
+
+23. __asm __volatile(" assembly code here ")
+	to insert assembly code and ask the compiler not to optimize it but leave it as it is
+
+24. move.w	8(a3),d2
+	In summary, the instruction move.w 8(a3), d2 moves a 16-bit value from the memory location (a3 + 8) to the d2 register. The specific memory location accessed depends on the contents of the a3 register plus the offset of 8.
+	
+25. even:
+	This directive ensures that the next memory location is aligned on an even address boundary. 
+	
+26. DC.l data: (Define Constant. type)
+	define initialized memory space to store constant data. compilers normally place it in read-only memory
+
+27. DC.l size: (Define space. type)
+	define uninitialized space and size. compilers normally place it in read-write memory
+	
+28. BCC: (branch if carry clear)
+	used to perform a branch (jump) to a different location in the code based on the state of the carry flag (C) in the processor's status register. 
+
+29.  lea.l 	thinfo(pc),a1: (Load Effective Address)
+	thinfo means the address of the label thinfo as offset from the pc register to load it into a1 register
+	
+30. bss:
+	to initialize with zeroes the declaration aftewards
+
+31. .text:
+	directive is used in assembly language to define the code section or text segment of a program. 
+	
+32. macro and endm:
+	define the start and end of a macro with is a peace of code that gets copied wherever is called as opposed to a function
+
+33. .stack
+	specify beginning of the stack
+		.stack
+			.even
+			.ds.l	256
+	the stack is in an even address and is 256 bytes long of 64 words long
