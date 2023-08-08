@@ -134,10 +134,10 @@ $ 7e _DENSNS Calculator control
 $ 7f _ONTIME Check the elapsed time after startup
 $ 80 _B_INTVCS Vector setting												int _iocs_b_intvcs(int vector, int addr)
 $ 81 _B_SUPER Supervisor / user mode switching								int _iocs_b_super(long b_ssp)
-$ 82 _B_BPEEK Read 1 byte from the specified address
-$ 83 _B_WPEEK Read one word from the specified address
-$ 84 _B_LPEEK Read 1 longword from the specified address
-$ 85 _B_MEMSTR Read multiple bytes from the specified address
+$ 82 _B_BPEEK Read 1 byte from the specified address						int _iocs_b_bpeek (const void *addr)
+$ 83 _B_WPEEK Read one word from the specified address						int _iocs_b_wpeek (const void *addr)
+$ 84 _B_LPEEK Read 1 longword from the specified address					int _iocs_b_lpeek (const void *addr)
+$ 85 _B_MEMSTR Read multiple bytes from the specified address				void _iocs_b_memstr(const void *addr, void *buf, int_ cnt)
 $ 86 _B_BPOKE Write 1 byte to the specified address
 $ 87 _B_WPOKE Write one word to the specified address
 $ 88 _B_LPOKE Write to specified address 1 longword
@@ -985,14 +985,16 @@ Return value is always 0
 
 $ 2e _B_CONSOL Display range setting
 
-Argument d1.l Display start position (does not change when d1.l = -1)
-		d1.hw Display start dot position in the X direction (1008 or less in multiples of 16)
-		d1.w Y 〃 (4 〃 1020 〃)
+Argument 
+	d1.l Display start position (does not change when d1.l = -1)
+	d1.hw Display start dot position in the X direction (1008 or less in multiples of 16)
+	d1.w Y 〃 (4 〃 1020 〃)
 	d2.l display range (does not change when d2.l = -1)
 		d2.hw Number of display digits in the X direction-1 (0 to 127)
 		d2.w Y 〃 Number of lines-1 (0 to 63)
 
-Return value d0.l Always 0
+Return value 
+	d0.l Always 0
 	d1.l Display start offset before change (X / 8 + Y * 128)
 	d2.l 〃 Display range
 
@@ -2407,7 +2409,8 @@ Return value d0.l data
 
 $ 85 _B_MEMSTR Read multiple bytes from the specified address
 
-Argument d1.l Number of bytes transferred-1
+Argument 
+	d1.l Number of bytes transferred-1
 	a1.l Forwarding address
 	a2.l Forwarding address
 
@@ -2455,7 +2458,8 @@ Return value a1.l Next address
 
 $ 89 _B_MEMSET Write multiple bytes to the specified address
 
-Argument d1.l Number of bytes transferred-1
+Argument 
+	d1.l Number of bytes transferred-1
 	a1.l Forwarding address
 	a2.l Forwarding address
 
@@ -2824,14 +2828,14 @@ Return value d0.l Increased number of bytes in the string
 $ ac _SYS_STAT System state setting
 
 Argument d1.l mode
-		d1.l = 0 Obtaining MPU state
-			1 Obtaining the cache status
-			2 Set the cache to the SRAM setting
-			3 Clear cache
-			4 Cache settings
-	d2.l cache enable / disable flag (only when d1.l = 4)
-		bit 1 data cache (0: invalid 1: valid)
-		bit 0 instruction 〃 (〃)
+		d1.l = 	0 Obtaining MPU state
+				1 Obtaining the cache status
+				2 Set the cache to the SRAM setting
+				3 Clear cache
+				4 Cache settings
+		d2.l cache enable / disable flag (only when d1.l = 4)
+			bit 1 data cache (0: invalid 1: valid)
+			bit 0 instruction 〃 (〃)
 
 MPU status when return value d1.l = 0
 		bit 31-16 Clock speed (0.1MHz unit)
@@ -3254,7 +3258,8 @@ Return value d0.l = 0 Normal termination
 
 $ c6 _SP_REGST Sprite register settings
 
-Argument d1.l Vertical blanking interval detection / sprite number
+Argument 
+	d1.l Vertical blanking interval detection / sprite number
 		bit 31 0: Vertical blanking interval detection post-setting 1: Not detected
 		bit 6-0 sprite number (0-127)
 	d2.l X coordinates (0-1023 16 displayed on the far left)
@@ -3271,7 +3276,7 @@ Argument d1.l Vertical blanking interval detection / sprite number
 			3 SP <BG0 <BG1
 
 Return value d0.l = 0 Normal termination
-		-1 Illegal screen mode
+					-1 Illegal screen mode
 
 	Set the sprite register.
 	Setting d2.l/d3.l/d4.l/d5.l to -1 does not change the setting, but when setting for the first time

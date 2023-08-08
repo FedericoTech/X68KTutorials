@@ -1,15 +1,18 @@
-run68 AR.X:					X68k Archiver v1.00 				Copyright 1987 SHARP/Hudson
-run68 AS.X:					X68k Assembler v3.00 				Copyright 1987,88,89,90,91,92,93 SHARP/Hudson
-run68 BIND.X:				X68k Binder v1.00 					Copyright 1989 SHARP/Hudson
-run68 has309.x / has000.x:	X68k High-speed Assembler v3.09 	Copyright 1990-94 by Y.Nakamura
-run68 HAS060.X:				X68k High-speed Assembler v3.09+87 	Copyright 1990-94/96-99 Y.Nakamura/M.Kamada
-run68 has234.x:				X68k High-speed Assembler v2.34 	Copyright 1990,91 by Y.Nakamura
-run68 has250.x: 			X68k High-speed Assembler v2.50 	Copyright 1990,91,92 by Y.Nakamura
-run68 hlk301.x:				X68k SILK Hi-Speed Linker v3.01 	Copyright 1989-94 SALT
-run68 hlk301-12.r:			HLK evolution version 3.01+12 		Copyright 1989-94 SALT, 1999/07/16 Eriko Tachibana.
-run68 LIB.X:				X68k Librarian v1.10 				Copyright 1990,91,92 SHARP/Hudson
-run68 lk.x:					X68k Linker v3.00 					Copyright 1987,88,89,90,91,92,93 SHARP/Hudson
-run68 LK300.X:				X68k Linker v3.00 					Copyright 1987,88,89,90,91,92,93 SHARP/Hudson
-run68 MAKE.X:				X68k Make v1.10 					Copyright 1990,91,92 SHARP/Hudson
-run68 silk229.x:			X68k SILK Hi-Speed Linker v2.29 	Copyright 1989-93 SALT
-run68 silk301.x:			X68k SILK Hi-Speed Linker v3.01 	Copyright 1989-94 SALT
+1987	run68 AR.X:					X68k Archiver v1.00 				Copyright 1987 SHARP/Hudson
+1989	run68 BIND.X:				X68k Binder v1.00 					Copyright 1989 SHARP/Hudson
+
+1991	run68 has234.x:				X68k High-speed Assembler v2.34 	Copyright 1990,91 by Y.Nakamura
+
+1992	run68 MAKE.X:				X68k Make v1.10 					Copyright 1990,91,92 SHARP/Hudson
+1992	run68 LIB.X:				X68k Librarian v1.10 				Copyright 1990,91,92 SHARP/Hudson
+1992	run68 has250.x: 			X68k High-speed Assembler v2.50 	Copyright 1990,91,92 by Y.Nakamura
+
+1993	run68 AS.X:					X68k Assembler v3.00 				Copyright 1987,88,89,90,91,92,93 SHARP/Hudson
+1993	run68 lk.x / LK300.X:		X68k Linker v3.00 					Copyright 1987,88,89,90,91,92,93 SHARP/Hudson
+1993	run68 silk229.x:			X68k SILK Hi-Speed Linker v2.29 	Copyright 1989-93 SALT
+
+1994	run68 has309.x / has000.x:	X68k High-speed Assembler v3.09 	Copyright 1990-94 by Y.Nakamura
+1994	run68 silk301.x / hlk301.x:	X68k SILK Hi-Speed Linker v3.01 	Copyright 1989-94 SALT
+
+1999	run68 HAS060.X:				X68k High-speed Assembler v3.09+87 	Copyright 1990-94/96-99 Y.Nakamura/M.Kamada
+1999	run68 hlk301-12.r:			HLK evolution version 3.01+12 		Copyright 1989-94 SALT, 1999/07/16 Eriko Tachibana.

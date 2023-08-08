@@ -1,0 +1,175 @@
+			CTRL key function list (1/8)
+			
+CTRL+A		Move cursor back one word (<-)
+CTRL+B		Move cursor left (or right) end of the line
+CTRL+C		Roll up screen
+CTRL+D 		Move cursor right one character
+CTRL+E		Move cursor up one line
+CTRL+F		Move cursor one episode forward (->)
+CTRL+G 		Delete 1
+CTRL+H		Character Backspace
+CTRL+I		horizontal tab
+CTRL+J		Display help screen
+CTRL+K		Delete from cursor position to end of line
+CTRL+L		Insert contents of delete string buffer
+CTRL+M		Line breaks and line splits (splits only when in insert state)
+CTRL+N		Onsert line above cursor
+CTRL+O		Insert ON/OFF
+CTRL+P		Move cursor to right edge
+
+
+
+			CTRL key function list 2 (2/8)
+			
+CTRL+Q		Move cursor to left edge
+CTRL+R		roll down screen
+CTRL+S		Move cursor left one character
+CTRL+T		1 delete
+CTRL+U		Delete from the beginning of the line to just before the cursor
+CTRL+V		Input control code 
+CTRL+W		Roll down the screen by one line
+CTRL+X		Move the cursor down one line
+CTRL+Y		Delete one line > Move to delete string buffer
+CTRL+Z		Roll up screen by one line
+CTRL+[		ESC command
+CTRL+\		Current word backward search
+CTRL+]		uppercase/lowercase conversion
+CTRL+^		Current word forward search
+CTRL+_		file terminator
+
+
+			ESC command list 1	(3/8)
+
+(ESC+@)		Keyboard macro definition
+(ESC+A)		File switching (ascending order)
+(ESC+B)		top of file
+(ESC+C)		child process execution
+(ESC+D)		File switching (descending order)
+(ESC+E)		save all text being edited and exit the editor
+(ESC+F)		Edit new file
+(ESC+nG)	Copy the contents of the cut buffer to the cursor position n times
+(ESC+H)		Save the current edited text. editing continues
+(ESC+I)		Show/hide tab character consecutive 
+(ESC+J)		string replacement (forward) with confirmation
+(ESC+K)		quit editing without saving the current edited text
+(ESC+L)		Continuous string replacement (backward) with confirmation
+(ESC+M)		Show/hide newline character
+(ESC+N)		forward search
+(ESC+O)		Redo editing the current edit text from the beginning
+(ESC+nP)	Move from cursor position to n lines cut buffer
+
+
+			ESC command list 2	(4/8)
+
+(ESC+Q)		Force the editor to exit without saving the text
+(ESC+R)		Consecutive string replacement (forward) No confirmation
+(ESC+S)		backward search
+(ESC+T)		Rename current edit text file
+(ESC+U)		Consecutive string replacement (backward) No confirmation
+(ESC+V)		tag jump
+(ESC+W)		File export
+(ESC+X)		Save current text and finish editing
+(ESC+Y)		File loading
+(ESC+Z)		Last line of file
+(ESC+[)		Current forward substitution (no confirmation)
+(ESC+\)		Current backward substitution (no confirmation)
+(ESC+]) 	Character/lower case conversion
+(ESC+^) 	Forward substitution (no display)
+(ESC+_)		Backward substitution (no display)
+(ESC+NUM) 	Jump to specified line number
+
+
+			Function key function list (5/8)
+
+F-1 		Top of file
+F-2 		File last line
+F-3			Consecutive string replacement (without confirmation) (forward)
+F-4			Forward ↓ search for a string
+F-5			Forward ↓ search for current search string 
+F-6			Start selection operation of text in units of lines (range) 
+F-7 		Move selected text to cut buffer
+F-8 		Copy selected text to cut buffer
+F-9 		Insert contents of line cut buffer above cursor line
+F-10 		Double line 
+SHIFT F-1 	New edit
+SHIFT F-2 	re-edit
+SHIFT F-3	Consecutive string replacement (without confirmation) (backward)
+SHIFT F-4 	Search backward for string 
+SHIFT F-5 	Search backward for current search string ↑
+SHIFT F-6 	Switch files (ascending order)
+SHIFT F-7 	Switch files (descending order)
+SHIFT F-8 	Load file
+SHIFT F-9 	Write file 
+SHIFT F-10 	Run child process
+
+
+			Single key function list (6/8)
+
+ROLLUP		roll up screen
+ROLLDWN		roll down screen
+CR			Line feed and line split (split only in insert state)
+TAB			horizontal tab
+BS			Backspace 
+INS			Insertion MODE ON/OFF
+DEL			Delete 1 character
+CLR			Show end of file symbol
+HELP		Display help screen
+HOME		Move to home position
+LEFT		Move cursor left
+RIGHT		Move cursor right
+UP			Move cursor up
+DOWN		Move cursor down
+ESC			ESC command
+UNDO		Run keyboard macro
+
+
+			Boot options (7/8)
+
+-A			Help file path specification
+			Default is the path with ed.x
+-B			Specifies that the end of text is recognized at the physical end of data
+			Default is EOF(&H1A) for end of text file
+			Recognize in code 
+-E			Specifies display of end of file symbol
+-H			Specifies the maximum display width of horizontal tabs (2/4/6/8)
+-L			Specifies the display of newline characters
+			Default is no display
+-M			Specifies the length of a line
+			(128/256/512/1024 BYTES)
+-S			Specify the screen size
+			1 96 (XPOS)*30
+			2 64 (XPOS)*30
+-T			Specifies the display of tab characters
+
+
+			ASCII code list	(8/8)
+
+	0x	1x	2x	3x	4x	5x	6x	7x	8x	9x	Ax	Bx	Cx	Dx	Ex	Fx
+	
+0				0	@	P	`	p				ｰ	ﾀ	ﾐ	
+1			!	1	A	Q	a	q			｡	ｱ	ﾁ	ﾑ	
+2			"	2	B	R	b	r			｢	ｲ	ﾂ	ﾒ	
+3			#	3	C	S	c	s			｣	ｳ	ﾃ	ﾓ	
+4			$	4	D	T	d	t			､	ｴ	ﾄ	ﾔ	
+5			%	5	E	U	e	u			･	ｵ	ﾅ	ﾕ	
+6			&	6	F	V	f	v			ｦ	ｶ	ﾆ	ﾖ	
+7			'	7	G	W	g	w			ｧ	ｷ	ﾇ	ﾗ	
+8			(	8	H	X	h	x			ｨ	ｸ	ﾈ	ﾘ	
+9			)	9	I	Y	i	y			ｩ	ｹ	ﾉ	ﾙ	
+A			*	:	J	Z	j	z			ｪ	ｺ	ﾊ	ﾚ	
+B			+	;	K	[	k	{			ｫ	ｻ	ﾋ	ﾛ	
+C			,	<	L	\	l	|			ｬ	ｼ	ﾌ	ﾜ	
+D			-	=	M	]	m	}			ｭ	ｽ	ﾍ	ﾝ	
+E			.	>	N	^	n	‾			ｮ	ｾ	ﾎ	ﾞ	
+F			/	?	O	_	o				ｯ	ｿ	ﾏ	ﾟ
+
+ 
+
+
+
+
+
+
+
+
+

@@ -160,7 +160,7 @@ $fff7   _BUS_ERR        Inspect bus error occurrence
 $fff8   _OPEN_PR        Register background task							int _dos_open_pr (const char *name, int counter, int usp, int ssp, int sr, int pc, struct _prcctrl *buff, long sleep_time)
 
 $fff9   _KILL_PR        Kill this process									int _dos_kill_pr()
-$fffa   _GET_PR         Get thread management info
+$fffa   _GET_PR         Get thread management info							int _dos_get_pr(int tid, struct _prcptr *buff)
 $fffb   _SUSPEND_PR     Force-sleep thread									int _dos_suspend_pr(int tid)
 $fffc   _SLEEP_PR       Sleep												int _dos_sleep_pr(long time)
 $fffd   _SEND_PR        Send thread commands/data							int _dos_send_pr(int my_id, int your_id, int command, char *buff, long length)
@@ -2892,29 +2892,29 @@ Return value Thread ID of the registered task (error code if negative)
 	d0.l = -27 A task with the same name already exists.
 	d0.l = -29 No more tasks can be registered.
 
-Registers a background task with a thread name of up to 15 characters specified by NAME.
+	Registers a background task with a thread name of up to 15 characters specified by NAME.
 
-The registered thread goes to sleep.
-For COUNT, specify the number of timer interrupts to be counted to execute one task from 2 to 255. 
-If the value is 0 to 1, it is treated as 2.
+	The registered thread goes to sleep.
+	For COUNT, specify the number of timer interrupts to be counted to execute one task from 2 to 255. 
+	If the value is 0 to 1, it is treated as 2.
 
-INIT_USP, INIT_SSP, INIT_PC are the initial values of each register when executing the registered task.
+	INIT_USP, INIT_SSP, INIT_PC are the initial values of each register when executing the registered task.
 
-System stack requires 6KB.
+	System stack requires 6KB.
 
-INIT_SR specifies $0000 or $2000 and selects either user mode or supervisor mode.
+	INIT_SR specifies $0000 or $2000 and selects either user mode or supervisor mode.
 
-The initial values of all other registers are 0.
+	The initial values of all other registers are 0.
 
-BUFFER specifies the buffer address for intertask communication.
+	BUFFER specifies the buffer address for intertask communication.
 
-SLEEP_TIME specifies the wait time in milliseconds. 0 means sleep forever.
+	SLEEP_TIME specifies the wait time in milliseconds. 0 means sleep forever.
 
-A thread registered as a background task with DOS _OPEN_PR is terminated with DOS _KEEPPR.
+	A thread registered as a background task with DOS _OPEN_PR is terminated with DOS _KEEPPR.
 
-Use DOS _KILL_PR to kill a thread from memory.
+	Use DOS _KILL_PR to kill a thread from memory.
 
-The contents of BUFFER are as follows:
+	The contents of BUFFER are as follows:
 
 offset size
 0 		1.l LENGTH Number of bytes in buffer for data
@@ -2937,27 +2937,28 @@ lea (28,sp),sp
 $fff9 _KILL_PR Kill own process
 
 Return value Error code
-	Kills own process.
-	In case of a resident terminated process, kills all threads with the same process id as it and frees the allocated memory.
-	Before executing this DOS call, it closes any files it has opened, undoes any modified vectors, etc. 
-	The system only deletes the thread and frees its memory.
-	If a process exits with DOS_EXIT or DOS_EXIT2 after executing several registered threads, 
-	the thread that was opened earlier is killed with KILL_PR. is not guaranteed. 
+	Deletes its own process. 
+	If the process was terminated resident, deletes all threads with the same process ID and frees the allocated memory.
+	Before executing this DOS call, close all the files you opened yourself and restore the rewritten vectors, etc. 
+	The system only deletes threads and frees memory.
+	If a process terminates with DOS_EXIT or DOS_EXIT2 after executing several registered threads, 
+	the thread that was opened first is deleted with KILL_PR. is not guaranteed. 
 	To kill a process other than your own, send a KILL command with DOS _SEND_PR.
-
+	
 ==============================================================================
 
 $ fffa _GET_PR Get thread management information
 
-Argument ID.w Thread ID
+Argument 
+	ID.w Thread ID
 	BUFFER.l Buffer pointer to write management information
 
 Return value Thread ID or error code
 
-	The 116-byte buffer specified by BUFFER for the management information of the thread with the specified ID.
-	Copy to the ffa.
-	If you specify -1 for the ID and the name of the thread for BUFFER + 96, the thread's
-	ID is returned. Also, if you specify -2 for ID, your own ID is returned.
+	Copies the management information of the thread with the specified ID 
+	to the 116-byte buffer specified by BUFFER.
+	Specifying an ID of -1 and the name of the thread in BUFFER + 96 returns the ID of the thread, 
+	and specifying an ID of -2 returns his own ID.
 
 offset	size
 0 		1.l NEXT_PTR Management information storage area for the next thread
@@ -3012,15 +3013,15 @@ $fffc _SLEEP_PR Enter sleep state
 Arguments TIME.l Wait time (in milliseconds)
 
 Return value Thread state
-	d0.l = -1 The waiting time has passed and I woke up on my own.
-	d0.l = -2 Woke up with DOS _SEND_PR after waiting time.
-	d0.l = other remaining time (woke up with DOS _SEND_PR).
+		d0.l = -1 The waiting time has passed and I woke up on my own.
+		d0.l = -2 Woke up with DOS _SEND_PR after waiting time.
+		d0.l = other remaining time (woke up with DOS _SEND_PR).
 
-Specify the waiting time with TIME and enter the sleep state.
-When TIME = 0, sleep forever.
-A thread that has entered sleep can be forced to wake up using DOS_SEND_PR.
-If the DOS_SEND_PR command is $fffb, the intertask communication buffer remains unchanged.
-For other commands, it is set as follows.
+	Specify the waiting time with TIME and enter the sleep state.
+	When TIME = 0, sleep forever.
+	A thread that has entered sleep can be forced to wake up using DOS_SEND_PR.
+	If the DOS_SEND_PR command is $fffb (_SUSPEND_PR), the intertask communication buffer remains unchanged.
+	For other commands, it is set as follows.
 
 offset size
 0 		1.l LENGTH Number of bytes written to data buffer
@@ -3028,17 +3029,22 @@ offset size
 8 		1.w COMMAND Command number
 10 		1.w ID ID of the thread that caused it
 
-Before going to sleep, process the contents of the data buffer, 
-set the address and number of bytes in the data buffer, and set the ID to -1.
-This allows communication from other threads.
-If data is sent by SEND_PR even when not sleeping, it wakes up as soon as it 
-sleeps and returns the set waiting time.
+	Before going to sleep, process the contents of the data buffer, 
+	set the address and number of bytes in the data buffer, and set the ID to -1.
+	This allows communication from other threads.
+	If data is sent by SEND_PR even when not sleeping, it wakes up as soon as it 
+	sleeps and returns the set waiting time.
 
-The contents of the returned value are as follows.
+	The contents of the returned value are as follows.
 
-d0.l = -1 I got up by myself after waiting time. The contents of the intertask communication buffer remain unchanged.
-d0.l = -2 Wait time elapsed, but was awakened by DOS _SEND_PR after being stopped by DOS _SUSPEND_PR.
-d0.l = Other Woke up with DOS _SEND_PR, although the wait time has not elapsed. The unit of the returned value is milliseconds.
+	d0.l = -1 
+		I got up by myself after waiting time. 
+		The contents of the intertask communication buffer remain unchanged.
+	d0.l = -2 
+		Wait time elapsed, but was awakened by DOS _SEND_PR after being stopped by DOS _SUSPEND_PR.
+	d0.l = Other 
+		Woke up with DOS _SEND_PR, although the wait time has not elapsed. 
+		The unit of the returned value is milliseconds.
 
 move.l TIME,-(sp)
 DOS_SLEEP_PR
@@ -3061,18 +3067,17 @@ Return value d0.l = 0 Successful completion
 	d0.l = $ffff00?? Specified ID is invalid ($?? is the maximum value of ID)
 	d0.l = $8000???? The number of data bytes is invalid ($???? is the maximum capacity)
 
-Sends commands and data to the thread with the specified ID and wakes it up if it is sleeping.
-Specify your girlfriend's ID for MY_ID, and her ID for the thread you want to communicate with for YOUR_ID.
-CMDNO is a word value that indicates the content of communication, and commands other than those defined by the system are defined between threads. 
-Commands reserved by the system are $ff?? defines the values shown below.
+	Sends commands and data to the thread with the specified ID and wakes it up if it is sleeping.
+	Specify your girlfriend's ID for MY_ID, and her ID for the thread you want to communicate with for YOUR_ID.
+	CMDNO is a word value that indicates the content of communication, 
+	and commands other than those defined by the system are defined between each thread. Commands reserved by the system are $ff?? ing.
 
-	$fff9 Request to delete thread.
-	$fffb Waking up from the forced sleep state does not change the intertask communication buffer.
-	$fffc Request to sleep.
-
-If this command has been sent when you wake up, you should immediately set the ID of the intertask communication buffer to -1 and go to sleep.
-Effective when monitoring inter-task communication buffers without sleeping.
-$ffff Check if processing is finished. If -28 is returned, processing is still in progress.
+	$fff9 (_KILL_PR) 	Request to delete thread.
+	$fffb (_SUSPEND_PR) Waking up from the forced sleep state does not change the intertask communication buffer.
+	$fffc (_SLEEP_PR) 	Request to sleep.
+		If this command has been sent when you wake up, you should immediately set the ID of the intertask communication buffer to -1 and go to sleep.
+		Effective when monitoring inter-task communication buffers without sleeping.
+	$ffff (_CHANGE_PR) 	Check if processing is finished. If -28 is returned, processing is still in progress.
 
 Inter-task communication buffers are used to transfer commands and data.
 The contents of the buffer are as follows.
@@ -3083,11 +3088,17 @@ offset size
 8 		1.w COMMAND Command number
 10 		1.w ID ID (-1 allows communication)
 
-If the ID of the intertask communication buffer for the thread specified by YOUR_ID is set to -1, the buffer is writable, so MY_ID and CMDNO are set to ID and COMMAND respectively, and the data from BUFFER is LEN Writes the number of bytes specified by , to DATABUF, and sets LENGTH to LEN.
-Wakes up the specified thread if it is sleeping.
-In particular, the $fffb command is specially processed, it only wakes up the specified thread, and the ID of the intertask communication buffer does not have to be -1, and other buffers do not change.
-An error occurs when LEN is greater than LENGTH or when writing is not possible.
-Doesn't work properly with Human68k version 3.02 (ID check fails).
+	If the ID of the intertask communication buffer for the thread specified by YOUR_ID is set to -1, 
+	the buffer is writable, so MY_ID and CMDNO are set to ID and COMMAND respectively, 
+	and the data from BUFFER is LEN Writes the number of bytes specified by , to DATABUF, 
+	and sets LENGTH to LEN. Wakes up the specified thread if it is sleeping.
+	
+	In particular, the $fffb (_SUSPEND_PR) command is specially processed, 
+	it only wakes up the specified thread, and the ID of the intertask communication buffer does not have to be -1, 
+	and other buffers do not change.
+
+	An error occurs when LEN is greater than LENGTH or when writing is not possible.
+	Doesn't work properly with Human68k version 3.02 (ID check fails).
 
 move.l LEN,-(sp)
 pea (BUFFER)
