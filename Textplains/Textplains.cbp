@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="Textplains" />
+		<Option pch_mode="2" />
+		<Option compiler="x68000_gcc_compiler" />
+		<Build>
+			<Target title="default">
+				<Option output="default/Textplains" prefix_auto="1" extension_auto="0" />
+				<Option type="1" />
+				<Option compiler="x68000_gcc_compiler" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+			<Target title="lydux">
+				<Option output="lydux/Textplains" prefix_auto="1" extension_auto="0" />
+				<Option type="1" />
+				<Option compiler="human68k_gcc" />
+				<Linker>
+					<Add option="-Wl,-q,-Map=$(TARGET_OUTPUT_FILE).map,--cref" />
+				</Linker>
+				<ExtraCommands>
+					<Add after="human68k-objcopy -v -O xfile $(TARGET_OUTPUT_FILE) $(TARGET_OUTPUT_FILE).X" />
+				</ExtraCommands>
+			</Target>
+		</Build>
+		<Unit filename="main.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Extensions>
+			<lib_finder disable_auto="1" />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
