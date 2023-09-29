@@ -152,15 +152,15 @@ $ 90 _G_CLR_ON Graphic screen initialization and display mode setting
 $ 91 (Unpublished) Graphic screen mode setting
 $ 92 (Unpublished) Priority setting
 $ 93 (Unpublished) Screen display and special mode settings
-$ 94 _GPALET Graphic palette setting
-$ 95 (Unpublished) Color code setting
-$ 96 (Unpublished) Access page settings
-$ 97 (Unpublished) Graphic VRAM dot-by-dot read
-$ 98 (Unpublished) Graphic VRAM dot-by-dot writing (with color mask)
-$ 99 (Unpublished) Graphic VRAM dot-by-dot write
-$ 9a (Unpublished) Write graphic VRAM bit pattern
-$ 9b (Unpublished) Graphic VRAM bit pattern write (with back color)
-$ 9c (Unpublished) Graphic VRAM Bit Pattern Enlarged Write
+$ 94 _GPALET Graphic palette setting										int _iocs_gpalet (int, int)
+$ 95 (Unpublished) Color code setting										void _iocs_gcolor(int)
+$ 96 (Unpublished) Access page settings										void _iocs_apage2(int)
+$ 97 (Unpublished) Graphic VRAM dot-by-dot read								void _iocs_gv_get(int x, int y, struct _gvrambuf *buf)
+$ 98 (Unpublished) Graphic VRAM dot-by-dot writing (with color mask)		void _iocs_gv_put(int x, int y, const struct _gvrambuf *buf)
+$ 99 (Unpublished) Graphic VRAM dot-by-dot write							void _iocs_gv_put2(int x, int y, int color, const struct _gvrambuf *buf)
+$ 9a (Unpublished) Write graphic VRAM bit pattern							void _iocs_gbitput(int x, int y, const struct _fntbuf *buf)
+$ 9b (Unpublished) Graphic VRAM bit pattern write (with back color)			void _iocs_gbitput2(int x, int y, int color, const struct _fntbuf *buf)
+$ 9c (Unpublished) Graphic VRAM Bit Pattern Enlarged Write					void _iocs_gbitput3(int x, int y, int x_ratio, int y_ratio, const struct _fntbuf *buf)
 $ a0 _SFTJIS S-JIS → JIS code conversion
 $ a1 _JISSFT JIS → S-JIS code conversion
 $ a2 _AKCONV ANK → S-JIS code conversion
@@ -172,8 +172,8 @@ $ ad _B_CONMOD Cursor and scroll settings
 $ ae _OS_CURON Cursor display
 $ af _OS_CUROF Cursor erase
 $ b0 _DRAWMODE Graphic drawing mode setting
-$ b1 _APAGE Graphic drawing page settings
-$ b2 _VPAGE Graphic screen display page settings
+$ b1 _APAGE Graphic drawing page settings									int _iocs_apage (int)
+$ b2 _VPAGE Graphic screen display page settings							int _iocs_vpage (int)
 $ b3 _HOME Graphic screen display position setting
 $ b4 _WINDOW Graphic drawing window settings
 $ b5 _WIPE Clear graphic screen
@@ -2611,11 +2611,13 @@ Settings before changing the return value
 
 $ 94 GPALET Graphic palette settings
 
-Argument d1.w Palette code
+Argument 
+	d1.w Palette code
 	d2.l color code (check the color code when d2.l = -1)
 
-Return value d0.l = 0 Normal termination
-		-1 The graphic screen is not initialized or the palette code is incorrect.
+Return value 
+	d0.l = 0 Normal termination
+			-1 The graphic screen is not initialized or the palette code is incorrect.
 	Returns a color code when d2.l = -1 (error if -1)
 
 	Set / acquire the graphic palette.
@@ -2625,9 +2627,13 @@ Return value d0.l = 0 Normal termination
 
 $ 95 (Unpublished) Color code setting
 
-Argument d1.w Palette code
+Argument 
+	d1.w Palette code
 
-	Set the palette code written in IOCS $ 9a, $ 9b, $ 9c.
+	Set the palette code written in IOCS:
+		$ 9a) void _iocs_gbitput(int x, int y, const struct _fntbuf *buf)
+		$ 9b) void _iocs_gbitput2(int x, int y, int color, const struct _fntbuf *buf)
+		$ 9c) void _iocs_gbitput3(int x, int y, int x_ratio, int y_ratio, const struct _fntbuf *buf)
 
 ================================================= ============================
 
@@ -2676,7 +2682,8 @@ Return value d0.l = 0 Normal termination
 
 $ 99 (Unpublished) Graphic VRAM dot-by-dot write
 
-Argument d1.w X coordinates
+Argument 
+	d1.w X coordinates
 	d2.w Y 〃
 	a1.l Buffer address
 		(0, a1) Number of dots in the X direction
@@ -2693,7 +2700,8 @@ Return value d0.l = 0 Normal termination
 
 $ 9a (Unpublished) Write graphic VRAM bit pattern
 
-Argument d1.w X coordinates
+Argument 
+	d1.w X coordinates
 	d2.w Y 〃
 	a1.l Buffer address
 		(0, a1) Number of dots in the X direction
@@ -2708,7 +2716,8 @@ Argument d1.w X coordinates
 
 $ 9b (Unpublished) Graphic VRAM bit pattern write (with back color)
 
-Argument d1.w X coordinates
+Argument
+	d1.w X coordinates
 	d2.w Y 〃
 	d3.w back color code
 	a1.l Buffer address
@@ -2724,7 +2733,8 @@ Argument d1.w X coordinates
 
 $ 9c (Unpublished) Graphic VRAM Bit Pattern Enlarged Write
 
-Argument d1.w X coordinates
+Argument 
+	d1.w X coordinates
 	d2.w Y 〃
 	d3.w Expansion rate in the X direction
 	d4.w Y 〃

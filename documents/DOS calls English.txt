@@ -4,34 +4,34 @@
 
 - List of DOS calls
 
-$ff00   _EXIT           End program											void _dos_exit() 
+$ff00   _EXIT           The end of the program								void _dos_exit() 
 $ff01   _GETCHAR        Keyboard input (with echo)							int _dos_getchar()	
 $ff02   _PUTCHAR        Display character									void _dos_putchar(int code)
-$ff03   _COMINP         Read byte from RS-232C								int _dos_cominp()
-$ff04   _COMOUT         Write byte to RS-232C								void _dos_comout(int code)
-$ff05   _PRNOUT         Write character to printer							void _dos_prnout(int code)
+$ff03   _COMINP         Read 1 byte from RS-232C							int _dos_cominp()
+$ff04   _COMOUT         Write 1 byte to RS-232C								void _dos_comout(int code)
+$ff05   _PRNOUT         Write 1 character to printer						void _dos_prnout(int code)
 $ff06   _INPOUT         Character I/O										int _dos_inpout(int code)
-$ff07   _INKEY          Get character from keyboard (no break check)		int _dos_inkey()
-$ff08   _GETC           Get character from keyboard (with break check)		int _dos_getchar()
+$ff07   _INKEY          Get 1 character from keyboard (no break check)		int _dos_inkey()
+$ff08   _GETC           Get 1 character from keyboard (with break check)	int _dos_getc()
 $ff09   _PRINT          Print character string								void _dos_print(const char *string)
 $ff0a   _GETS           Get character string (with break check)				int _dos_gets (struct _inpptr *ptr)
-$ff0b   _KEYSNS         Inspect key input status							int _dos_keysns(void)
+$ff0b   _KEYSNS         Key input status check								int _dos_keysns(void)
 $ff0c   _KFLUSH         Get key input after flushing buffer					int _dos_kflushgp()
-$ff0d   _FFLUSH         Disk reset
-$ff0e   _CHGDRV         Select working drive
-$ff0f   _DRVCTRL        Inspect/select drive status
+$ff0d   _FFLUSH         Disk reset											void _dos_fflush()
+$ff0e   _CHGDRV         Select working drive								int _dos_chgdrv(int drv)
+$ff0f   _DRVCTRL        Inspect/select drive status							int _dos_drvctrl(int mode, int drv)
 
 $ff10   _CONSNS         Inspect screen output status
 $ff11   _PRNSNS         Inspect printer output status
 $ff12   _CINSNS         Inspect RS-232C input status
 $ff13   _COUTSNS        Inspect RS-232C output status
 $ff17   _FATCHK         Inspect file allocation status
-$ff18   _HENDSP         Kanji conversion control
-$ff19   _CURDRV         Get working drive									_dos_curdrv()
+$ff18   _HENDSP         Kanji conversion line control
+$ff19   _CURDRV         Get current drive									_dos_curdrv()
 $ff1a   _GETSS          Get character string (no break check)
-$ff1b   _FGETC          Read byte from file
+$ff1b   _FGETC          Read 1 byte from file
 $ff1c   _FGETS          Read character string from file
-$ff1d   _FPUTC          Write byte to file
+$ff1d   _FPUTC          Write 1 byte to file
 $ff1e   _FPUTS          Write character string to file
 $ff1f   _ALLCLOSE       Close all files
 
@@ -42,19 +42,19 @@ $ff23   _CONCTRL        Console control / direct output
 $ff24   _KEYCTRL        Inspect console status / direct input
 $ff25   _INTVCS         Set vector handling address							void* _dos_intvcs(int intno, void* jobadr)
 $ff26   _PSPSET         Make process stack pointer							void _dos_pspset (struct _psp *pspadr)
-$ff27   _GETTIM2        Get time (longword)
+$ff27   _GETTIM2        Get time (longword)									int _dos_gettim2(void)
 $ff28   _SETTIM2        Set time (longword)
 $ff29   _NAMESTS        Expand filename
-$ff2a   _GETDATE        Get date
+$ff2a   _GETDATE        Get date											int _dos_getdate(void)
 $ff2b   _SETDATE        Set date
-$ff2c   _GETTIME        Get time
+$ff2c   _GETTIME        Get time											int _dos_gettime (void)
 $ff2d   _SETTIME        Set time
 $ff2e   _VERIFY         Set verify flag
 $ff2f   _DUP0           Force-copy file handle
 
 $ff30 	_VERNUM 		Get OS version
-$ff31   _KEEPPR         Terminate and stay									void _dos_keeppr (int prglen, int code)
-$ff32   _GETDPB         Get drive parameter block
+$ff31   _KEEPPR         Terminate and reside								void _dos_keeppr (int prglen, int code)
+$ff32   _GETDPB         Get Process data block
 $ff33   _BREAKCK        Set break check
 $ff34   _DRVXCHG        Drive exchange
 $ff35   _INTVCG         Get vector handling address							void* _dos_intvcg(int intno)
@@ -91,6 +91,32 @@ $ff4c   _EXIT2          End program with exit code							void _dos_exit2(int cod
 $ff4d   _WAIT           Get process exit code								int _dos_wait()
 $ff4e   _FILES          Find file
 $ff4f   _NFILES         Find next file
+
+$ff50   (_SETPDB)       (v2) Modify process data block
+$ff51   (_GETPDB)       (v2) Process information acquisition
+$ff52   (_SETENV)       (v2) Environment variable settings
+$ff53   (_GETENV)       (v2) Get environment variables
+$ff54   (_VERIFYG)      (v2) Verify flag acquisition
+$ff55   (_COMMON)       (v2) common area control
+$ff56   (_RENAME)       (v2) Rename/move file
+$ff57   (_FILEDATE)     (v2) Get/set file modification date/time
+$ff58   (_MALLOC2)      (v2) Memory reservation
+$ff5a   (_MAKETMP)      (v2) Create temporary file
+$ff5b   (_NEWFILE)      (v2) File creation
+$ff5c   (_LOCK)         (v2) file lock
+$ff5f   (_ASSIGN)       (v2) Obtain/set/cancel virtual drive/directory allocation
+
+$ff60   (_MALLOC3)      (v2) 060turbo memory reservation
+$ff61   (_SETBLOCK2)    (v2) 060turbo memory block change
+$ff62   (_MALLOC4)      (v2) 060turbo memory reservation
+$ff63   (_S_MALLOC2)    (v2) 060turbo Secure memory block under main memory management
+
+$ff7a   (_FFLUSH_SET)   (v2) Setting FFLUSH mode
+$ff7b   (_OS_PATCH)     (v2) OS internal processing switching (system dedicated call)
+$ff7c   (_GETFCB)       (v2) FCB pointer acquisition
+$ff7d   (_S_MALLOC)     (v2) Secure memory block under main memory management
+$ff7e   (_S_MFREE)      (v2) Main memory managed memory block release
+$ff7f   (_S_PROCESS)    (v2) Sub memory management settings
 
 $ff80   _SETPDB         Modify process data block							struct _psp* _dos_setpdb(struct _psp* pdbadr)
 $ff81   _GETPDB         Get process data block. same as [extern int _PSP;]	struct _psp* _dos_getpdb()
@@ -140,7 +166,7 @@ $ff8c   _LOCK           Lock file											int _dos_lock(int fno, int offset, i
 																			int _dos_unlock (int fno, int offset, int len)
 $ff8f   _ASSIGN         Get/set/delete virtual drive/directory allocation
 
-$ffaa   (unlisted)      Set FFLUSH mode (unlisted)
+$ffaa   _FFLUSH_SET     Set FFLUSH mode (unlisted)
 $ffab   _OS_PATCH       Update internal OS handler (unlisted)
 $ffac   _GETFCB         Get file control block pointer (unlisted)
 $ffad   _S_MALLOC       Reserve memory block under main memory manager		void* _dos_s_malloc(int md, int size)
@@ -156,10 +182,10 @@ $fff3   _DISKRED        Block device direct input
 $fff4   _DISKWRT        Block device direct output
 $fff5   _INDOSFLG       Get pointer to OS' work area
 $fff6   _SUPER_JSR      Subroutine call										void _dos_super_jsr(void (*func)(), struct _dregs *inregs, struct _dregs *outregs)
-$fff7   _BUS_ERR        Inspect bus error occurrence
-$fff8   _OPEN_PR        Register background task							int _dos_open_pr (const char *name, int counter, int usp, int ssp, int sr, int pc, struct _prcctrl *buff, long sleep_time)
+$fff7   _BUS_ERR        Inspect bus error occurrence						int _dos_bus_err(void *s_addr, void *d_addr, int mode) / _dos_memcpy(void *s_addr, void *d_addr, int mode)
+$fff8   _OPEN_PR        Register background task							int _dos_open_pr(const char *name, int counter, int usp, int ssp, int sr, int pc, struct _prcctrl *buff, long sleep_time)
 
-$fff9   _KILL_PR        Kill this process									int _dos_kill_pr()
+$fff9   _KILL_PR        Self process deletion									int _dos_kill_pr()
 $fffa   _GET_PR         Get thread management info							int _dos_get_pr(int tid, struct _prcptr *buff)
 $fffb   _SUSPEND_PR     Force-sleep thread									int _dos_suspend_pr(int tid)
 $fffc   _SLEEP_PR       Sleep												int _dos_sleep_pr(long time)
@@ -1052,11 +1078,11 @@ RETURN  Previous handling address of selected vector
         INTNO = $0100-$01ff IOCS calls
         INTNO = $ff00-$ffff	DOS calls
 
-        When addresses for trap #10-14 or _EXITVC are changed, the work area in PSP
-        changes as well. Also, when further aborting in _ERRJVC, its SR and SSP are
-        changed to that of the moment this DOS call was executed. In the case of
-        _CTRLVC, in addition to the _ERRJVC treatment, the SP and SSP from aborting
-        via CTRL-C also change.
+        If the addresses of trap #10 to 14 and _EXITVC are changed, the work in the PSP will also be changed. 
+		In addition, _ERRJVC further changes sr and ssp at the time of abort to those at the moment 
+		this DOS call was executed. 
+		In the case of _CTRLVC, after changing the address of _CTRLVC and the work in PSP, 
+		perform the same processing as _ERRJVC.
 
         head (JOBADR)
         move    INTNO,-(sp)
@@ -1069,12 +1095,11 @@ $ff26   _PSPSET         Make process stack pointer
 
 ARGS    PSPADR.l        Process stack pointer's address (memory stack pointer + 16)
 
-RETURN  Usually 0
+RETURN  Always/Usually 0
 
-        Prepares various information for when the program ends at the address
-        specified in PSPADR.
-        The process stack pointer PSPADR must be the address of a memory stack
-        pointer + $10; its size is 240 bytes.
+		Creates various information at the address specified by PSPADR when the program ends.
+         The process management pointer PSPADR must be the address of the memory management pointer + $10, 
+		 and its size is 240 bytes.
 
         head (PSPADR)
         DOS _PSPSET
@@ -2141,7 +2166,7 @@ $ ff80 _SETPDB Move management process
 Argument 
 	PDBADR.l Process management pointer
 
-Process management pointer before the return value
+Return value: Previous process management pointer
 
 	Transfer control to the process specified in PDBADR.
 	PDBADR must be the address obtained by _GETPDB.
@@ -2154,9 +2179,9 @@ Process management pointer before the return value
 
 $ ff81 _GETPDB Get current process information
 
-Return value Current process management pointer
+Return value: Current process management pointer
 
-	Acquire a process management pointer that represents the current process.
+	Get the process management pointer representing the current process.
 
 ==============================================================================
 
@@ -2837,13 +2862,12 @@ Argument
 Return value 
 	d0-d7 / a0-a6 Depends on processing
 
-	Jsr to the program specified by JOBADR in supervisor mode.
-	The d0-d7 / a0-a6 just before executing the DOS call is passed, and when the process returns, that
-	At the time of, d0-d7 / a0-a6 is returned, but SR does not change.
-	Since it is uncertain how SSP / USP is passed, pass the argument using the stack.
-	Can't be.
-	This DOS call addresses runaway and bus errors caused by jsr.
-	No processing is performed.
+	jsr the program specified by JOBADR in supervisor mode.
+	The d0-d7/a0-a6 immediately before the DOS call is executed is passed, and when the process returns, 
+	the current d0-d7/a0-a6 is returned, but the SR does not change.
+
+	Since it is undefined how SSP/USP is passed, it is not possible to pass arguments using the stack.
+	This DOS call does not handle runaways or bus errors that occur due to JSR.
 
 	head (JOBADR)
 	TWO _SUPER_JSR
@@ -2863,10 +2887,10 @@ Return value
 	d0.l = 2 Bus error occurs when reading from P1
 	d0.l = -1 error (argument is abnormal)
 
-	Read from the address specified by P1 with the size specified by SIZE and its data
-	To check if a bus error occurs by writing to the address specified in P2.
-	When the value of SIZE is abnormal or when SIZE = 2,4 and an odd address is specified for P1 and P2
-	If so, the return value will be -1.
+	Read data of the size specified by SIZE from the address specified by P1, 
+	write that data to the address specified by P2, and check whether a bus error occurs.
+	If the value of SIZE is abnormal, or if SIZE = 2 or 4 and odd addresses are specified for P1 and P2, 
+	the return value will be -1.
 
 	move	SIZE,-(sp)
 	pea (P2)
@@ -2891,27 +2915,26 @@ Arguments
 Return value Thread ID of the registered task (error code if negative)
 	d0.l = -27 A task with the same name already exists.
 	d0.l = -29 No more tasks can be registered.
-
+	
 	Registers a background task with a thread name of up to 15 characters specified by NAME.
-
+	
 	The registered thread goes to sleep.
+	
 	For COUNT, specify the number of timer interrupts to be counted to execute one task from 2 to 255. 
-	If the value is 0 to 1, it is treated as 2.
-
-	INIT_USP, INIT_SSP, INIT_PC are the initial values of each register when executing the registered task.
-
-	System stack requires 6KB.
-
-	INIT_SR specifies $0000 or $2000 and selects either user mode or supervisor mode.
-
+	If the number is 0 to 1, it is treated as 2.
+	
+	INIT_USP, INIT_SSP, and INIT_PC are the initial values of each register when executing the registered task.
+	The system stack requires 6KB.
+	
+	INIT_SR specifies $0000 or $2000 to select either user mode or supervisor mode.
 	The initial values of all other registers are 0.
-
+	
 	BUFFER specifies the buffer address for intertask communication.
-
-	SLEEP_TIME specifies the wait time in milliseconds. 0 means sleep forever.
-
+	
+	SLEEP_TIME specifies the time to wait in milliseconds. 0 means sleep forever.
+	
 	A thread registered as a background task with DOS _OPEN_PR is terminated with DOS _KEEPPR.
-
+	
 	Use DOS _KILL_PR to kill a thread from memory.
 
 	The contents of BUFFER are as follows:
@@ -2939,10 +2962,13 @@ $fff9 _KILL_PR Kill own process
 Return value Error code
 	Deletes its own process. 
 	If the process was terminated resident, deletes all threads with the same process ID and frees the allocated memory.
-	Before executing this DOS call, close all the files you opened yourself and restore the rewritten vectors, etc. 
-	The system only deletes threads and frees memory.
-	If a process terminates with DOS_EXIT or DOS_EXIT2 after executing several registered threads, 
-	the thread that was opened first is deleted with KILL_PR. is not guaranteed. 
+	Before executing this DOS call, it closes all the files it opened and undoes any modified vectors, etc.
+	
+	The system only deletes the thread and frees its memory.
+	If a process terminates with DOS_EXIT or DOS_EXIT2 after running several registered threads, 
+	kill the previously opened thread with its KILL_PR.
+	
+	If the process that is the main thread is deleted, subsequent operation is not guaranteed.
 	To kill a process other than your own, send a KILL command with DOS _SEND_PR.
 	
 ==============================================================================
@@ -2955,10 +2981,9 @@ Argument
 
 Return value Thread ID or error code
 
-	Copies the management information of the thread with the specified ID 
-	to the 116-byte buffer specified by BUFFER.
-	Specifying an ID of -1 and the name of the thread in BUFFER + 96 returns the ID of the thread, 
-	and specifying an ID of -2 returns his own ID.
+	Copies the management information of the thread with the specified ID to the 116-byte buffer specified by BUFFER.
+	If you specify -1 for ID and the thread name for BUFFER+96, the thread ID will be returned.
+	Also, if you specify -2 for ID, your own ID will be returned.
 
 offset	size
 0 		1.l NEXT_PTR Management information storage area for the next thread
@@ -3055,8 +3080,8 @@ addq.l #4,sp
 $fffd _SEND_PR Send command/data to thread and wake it up if sleeping
 
 Argument 
-	MY_ID.w		Your thread ID
-	YOUR_ID.w	Your thread ID
+	MY_ID.w		my thread ID
+	YOUR_ID.w	opponent's thread ID
 	CMDNO.w		Command to send
 	BUFFER.l	Pointer to data to send
 	LEN.l 		Number of bytes of data to send
@@ -3068,10 +3093,10 @@ Return value d0.l = 0 Successful completion
 	d0.l = $8000???? The number of data bytes is invalid ($???? is the maximum capacity)
 
 	Sends commands and data to the thread with the specified ID and wakes it up if it is sleeping.
-	Specify your girlfriend's ID for MY_ID, and her ID for the thread you want to communicate with for YOUR_ID.
-	CMDNO is a word value that indicates the content of communication, 
-	and commands other than those defined by the system are defined between each thread. Commands reserved by the system are $ff?? ing.
-
+	Specify your own ID in MY_ID and the ID of the thread to communicate with in YOUR_ID.
+	CMDNO is a word value that indicates the content of communication, and commands other than those defined by the system are defined between each thread. 
+	Commands reserved by the system are $ff?? There are:
+	
 	$fff9 (_KILL_PR) 	Request to delete thread.
 	$fffb (_SUSPEND_PR) Waking up from the forced sleep state does not change the intertask communication buffer.
 	$fffc (_SLEEP_PR) 	Request to sleep.
@@ -3086,17 +3111,17 @@ offset size
 0		1.l LENGTH Number of bytes in data buffer
 4 		1.l DATABUF data buffer pointer
 8 		1.w COMMAND Command number
-10 		1.w ID ID (-1 allows communication)
+10 		1.w YOUR_ID (-1 allows communication)
 
-	If the ID of the intertask communication buffer for the thread specified by YOUR_ID is set to -1, 
-	the buffer is writable, so MY_ID and CMDNO are set to ID and COMMAND respectively, 
-	and the data from BUFFER is LEN Writes the number of bytes specified by , to DATABUF, 
-	and sets LENGTH to LEN. Wakes up the specified thread if it is sleeping.
-	
-	In particular, the $fffb (_SUSPEND_PR) command is specially processed, 
+	If the ID of the intertask communication buffer of the thread specified by YOUR_ID is set to -1, 
+	the buffer is writable, so MY_ID and CMDNO are set to ID and COMMAND respectively, and the data from BUFFER is specified by LEN. 
+	Write the number of bytes to DATABUF and set LENGTH to LEN.
+	Wakes up the specified thread if it is sleeping.
+
+	In particular, the command of $fffb is specially processed, 
 	it only wakes up the specified thread, and the ID of the intertask communication buffer does not have to be -1, 
 	and other buffers do not change.
-
+	
 	An error occurs when LEN is greater than LENGTH or when writing is not possible.
 	Doesn't work properly with Human68k version 3.02 (ID check fails).
 

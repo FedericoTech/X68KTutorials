@@ -4,124 +4,155 @@
 
 - List of DOS calls
 
-$ff00   _EXIT           End program
-$ff01   _GETCHAR        Keyboard input (with echo)
-$ff02   _PUTCHAR        Display character
-$ff03   _COMINP         Read byte from RS-232C
-$ff04   _COMOUT         Write byte to RS-232C
-$ff05   _PRNOUT         Write character to printer
-$ff06   _INPOUT         Character I/O
-$ff07   _INKEY          Get character from keyboard (no break check)
-$ff08   _GETC           Get character from keyboard (with break check)
-$ff09   _PRINT          Print character string
-$ff0a   _GETS           Get character string (with break check)
-$ff0b   _KEYSNS         Inspect key input status
-$ff0c   _KFLUSH         Get key input after flushing buffer
-$ff0d   _FFLUSH         Disk reset
-$ff0e   _CHGDRV         Select working drive
-$ff0f   _DRVCTRL        Inspect/select drive status
+$ff00   _EXIT           プログラム終了
+$ff01   _GETCHAR        キーボード入力(エコーあり)
+$ff02   _PUTCHAR        文字表示
+$ff03   _COMINP         RS-232C 回線 1 バイト入力
+$ff04   _COMOUT         RS-232C 回線 1 バイト出力
+$ff05   _PRNOUT         プリンタ 1 文字出力
+$ff06   _INPOUT         文字入出力
+$ff07   _INKEY          キーボード 1 文字入力(ブレークチェックなし)
+$ff08   _GETC           キーボード 1 文字入力(ブレークチェックあり)
+$ff09   _PRINT          文字列表示
+$ff0a   _GETS           文字列入力(ブレークチェックあり)
+$ff0b   _KEYSNS         キー入力状態検査
+$ff0c   _KFLUSH         バッファフラッシュ後キーボード入力
+$ff0d   _FFLUSH         ディスクリセット
+$ff0e   _CHGDRV         カレントドライブ設定
+$ff0f   _DRVCTRL        ドライブ状態検査/設定
 
-$ff10   _CONSNS         Inspect screen output status
-$ff11   _PRNSNS         Inspect printer output status
-$ff12   _CINSNS         Inspect RS-232C input status
-$ff13   _COUTSNS        Inspect RS-232C output status
-$ff17   _FATCHK         Inspect file allocation status
-$ff18   _HENDSP         Kanji conversion control
-$ff19   _CURDRV         Get working drive
-$ff1a   _GETSS          Get character string (no break check)
-$ff1b   _FGETC          Read byte from file
-$ff1c   _FGETS          Read character string from file
-$ff1d   _FPUTC          Write byte to file
-$ff1e   _FPUTS          Write character string to file
-$ff1f   _ALLCLOSE       Close all files
+$ff10   _CONSNS         画面出力検査
+$ff11   _PRNSNS         プリンタ出力検査
+$ff12   _CINSNS         RS-232C 回線入力検査
+$ff13   _COUTSNS        RS-232C 回線出力検査
+$ff17   _FATCHK         ファイル連結状態検査
+$ff18   _HENDSP         漢字変換行制御
+$ff19   _CURDRV         カレントドライブ収得
+$ff1a   _GETSS          文字列入力(ブレークチェックなし)
+$ff1b   _FGETC          ファイル 1 バイト入力
+$ff1c   _FGETS          ファイル文字列入力
+$ff1d   _FPUTC          ファイル 1 文字出力
+$ff1e   _FPUTS          ファイル文字列出力
+$ff1f   _ALLCLOSE       全ファイルクローズ
 
-$ff20   _SUPER          Set supervisor/user mode
-$ff21   _FNCKEY         Get/set redefinable keys
-$ff22   _KNJCTRL        Function call for kana-kanji conversion
-$ff23   _CONCTRL        Console control / direct output
-$ff24   _KEYCTRL        Inspect console status / direct input
-$ff25   _INTVCS         Set vector handling address
-$ff26   _PSPSET         Make process stack pointer
-$ff27   _GETTIM2        Get time (longword)
-$ff28   _SETTIM2        Set time (longword)
-$ff29   _NAMESTS        Expand filename
-$ff2a   _GETDATE        Get date
-$ff2b   _SETDATE        Set date
-$ff2c   _GETTIME        Get time
-$ff2d   _SETTIME        Set time
-$ff2e   _VERIFY         Set verify flag
-$ff2f   _DUP0           Force-copy file handle
+$ff20   _SUPER          スーパーバイザ/ユーザーモード設定
+$ff21   _FNCKEY         再定義可能キー収得/設定
+$ff22   _KNJCTRL        仮名漢字変換用ファンクションコール
+$ff23   _CONCTRL        コンソール制御/直接出力
+$ff24   _KEYCTRL        コンソール状態検査/直接入力
+$ff25   _INTVCS         ベクタ処理アドレス設定
+$ff26   _PSPSET         プロセス管理ポインタ作成
+$ff27   _GETTIM2        時刻収得(ロングワード)
+$ff28   _SETTIM2        時刻設定(ロングワード)
+$ff29   _NAMESTS        ファイル名展開
+$ff2a   _GETDATE        日付収得
+$ff2b   _SETDATE        日付設定
+$ff2c   _GETTIME        時刻収得
+$ff2d   _SETTIME        時刻設定
+$ff2e   _VERIFY         ベリファイフラグ設定
+$ff2f   _DUP0           ファイルハンドル強制複写
 
-$ff30   _VERNUM         Get OS version
-$ff31   _KEEPPR         Terminate and stay
-$ff32   _GETDPB         Get drive parameter block
-$ff33   _BREAKCK        Set break check
-$ff34   _DRVXCHG        Drive exchange
-$ff35   _INTVCG         Get vector handling address
-$ff36   _DSKFRE         Get remaining disk space
-$ff37   _NAMECK         Expand filename
-$ff39   _MKDIR          Make subdirectory
-$ff3a   _RMDIR          Remove subdirectory
-$ff3b   _CHDIR          Change working directory
-$ff3c   _CREATE         Create file
-$ff3d   _OPEN           Open file
-$ff3e   _CLOSE          Close file
-$ff3f   _READ           Read from file
+$ff30   _VERNUM         OS バージョン収得
+$ff31   _KEEPPR         常駐終了
+$ff32   _GETDPB         ドライブパラメータブロック複写
+$ff33   _BREAKCK        ブレークチェック設定
+$ff34   _DRVXCHG        ドライブ交換
+$ff35   _INTVCG         ベクタ処理アドレス収得
+$ff36   _DSKFRE         ディスク残量収得
+$ff37   _NAMECK         ファイル名展開
+$ff39   _MKDIR          サブディレクトリ作成
+$ff3a   _RMDIR          サブディレクトリ削除
+$ff3b   _CHDIR          カレントディレクトリ変更
+$ff3c   _CREATE         ファイル作成
+$ff3d   _OPEN           ファイルオープン
+$ff3e   _CLOSE          ファイルクローズ
+$ff3f   _READ           ファイル入力
 
-$ff40   _WRITE          Write to file
-$ff41   _DELETE         Delete file
-$ff42   _SEEK           Move file pointer
-$ff43   _CHMOD          Get/set file attributes
-$ff44   _IOCTRL         Device driver ioctrl direct I/O
-$ff45   _DUP            Copy file handle
-$ff46   _DUP2           Force-copy file handle
-$ff47   _CURDIR         Get working directory
-$ff48   _MALLOC         Reserve memory
-$ff49   _MFREE          Relinquish memory block
-$ff4a   _SETBLOCK       Modify memory block
-$ff4b   _EXEC           Load and execute program
-$ff4c   _EXIT2          End program with exit code
-$ff4d   _WAIT           Get process exit code
-$ff4e   _FILES          Find file
-$ff4f   _NFILES         Find next file
+$ff40   _WRITE          ファイル出力
+$ff41   _DELETE         ファイル削除
+$ff42   _SEEK           ファイルポインタ移動
+$ff43   _CHMOD          ファイル属性収得/設定
+$ff44   _IOCTRL         デバイスドライバ ioctrl 直接入出力
+$ff45   _DUP            ファイルハンドル複写
+$ff46   _DUP2           ファイルハンドル強制複写
+$ff47   _CURDIR         カレントディレクトリ収得
+$ff48   _MALLOC         メモリ確保
+$ff49   _MFREE          メモリブロック解放
+$ff4a   _SETBLOCK       メモリブロック変更
+$ff4b   _EXEC           プログラムロード/実行
+$ff4c   _EXIT2          終了コード指定終了
+$ff4d   _WAIT           プロセス終了コード収得
+$ff4e   _FILES          ファイル検索
+$ff4f   _NFILES         ファイル次検索
 
-$ff80   _SETPDB         Modify process data block
-$ff81   _GETPDB         Get process data block
-$ff82   _SETENV         Set environment variable
-$ff83   _GETENV         Get environment variable
-$ff84   _VERIFYG        Get verify flag
-$ff85   _COMMON         Control common region
-$ff86   _RENAME         Rename/move file
-$ff87   _FILEDATE       Get/set file modified date
-$ff88   _MALLOC2        Reserve memory
-$ff8a   _MAKETMP        Make temporary file
-$ff8b   _NEWFILE        Make new file
-$ff8c   _LOCK           Lock file
-$ff8f   _ASSIGN         Get/set/delete virtual drive/directory allocation
+$ff50   (_SETPDB)       (v2) 管理プロセス変更
+$ff51   (_GETPDB)       (v2) プロセス情報収得
+$ff52   (_SETENV)       (v2) 環境変数設定
+$ff53   (_GETENV)       (v2) 環境変数収得
+$ff54   (_VERIFYG)      (v2) ベリファイフラグ収得
+$ff55   (_COMMON)       (v2) common 領域制御
+$ff56   (_RENAME)       (v2) ファイル名変更/移動
+$ff57   (_FILEDATE)     (v2) ファイル変更日時収得/設定
+$ff58   (_MALLOC2)      (v2) メモリ確保
+$ff5a   (_MAKETMP)      (v2) テンポラリファイル作成
+$ff5b   (_NEWFILE)      (v2) ファイル作成
+$ff5c   (_LOCK)         (v2) ファイルロック
+$ff5f   (_ASSIGN)       (v2) 仮想ドライブ/ディレクトリ割り当て収得/設定/解除
 
-$ffaa   (unlisted)      Set FFLUSH mode (unlisted)
-$ffab   _OS_PATCH       Update internal OS handler (unlisted)
-$ffac   _GETFCB         Get file control block pointer (unlisted)
-$ffad   _S_MALLOC       Reserve memory block under main memory manager
-$ffae   _S_MFREE        Relinquish memory block under main memory manager
-$ffaf   _S_PROCESS      Set sub-memory manager
+$ff60   (_MALLOC3)      (v2) 060turbo メモリ確保
+$ff61   (_SETBLOCK2)    (v2) 060turbo メモリブロック変更
+$ff62   (_MALLOC4)      (v2) 060turbo メモリ確保
+$ff63   (_S_MALLOC2)    (v2) 060turbo メインメモリ管理下メモリブロック確保
 
-$fff0   _EXITVC         (address to execute at end of program)
-$fff1   _CTRLVC         (address to execute at CTRL+C abort)
-$fff2   _ERRJVC         (address to execute at error abort)
-$fff3   _DISKRED        Block device direct input
-$fff4   _DISKWRT        Block device direct output
-$fff5   _INDOSFLG       Get pointer to OS' work area
-$fff6   _SUPER_JSR      Subroutine call
-$fff7   _BUS_ERR        Inspect bus error occurrence
-$fff8   _OPEN_PR        Register background task
-$fff9   _KILL_PR        Kill this process
-$fffa   _GET_PR         Get thread management info
-$fffb   _SUSPEND_PR     Force-sleep thread
-$fffc   _SLEEP_PR       Sleep
-$fffd   _SEND_PR        Send thread commands/data
-$fffe   _TIME_PR        Get timer counter value
-$ffff   _CHANGE_PR      Yield execution time
+$ff7a   (_FFLUSH_SET)   (v2) FFLUSH モードの設定
+$ff7b   (_OS_PATCH)     (v2) OS 内部処理切り換え(システム専用コール)
+$ff7c   (_GETFCB)       (v2) FCB ポインタ収得
+$ff7d   (_S_MALLOC)     (v2) メインメモリ管理下メモリブロック確保
+$ff7e   (_S_MFREE)      (v2) メインメモリ管理下メモリブロック解放
+$ff7f   (_S_PROCESS)    (v2) サブメモリ管理設定
+
+$ff80   _SETPDB         管理プロセス変更
+$ff81   _GETPDB         プロセス情報収得
+$ff82   _SETENV         環境変数設定
+$ff83   _GETENV         環境変数収得
+$ff84   _VERIFYG        ベリファイフラグ収得
+$ff85   _COMMON         common 領域制御
+$ff86   _RENAME         ファイル名変更/移動
+$ff87   _FILEDATE       ファイル変更日時収得/設定
+$ff88   _MALLOC2        メモリ確保
+$ff8a   _MAKETMP        テンポラリファイル作成
+$ff8b   _NEWFILE        ファイル作成
+$ff8c   _LOCK           ファイルロック
+$ff8f   _ASSIGN         仮想ドライブ/ディレクトリ割り当て収得/設定/解除
+
+$ff90   _MALLOC3        060turbo メモリ確保
+$ff91   _SETBLOCK2      060turbo メモリブロック変更
+$ff92   _MALLOC4        060turbo メモリ確保
+$ff93   _S_MALLOC2      060turbo メインメモリ管理下メモリブロック確保
+
+$ffaa   _FFLUSH_SET     FFLUSH モードの設定
+$ffab   _OS_PATCH       OS 内部処理切り換え(システム専用コール)
+$ffac   _GETFCB         FCB ポインタ収得
+$ffad   _S_MALLOC       メインメモリ管理下メモリブロック確保
+$ffae   _S_MFREE        メインメモリ管理下メモリブロック解放
+$ffaf   _S_PROCESS      サブメモリ管理設定
+
+$fff0   _EXITVC         (プログラム終了時実行アドレス)
+$fff1   _CTRLVC         (CTRL+C アボート時実行アドレス)
+$fff2   _ERRJVC         (エラーアボート時実行アドレス)
+$fff3   _DISKRED        ブロックデバイス直接入力
+$fff4   _DISKWRT        ブロックデバイス直接出力
+$fff5   _INDOSFLG       OS ワークポインタ収得
+$fff6   _SUPER_JSR      サブルーチンコール
+$fff7   _BUS_ERR        バスエラー発生検査
+$fff8   _OPEN_PR        バックグラウンドタスク登録
+$fff9   _KILL_PR        自己プロセス削除
+$fffa   _GET_PR         スレッド管理情報収得
+$fffb   _SUSPEND_PR     スレッド強制スリープ
+$fffc   _SLEEP_PR       スリープ
+$fffd   _SEND_PR        スレッドコマンド/データ送信
+$fffe   _TIME_PR        タイマカウンタ値収得
+$ffff   _CHANGE_PR      実行権放棄
 
 CAUTION: Calls listed as $ff50-$ff7f in Human68k version 2 were moved to
          $ff80-$ffaf in version 3
@@ -135,70 +166,71 @@ CAUTION: Calls listed as $ff50-$ff7f in Human68k version 2 were moved to
 
 - List of error codes
 
-$ffffffff        -1     Executed invalid function code
-$fffffffe        -2     Specified file not found
-$fffffffd        -3     Specified directory not found
-$fffffffc        -4     Too many open files
-$fffffffb        -5     Cannot access directory or volume label
-$fffffffa        -6     Specified handle is not open
-$fffffff9        -7     Memory manager region was destroyed
-$fffffff8        -8     Not enough memory to execute
-$fffffff7        -9     Invalid memory manager pointer specified
-$fffffff6       -10     Illegal environment specified
-$fffffff5       -11     Abnormal executable file format
-$fffffff4       -12     Abnormal open access mode
-$fffffff3       -13     Error in selecting a filename
-$fffffff2       -14     Called with invalid parameter
-$fffffff1       -15     Error in selecting a drive
-$fffffff0       -16     Cannot remove current directory
-$ffffffef       -17     Cannot ioctrl device
-$ffffffee       -18     No more files found
-$ffffffed       -19     Cannot write to specified file
-$ffffffec       -20     Specified directory already registered
-$ffffffeb       -21     Cannot delete because file exists
-$ffffffea       -22     Cannot name because file exists
-$ffffffe9       -23     Cannot create file because disk is full
-$ffffffe8       -24     Cannot create file because directory is full
-$ffffffe7       -25     Cannot seek to specified location
-$ffffffe6       -26     Specified supervisor mode with supervisor status on
-$ffffffe5       -27     Thread with same name exists
-$ffffffe4       -28     Interprocess communication buffer is write-protected
-$ffffffe3       -29     Cannot start any more background processes
-$ffffffe0       -32     Not enough lock regions
-$ffffffdf       -33     Locked; cannot access
-$ffffffde       -34     Handler for specified drive is opened
-$ffffffdd       -35     Symbolic link nest exceeded 16 steps (lndrv)
-$ffffffb0       -80     File exists
+$ffffffff        -1     無効なファンクションコードを実行した
+$fffffffe        -2     指定したファイルが見つからない
+$fffffffd        -3     指定したディレクトリが見つからない
+$fffffffc        -4     オープンしているファイルが多すぎる
+$fffffffb        -5     ディレクトリやボリュームラベルはアクセスできない
+$fffffffa        -6     指定したハンドルはオープンされていない
+$fffffff9        -7     メモリ管理領域が破壊された
+$fffffff8        -8     実行に必要なメモリがない
+$fffffff7        -9     無効なメモリ管理ポインタを指定した
+$fffffff6       -10     不正な環境を指定した
+$fffffff5       -11     実行ファイルのフォーマットが異常
+$fffffff4       -12     オープンのアクセスモードが異常
+$fffffff3       -13     ファイル名の指定に誤りがある
+$fffffff2       -14     無効なパラメータでコールした
+$fffffff1       -15     ドライブ指定に誤りがある
+$fffffff0       -16     カレントディレクトリは削除できない
+$ffffffef       -17     ioctrl できないデバイス
+$ffffffee       -18     これ以上ファイルが見つからない
+$ffffffed       -19     指定のファイルは書き込みできない
+$ffffffec       -20     指定のディレクトリは既に登録されている
+$ffffffeb       -21     ファイルがあるので削除できない
+$ffffffea       -22     ファイルがあるのでリネームできない
+$ffffffe9       -23     ディスクが一杯でファイルが作れない
+$ffffffe8       -24     ディレクトリが一杯でファイルが作れない
+$ffffffe7       -25     指定の位置にはシークできない
+$ffffffe6       -26     スーパーバイザ状態で再びスーパーバイザモードの指定を行った
+$ffffffe5       -27     同じスレッド名が存在する
+$ffffffe4       -28     プロセス間通信のバッファが書き込み禁止状態
+$ffffffe3       -29     これ以上バックグラウンドプロセスを起動できない
+$ffffffe0       -32     ロック領域が足りない
+$ffffffdf       -33     ロックされていてアクセスできない
+$ffffffde       -34     指定のドライブはハンドラがオープンされている
+$ffffffdd       -35     シンボリックリンクのネストが16回を超えた(lndrv)
+$ffffffb0       -80     ファイルが存在する
 
 ==============================================================================
 
 ==============================================================================
 
-$ff00   _EXIT           End program
+$ff00   _EXIT           プログラムの終了
 
-        Ends the program. Handles of open files will be closed.
-
-==============================================================================
-
-$ff01   _GETCHAR        Wait for keyboard input (with echo)
-
-RETURN  key code
-
-        Waits for key input; outputs input key code to standard output.
-        It will check if the input key is ^C (return to parent process),
-        ^P (send future standard output to the printer as well), or ^N (exit
-        ^P status).
+        プログラムを終了する。オープンしたファイルハンドルはクローズされ、使用
+        中のメモリブロックは全て解放される。
+        終了コードは 0 となる。
 
 ==============================================================================
 
-$ff02   _PUTCHAR        Display specified character code
+$ff01   _GETCHAR        キーボードの入力を待つ(エコーあり)
 
-ARGS    CODE.w          one-byte character code
+返値    キーコード
 
-RETURN  usually 0
+        キーの入力を待ち、入力したキーコードを標準出力に出力する。
+        入力されたキーが ^C(親プロセスに戻る)、^P(以後の標準出力をプリンタにも
+        出力する)、^N(^P 状態をやめる)のいずれであるか調べる。
 
-        Outputs the character code specified in CODE to standard output.
-        It will check if an input key on the display was ^C, ^S, ^P, or ^N.
+==============================================================================
+
+$ff02   _PUTCHAR        指定文字コードの表示
+
+引数    CODE.w          1 バイト文字コード
+
+返値    常に 0
+
+        CODE で指定した文字コードを標準出力に出力する。
+        表示中に入力されたキーが ^C、^S、^P、^N であるか調べる。
 
         move    CODE,-(sp)
         DOS     _PUTCHAR
@@ -206,20 +238,20 @@ RETURN  usually 0
 
 ==============================================================================
 
-$ff03   _COMINP         Get byte of input from the RS-232C port
+$ff03   _COMINP         RS-232C 回線から 1 バイト入力
 
-RETURN  byte of input
+返値    入力した 1 バイト
 
-        Gets one byte of input from the RS-232C port (with break check).
+        RS-232C 回線から 1 バイト入力する(ブレークチェックあり)。
 
 ==============================================================================
 
-$ff04   _COMOUT         Send byte of output to the RS-232C port
+$ff04   _COMOUT         RS-232C 回線へ 1 バイト出力
 
-ARGS    CODE.w          one-byte code
+引数    CODE.w          1 バイトコード
 
-        Outputs the byte code specified in CODE to the RS-232C port (with break
-        check).
+        CODE で指定した 1 バイトのコードを RS-232C 回線に出力する(ブレークチェ
+        ックあり)。
 
         move    CODE,-(sp)
         DOS     _COMOUT
@@ -227,13 +259,13 @@ ARGS    CODE.w          one-byte code
 
 ==============================================================================
 
-$ff05   _PRNOUT         Outputs one character to the printer
+$ff05   _PRNOUT         プリンタへ 1 文字出力
 
-ARGS    CODE.w          one-byte character code
+引数    CODE.w          1 バイト文字コード
 
-        Outputs the character specified in CODE to the printer (with break
-        check). The upper byte of CODE must be 0, so kanji must be sent one
-        byte at a time, upper byte first, lower byte second.
+        CODE で指定した 1 文字をプリンタへ出力する(ブレークチェックあり)。
+        CODE の上位バイトは 0 でなければならないので、漢字は上位・下位の順で 1
+        バイトずつ出力する。
 
         move    CODE,-(sp)
         DOS     _PRNOUT
@@ -241,20 +273,19 @@ ARGS    CODE.w          one-byte character code
 
 ==============================================================================
 
-$ff06   _INPOUT         Key I/O
+$ff06   _INPOUT         キーの入出力
 
-ARGS    CODE.w          one-byte character code
+引数    CODE.w          1 バイト文字コード
 
-RETURN  CODE = $ff, $fe
-                The input key code (if d0.l = 0, no input)
-        CODE = something else
+返値    CODE = $ff,$fe
+                入力されたキーコード(d0.l = 0 なら入力なし)
+        CODE = その他
                 d0.l = 0
 
-        If the value of CODE is $ff, it performs key input, but it will
-        return immediately if no key is input. If it is $fe, buffered key input
-        will be performed, but even if a key is being input, that key will be
-        put in the buffer. If CODE is some other value, it is considered a
-        character code and displayed accordingly.
+        CODE の値が $ff であればキー入力を行うが、キーが入力されていなければす
+        ぐに終了する。$fe であればキーの先読み入力を行うが、キーが入力されてい
+        てもそのキーはそのままバッファに残る。CODE がその他の値であれば文字コ
+        ードとみなして表示する。
 
         move    CODE,-(sp)
         DOS     _INPOUT
@@ -262,57 +293,54 @@ RETURN  CODE = $ff, $fe
 
 ==============================================================================
 
-$ff07   _INKEY          Get input character from keyboard (no break check)
+$ff07   _INKEY          キーボードから 1 文字入力(ブレークチェックなし)
 
-RETURN  key code
+返値    キーコード
 
-        Waits until key is pressed, returns its keycode.
-
-==============================================================================
-
-$ff08   _GETC           Get input character from keyboard (with break check)
-
-RETURN  key code
-
-        Waits until key is pressed, returns its keycode. Checks whether it is
-        ^C, ^P, or ^N.
+        キーが押されるまで待ち、そのキーコードを返す。
 
 ==============================================================================
 
-$ff09   _PRINT          Print character string
+$ff08   _GETC           キーボードから 1 文字入力(ブレークチェックあり)
 
-ARGS    MESPTR.l        Pointer to character string
+返値    キーコード
 
-RETURN  usually 0
+        キーが押されるまで待ち、そのキーコードを返す。^C、^P、^N について調べ
+        る。
 
-        Displays the character string specified in MESPTR. Checks for ^C, ^S,
-        ^P, and ^N.
+==============================================================================
+
+$ff09   _PRINT          文字列の表示
+
+引数    MESPTR.l        文字列のポインタ
+
+返値    常に 0
+
+        MESPTR で指定した文字列を表示する。^C、^S、^P、^N について調べる。
 
         pea     (MESPTR)
         DOS     _PRINT
-        addq.l  #4,sp
+        addq,l  #4,sp
 
 ==============================================================================
 
-$ff0a   _GETS           Get character string input
+$ff0a   _GETS           文字列の入力
 
-ARGS    BUFFER.l        Pointer to input buffer
+引数    BUFFER.l        入力バッファのポインタ
 
-RETURN  number of input characters
+返値    入力文字数
 
-        Reads input character string into input buffer specified in BUFFER
-        until newline. The newline character will be replaced by a null
-        character. Checks for ^C, ^P, and ^N. If the maximum number of input
-        characters is exceeded, a warning will be given, but it will not end.
-        Maximum number of input characters is set by using a buffer with
-        contents as below before calling. When executed continuing with the
-        same buffer, if the number of input characters received from the
-        previous execution is not cleared, the template still works.
+        BUFFER で指定した入力バッファに、改行までの入力文字列を書き込む。
+        改行文字はヌル文字に置き換えられる。^C、^P、^N について調べる。
+        最大入力文字数を超えた場合は、警告を出すが終了はしない。
+        入力バッファの内容は以下の通りで、最大入力文字数を設定してから呼び出す。
+        同一バッファで続けて実行する場合、前回の実行時に得られた入力文字数をク
+        リアしなければテンプレート機能が使用できる。
 
 offset  size
-0       1.b     maximum number of input characters: n
-1       1.b     actual number of input characters
-2       n+1.b   input character string
+0       1.b     最大入力文字数 : n
+1       1.b     実際に入力された文字数
+2       n+1.b   入力文字列
 
         pea     (BUFFER)
         DOS     _GETS
@@ -320,48 +348,47 @@ offset  size
 
 ==============================================================================
 
-$ff0b   _KEYSNS         Inspect key input status
+$ff0b   _KEYSNS         キーの入力状態の検査
 
-RETURN  input status (0: no input; -1: input)
+返値    入力状態(0:入力なし、-1:入力あり)
 
-        Checks key input status. Checks if there is ^C, ^P, or ^N.
+        キーの入力状態を調べる。^C、^P、^N について調べる。
 
 ==============================================================================
 
-$ff0c   _KFLUSH         Get input from keyboard after flushing buffer
+$ff0c   _KFLUSH         バッファフラッシュ後キーボードから入力
 
-ARGS    MODE.w          mode
-        CODE.w          code to select process
-        BUFFER.l        pointer to input buffer
+引数    MODE.w          モード
+        CODE.w          処理を撰択するコード
+        BUFFER.l        入力バッファのポインタ
 
-RETURN  MODE = 1, 7, 8
-                        the input keycode
+返値    MODE = 1,7,8
+                        入力されたキーコード
         MODE = 6
-                CODE = $fe, $ff
-                        the input keycode (if 0, no input)
-                CODE = something else
+                CODE = $fe,$ff
+                        入力されたキーコード(0 なら入力なし)
+                CODE = その他
                         d0.l = 0
         MODE = 10
-                        number of input characters
+                        入力文字数
 
-        After emptying the key input buffer, get input from keyboard.
-        The value of MODE corresponds to the lower byte of a DOS call;
-        it performs one of the actions below.
+        キー入力バッファを空にしてから、キーボードから入力する。
+        MODE の値は DOS コールの下位 1 バイトに対応し、以下の動作をする。
 
         MODE = 1
-                Wait for key input; echo the input code to standard output.
+                キー入力を待ち、入力されたコードを標準出力に出力する。
         MODE = 6
-                CODE = $ff      check key input (will not wait for input).
-                CODE = $fe      performs buffered key input
-                CODE = other    outputs to standard output.
+                CODE = $ff      キー入力(入力がなくても待たない)を調べる。
+                CODE = $fe      キーの先読み入力を行う。
+                CODE = その他   標準出力に出力する。
         MODE = 7
-                Wait for key input (no break check).
+                キー入力を待つ(ブレークチェックなし)。
         MODE = 8
-                Wait for key input (with break check).
+                キー入力を待つ(ブレークチェックあり)。
         MODE = 10
-                Write input character buffer until newline.
+                改行までに入力した文字列をバッファに書き込む。
 
-MODE = 1, 7, 8
+MODE = 1,7,8
         move    MODE,-(sp)
         DOS     _KFLUSH
         adddq.l #2,sp
@@ -380,23 +407,23 @@ MODE = 10
 
 ==============================================================================
 
-$ff0d   _FFLUSH         Reset disk
+$ff0d   _FFLUSH         ディスクのリセット
 
-RETURN  usually 0
+返値    常に 0
 
-        Initializes disk buffer contents and input buffer from standard input.
-        Does not close files. If fflush = off, does nothing.
+        ディスクバッファの内容と標準入力からの行入力バッファを初期化する。ファ
+        イルのクローズはしない。fflush = off であれば何もしない。
 
 ==============================================================================
 
-$ff0e   _CHGDRV         Select working drive
+$ff0e   _CHGDRV         カレントドライブの設定
 
-ARGS    DRIVE.w         drive number (0: A, 1: B, ..., 25: Z)
+引数    DRIVE.w         ドライブ番号(0:A 1:B … 25:Z)
 
-RETURN  Number of selectable drives (1-26)
+返値    指定可能ドライブ数(1～26)
 
-        Changes current working drive. Fails if return value is less than
-        selected drive number.
+        カレントドライブを変更する。返値が指定したドライブ番号以下であれば失敗
+        したことになる。
 
         move    DRIVE,-(sp)
         DOS     _CHGDRV
@@ -404,57 +431,57 @@ RETURN  Number of selectable drives (1-26)
 
 ==============================================================================
 
-$ff0f   _DRVCTRL        Inspect/set drive status
+$ff0f   _DRVCTRL        ドライブの状態検査/設定
 
-ARGS    MODE.w          (MD.b*256 + DRIVE.b)
-            MB.b            mode
-            DRIVE.b         drive number (0: current, 1: A, 2: B, ..., 26: Z)
-        P1.l            argument 1
-        P2.l            argument 2
-        ...
-        Pn.l            argument n
+引数    MODE.w          (MD.b×256＋DRIVE.b)
+                MB.b            モード
+                DRIVE.b         ドライブ番号(0:カレント 1:A 2:B … 26:Z)
+        P1.l            引数 1
+        P2.l            引数 2
+        …
+        Pn.l            引数 n
 
-RETURN  MD = 0
-                Specified drive's status
+返値    MD = 0
+                指定ドライブの状態
 
-                        bit 7   LED blink
-                        bit 6   eject prohibited
-                        bit 5   buffer exists
-                        bit 4   eject by user prohibited
-                        bit 3   PRO (protect = 1)
-                        bit 2   RDY (not ready = 1)
-                        bit 1   media inserted
-                        bit 0   insert error
+                        bit 7   LED 点滅
+                        bit 6   イジェクト禁止
+                        bit 5   バッファあり
+                        bit 4   ユーザーによるイジェクト禁止
+                        bit 3   PRO(プロテクト = 1)
+                        bit 2   RDY(ノットレディ = 1)
+                        bit 1   メディア挿入
+                        bit 0   誤挿入
 
-                Warning: PRO and RDY only returned when media inserted.
+                注: PRO と RDY はメディアが挿入されていた場合のみ返す。
 
-        Inspects/sets status of drive specified by number in DRIVE according to
-        the value of mode MD.
-        The upper byte of MODE is mode MD; the lower byte specifies DRIVE, the
-        drive number.
+        モード MD の値に従って、ドライブ番号 DRIVE で指定したドライブの状態を
+        検査/設定する。
+        MODE の上位 8bit にモード MD、下位 8bit にドライブ番号 DRIVE を指定す
+        る。
 
-        MD = 0          Inspect status.
-        MD = 1          Eject (error if file open).
-        MD = 2          Forbid eject (also forbids MD = 1 eject).
-        MD = 3          Permit eject (opened drive is not closed; buffer is
-                        automatically cleared).
-        MD = 4          Flash LED when disk not inserted.
-        MD = 5-8        Forbid use.
-        MD = 9          Return FAT search to top with current directory as root
-                        (error if file open).
-        MD = 10         Return FAT search to top.
-        MD = 11-15      Reserved.
-        MD = 16-        Used for special block devices (possible to add
-                        optional arguments).
+        MD = 0          状態検査。
+        MD = 1          排出(オープン中のファイルがあるとエラー)。
+        MD = 2          排出禁止(MD = 1 の排出も禁止)。
+        MD = 3          排出許可(オープンされているドライブはクローズされず、
+                        バッファは自動的に消去される)。
+        MD = 4          ディスク未挿入時に LED 点滅。
+        MD = 5～8       使用禁止。
+        MD = 9          カレントディレクトリをルートにして検索 FAT を先頭に戻
+                        す(オープンされているファイルがあるとエラー)。
+        MD = 10         検索 FAT を先頭に戻す。
+        MD = 11～15     予約。
+        MD = 16～       特殊ブロックデバイスに対して使用する(任意の引数が追加
+                        可能)。
 
-MD = 0-4, 9, 10
+MD = 0～4,9,10
         move    MODE,-(sp)
         DOS     _DRVCTRL
         addq.l  #2,sp
 
-MD = 16-
+MD = 16～
         move.l  Pn,-(sp)
-        ...
+        …
         move.l  P1,-(sp)
         move    MODE,-(sp)
         DOS     _DRVCTRL
@@ -462,139 +489,159 @@ MD = 16-
 
 ==============================================================================
 
-$ff10   _CONSNS         Inspect whether screen output is possible
+$ff10   _CONSNS         画面出力ができるかの検査
 
-RETURN  output status (0: output not possible, not 0: output possible)
+返値    出力状態(0:出力不可、0 以外:出力可能)
 
-        Checks whether it is possible to output to the screen.
-
-==============================================================================
-
-$ff11   _PRNSNS         Inspect whether printer output is possible
-
-RETURN  output status (0: output not possible, not 0: output possible)
-
-        Checks whether it is possible to output to the printer.
+        画面に出力可能か調べる。
 
 ==============================================================================
 
-$ff12   _CINSNS         Inspect whether RS-232C port input is possible
+$ff11   _PRNSNS         プリンタ出力ができるかの検査
 
-RETURN  input status (0: input not possible, not 0: input possible)
+返値    出力状態(0:出力不可、0 以外:出力可能)
 
-        Checks whether it is possible to get input from the RS-232C port.
-
-==============================================================================
-
-$ff13   _COUTSNS        Inspect whether RS-232C port output is possible
-
-RETURN  output status (0: output not possible, not 0: output possible)
-
-        Checks whether it is possible to output to the RS-232C port.
+        プリンタに出力可能か調べる。
 
 ==============================================================================
 
-$ff17   _FATCHK         Inspect whether the drive sector continues
+$ff12   _CINSNS         RS-232C 回線から入力ができるかの検査
 
-ARGS    FILE.l          Pointer to filename
-        BUFFER.l        Pointer to buffer
-        LEN.w           Number of bytes in buffer
+返値    入力状態(0:入力不可、0 以外:入力可能)
 
-RETURN  Number of bytes used in buffer (error code if negative)
-                d0.l =  8       Continues (if called with [1])
-                d0.l = 14       Continues (if called with [2])
+        RS-232C 回線から入力可能か調べる。
 
-        Writes drive number and connection status of sector of the file
-        indicated by FILE. With this DOS call it is possible to look up the
-        continuation of the FAT, as well as directly read the data portions
-        with DISKRED.
-        For this DOS call, when you push the buffer address BUFFER onto the
-        stack, there are two kinds of calling methods:
-        [1] Push as-is, and
-        [2] Push BUFFER + $80000000.
-        In the case of [1], the size of the sector number and number of sectors
-        stored in the buffer is a word, but for [2], it is a long word.
-        Be aware that for [2], the number of bytes in the buffer LEN is a
-        required argument.
-        The information stored in the buffer is as below.
+==============================================================================
 
-[1]
-offset  size
-0       1.w     Drive number       : d (1: A, 2: B, ..., 26: Z)
-2       1.w     Head sector number : s1
-4       1.w     Number of sectors  : n1
-6       1.w     Next sector number : s2
-8       1.w     Number of sectors  : n2
-        ...
-?       1.w     End                : 0
+$ff13   _COUTSNS        RS-232C 回線へ出力ができるかの検査
 
-[2]
-offset  size
-0       1.w     Drive number       : d (1: A, 2: B, ..., 26: Z)
-2       1.l     Head sector number : s1
-6       1.l     Number of sectors  : n1
-10      1.l     Next sector number : s2
-14      1.l     Number of sectors  : n2
-        ...
-?       1.l     End                : 0
+返値    出力状態(0:出力不可、0 以外:出力可能)
 
-[1]
+        RS-232C 回線に出力可能か調べる。
+
+==============================================================================
+
+$ff17   _FATCHK         ドライブのセクタが連続しているかの検査
+
+　指定したファイル名のドライブ番号とセクタの連結状態(セクタ番号と連続するセク
+タ数)を調べ、バッファに書き込む。この DOS コールで FAT が連続しているかどうか
+を調べたり、得られたセクタ番号を使って DOS _DISKRED でデータ部を直接読むことが
+できる。
+
+　バッファアドレスの引数 BUFFER により動作モードが切り替わる。
+    BUFFER = アドレス  …………………… [1] (ワードモード)
+    BUFFER = アドレス + $8000_0000 …… [2] (ロングワードモード)
+
+BUFFER = アドレス …… [1] (ワードモード)
+    　セクタ番号とセクタ数をワードサイズで書き込む。
+
+    引数    FILE.l      ファイル名のポインタ
+            BUFFER.l    バッファのポインタ
+
+    返値    d0.l …… バッファの使用バイト数(負数ならエラーコード)
+            　FAT が完全に連続している場合は d0.l = 8 となる。
+
+    　バッファのバイト数は指定できず65536バイトとして扱われるので、十分な容量
+    を用意しておくこと。
+
+    　セクタ番号やセクタ数が $ffff を超える(ワードサイズで表現できない)場合は
+    代わりに $ffff がバッファに書き込まれる。この場合 DOS _DISKRED でデータ部
+    部を正しく読み込むことができない。
+
+    　バッファに書き込まれるデータは以下の構造。
+        offset  size
+        0       1.w     ドライブ番号    : d(1:A 2:B … 26:Z)
+        2       1.w     先頭セクタ番号  : s1
+        4       1.w     セクタ数        : n1
+        6       1.w     次のセクタ番号  : s2
+        8       1.w     セクタ数        : n2
+                …
+        ?       1.w     終わり          : 0
+
+    呼び出し手順
         pea     (BUFFER)
         pea     (FILE)
         DOS     _FATCHK
         addq.l  #8,sp
 
-[2]
-        move    LEN,-(sp)
-        pea     (BUFFER+$80000000)
+BUFFER = アドレス＋$8000_0000 [2] (ロングワードモード)
+    　セクタ番号とセクタ数をロングワードサイズで書き込む。
+
+    引数    FILE.l      ファイル名のポインタ
+            BUFFER.l    バッファのポインタ
+            LEN.w       バッファのバイト数
+
+    返値    d0.l …… バッファの使用バイト数(負数ならエラーコード)
+            FAT が完全に連続している場合は d0.l = 14 となる。
+
+    　BUFFER & $00ff_ffff の値がバッファアドレスとして使用される。060turbo.sys
+    組み込み時は BUFFER & $1fff_ffff の値が使用される。
+
+    　バッファに書き込まれるデータは以下の構造。
+        offset  size
+        0       1.w     ドライブ番号    : d(1:A 2:B … 26:Z)
+        2       1.l     先頭セクタ番号  : s1
+        6       1.l     セクタ数        : n1
+        10      1.l     次のセクタ番号  : s2
+        14      1.l     セクタ数        : n2
+                …
+        ?       1.l     終わり          : 0
+
+    不具合
+        該当環境: Human68k v3.02 (これ以外は未調査)
+        　LEN≧2のとき、バッファ末尾を最大4バイト越えてデータを書き込むことが
+        ある。
+
+    呼び出し手順
+        move    #LEN,-(sp)
+        pea     (BUFFER+$8000_0000)
         pea     (FILE)
         DOS     _FATCHK
         lea     (10,sp),sp
 
 ==============================================================================
 
-$ff18   _HENDSP         Control kanji conversion
+$ff18   _HENDSP         漢字変換行の制御
 
-ARGS    MD.w            Control mode
-        POS.w           Position (from the first in the conversion window)
-        MESPTR.l        Pointer to conversion string
+引数    MD.w            コントロールモード
+        POS.w           ポジション(変換ウィンドウの先頭からの位置)
+        MESPTR.l        変換文字列のポインタ
 
-RETURN  MD = 0, 4, 8
-                Maximum number of characters for window
-        MD = 1, 2, 5, 6, 7, 10
-                Next position
+返値    MD = 0,4,8
+                ウィンドウの最大文字数
+        MD = 1,2,5,6,7,10
+                次のポジション
 
-        Controls kanji conversion according to value of mode MD.
-        This DOS call is used in programs that handle kanji conversion, but
-        since the Japanese FP makes use of it, general applications are not
-        allowed to use it.
+        モード MD の値に従って漢字変換行を制御する。
+        この DOS コールは漢字変換を扱うプログラムに使用するが、日本語 FP から
+        利用するので一般のアプリケーションは使用禁止。
 
         MD = 0
-                Opens mode display window.
+                モード表示ウィンドウをオープンする。
         MD = 1
-                Display string normally from specified position.
+                指定位置から文字列をノーマルで表示する。
         MD = 2
-                Display string in reverse from specified position.
+                指定位置から文字列をリバースで表示する。
         MD = 3
-                Close mode display window.
+                モード表示ウィンドウをクローズする。
         MD = 4
-                Open input window.
+                入力ウィンドウをオープンする。
         MD = 5
-                Display string normally from specified position.
+                指定位置から文字列をノーマルで表示する。
         MD = 6
-                Display string in reverse from specified position.
+                指定位置から文字列をリバースで表示する。
         MD = 7
-                Restore specified position and after to before.
+                指定のポジション以降を元に戻す。
         MD = 8
-                Open candidate window.
+                侯補ウィンドウをオープンする。
         MD = 9
-                Display string normally from specified position.
+                指定位置から文字列をノーマルで表示する。
         MD = 10
-                Display string in reverse from specified position.
+                指定位置から文字列をリバースで表示する。
         MD = 11
-                Close candidate window.
+                侯補ウィンドウをクローズする。
 
-MD = 0, 3, 4, 8, 11
+MD = 0,3,4,8,11
         move    MD,-(sp)
         DOS     _HENDSP
         addq.l  #2,sp
@@ -605,7 +652,7 @@ MD = 7
         DOS     _HENDSP
         addq.l  #4,sp
 
-MD = 1, 2, 5, 6, 9, 10
+MD = 1,2,5,6,9,10
         pea     (MESPTR)
         move    POS,-(sp)
         move    MD,-(sp)
@@ -614,32 +661,30 @@ MD = 1, 2, 5, 6, 9, 10
 
 ==============================================================================
 
-$ff19   _CURDRV         Get current drive
+$ff19   _CURDRV         カレントドライブを得る
 
-RETURN  Number of current drive (0: A, 1:B, ..., 25: Z)
+返値    カレントドライブの番号(0:A 1:B … 25:Z)
 
-        Looks up current drive value.
+        カレントドライブの値を調べる。
 
 ==============================================================================
 
-$ff1a   _GETSS          Inputs a string
+$ff1a   _GETSS          文字列の入力
 
-ARGS    BUFFER.l        Pointer to input buffer
+引数    BUFFER.l        入力バッファのポインタ
 
-RETURN  Number of input characters
+返値    入力文字数
 
-        Writes a string to the buffer specified in BUFFER, reading input until
-        a newline.
-        The newline is replaced with a null character.
-        Does not perform break checks (does not newline with VOID/NEWLINE).
-        If it exceeds the maximum number of input characters, it will give a
-        warning, but will not end.
-        The input buffer's contents are as below.
+        BUFFER で指定した入力バッファに、改行までの入力文字列を書き込む。
+        改行文字は、ヌル文字に置き換えられる。
+        ブレークチェックはしない(VOID/NEWLINE で改行しない)。
+        最大入力文字数を超えた場合は、警告を出すが終了はしない。
+        入力バッファの内容は以下の通り。
 
 offset  size
-0       1.b     Maximum number of input characters: n
-1       1.b     (number of characters actually input)
-2       n+1.b   input string
+0       1.b     最大入力文字数  : n
+1       1.b     (実際に入力された文字数)
+2       n+1.b   入力文字列
 
         pea     (BUFFER)
         DOS     _GETSS
@@ -647,36 +692,34 @@ offset  size
 
 ==============================================================================
 
-$ff1b   _FGETC          Input one byte from file handle
+$ff1b   _FGETC          ファイルハンドルから 1 バイト入力
 
-ARGS    FILENO.w        File handle
+引数    FILENO.w        ファイルハンドル
 
-RETURN  The input 1-byte code
+返値    入力した 1 バイトコード
 
-        Waits until there is input from the file handle specified in FILENO; if
-        there is input, returns its code.
+        FILENO で指定したファイルハンドルから入力があるまで待ち、入力があった
+        らそのコードを返す。
 
 ==============================================================================
 
-$ff1c   _FGETS          Input string from file handle
+$ff1c   _FGETS          ファイルハンドルから文字列入力
 
-ARGS    BUFFER.l        Pointer to input buffer
-        FILENO.w        File handle
+引数    BUFFER.l        入力バッファのポインタ
+        FILENO.w        ファイルハンドル
 
-RETURN  Number of input characters
+返値    入力文字数
 
-        Inputs a string from the file handle specified with FILENO until a
-        newline and writes it to the input buffer specified with BUFFER. The
-        newline is converted to a null character.
-        Does not perform break checks (does not newline with VOID/NEWLINE).
-        If maximum number of input characters is exceeded, it will read until
-        that number and end.
-        The contents of the input buffer are as below.
+        FILENO で指定したファイルハンドルから改行までの文字列を入力し、BUFFER
+        で指定した入力バッファに書き込む。改行文字はヌル文字に置き換えられる。
+        ブレークチェックはしない(VOID/NEWLINE で改行しない)。
+        最大入力文字数を超えた場合は、最大入力文字数まで入れて終了する。
+        入力バッファの内容は以下の通り。
 
 offset  size
-0       1.b     Maximum number of input characters: n
-1       1.b     (number of characters actually input)
-2       n+1.b   input string
+0       1.b     最大入力文字数  : n
+1       1.b     (実際に入力された文字数)
+2       n+1.b   入力文字列
 
         move    FILENO,-(sp)
         pea     (BUFFER)
@@ -685,13 +728,13 @@ offset  size
 
 ==============================================================================
 
-$ff1d   _FPUTC          Output one byte to file handle
+$ff1d   _FPUTC          ファイルハンドルに 1 バイト出力
 
-ARGS    CODE.w          1-byte code
-        FILENO.w        File handle
+引数    CODE.w          1 バイトコード
+        FILENO.w        ファイルハンドル
 
-        Outputs the 1-byte code specified in CODE to the file handle specified
-        in FILENO.
+        CODE で指定した 1 バイトコードを、FILENO で指定したファイルハンドルに
+        出力する。
 
         move    FILENO,-(sp)
         move    CODE,-(sp)
@@ -700,13 +743,13 @@ ARGS    CODE.w          1-byte code
 
 ==============================================================================
 
-$ff1e   _FPUTS          Output string to file handle
+$ff1e   _FPUTS          ファイルハンドルに文字列出力
 
-ARGS    MESPTR.l        Pointer to string
-        FILENO.w        File handle
+引数    MESPTR.l        文字列のポインタ
+        FILENO.w        ファイルハンドル
 
-        Outputs string specified in MESPTR to file handle specified in FILENO.
-        The string's null terminator is not output.
+        MESPTR で指定した文字列を、FILENO で指定したファイルハンドルに出力する。
+        文字列の末尾のヌル文字は出力しない。
 
         move    FILENO,-(sp)
         pea     (MESPTR)
@@ -715,23 +758,26 @@ ARGS    MESPTR.l        Pointer to string
 
 ==============================================================================
 
-$ff1f   _ALLCLOSE       Close all files
+$ff1f   _ALLCLOSE       全ファイルのクローズ
 
-        Closes all open files.
+        オープンしたファイルを全てクローズする。
 
 ==============================================================================
 
-$ff20   _SUPER          Change to supervisor/user mode
+$ff20   _SUPER          スーパーバイザ/ユーザーモードの切り替え
 
-ARGS    STACK.l         Mode to change to (0 or address specified by SSP)
+引数    STACK.l         切り替えモード(0 若しくは SSP に設定するアドレス)
 
-RETURN  
-		STACK = 0		Previous value of SSP (error code if negative)
+返値    STACK = 0
+                前の SSP の値(負数ならエラーコード)
 
-        Changes between supervisor or user mode mode according to value on stack.
+        切り替えモード STACK の値に従って、スーパーバイザ/ユーザーモードを切り
+        替える。
 
-        STACK = 0 		Set value of USP to SSP; change to supervisor mode.
-        STACK = other	Set STACK to SSP; change to user mode.
+        STACK = 0
+                USP の値を SSP に設定し、スーパーバイザモードに切り替える。
+        STACK = その他
+                STACK を SSP に設定し、ユーザーモードに切り替える。
 
         pea     (STACK)
         DOS     _SUPER
@@ -739,44 +785,44 @@ RETURN
 
 ==============================================================================
 
-$ff21   _FNCKEY         Get/set redefinable keys
+$ff21   _FNCKEY         再定義可能なキーの読み出し/設定
 
-ARGS    MODE.w          Mode and key number (MD.b*256 + FNO.b)
-        BUFFER.l        Pointer to data buffer
+引数    MODE.w          モード及びキー番号(MD.b×256＋FNO.b)
+        BUFFER.l        データバッファのポインタ
 
-RETURN  d0.l =  0       Completed normally
-                -1      Key number is abnormal
+返値    d0.l =  0       正常終了
+                -1      キー番号が異常
 
-        Gets/sets redefinable key according to value of MD.
-        This DOS call is supported by the CON device (console).
-        MD is set in the upper byte of MODE, and FNO in the lower byte.
+        モード MD の値によって、再定義可能なキーの収得/設定をする。
+        この DOS コールは、CON デバイス(コンソール)でサポートされる。
+        MODE の上位 8bit にモード MD、下位 8bit にキー番号 FNO を指定する。
 
-        MD = 0  Get
-        MD = 1  Set (also displays key's function, but not during 32-row mode)
+        MD = 0  収得
+        MD = 1  設定(同時にファンクションキーの表示も行なうが、32 行モードの時
+                は表示しない)
 
-        FNO     Key name
-         0      All keys
-         1-10   F01-F10
-        11-20   SHIFT + F01-F10
+        FNO     キー名
+         0      全てのキー
+         1～10  F01～F10
+        11～20  SHIFT＋F01～F10
         21      ROLL UP
         22      ROLL DOWN
         23      INS
         24      DEL
-        25      UP (↑)
-        26      LEFT (←)
-        27      RIGHT (→)
-        28      DOWN (↓)
+        25      UP(↑)
+        26      LEFT(←)
+        27      RIGHT(→)
+        28      DOWN(↓)
         29      CLR
         30      HELP
         31      HOME
         32      UNDO
 
-        BUFFER is a buffer for getting/setting; the size varies according to the
-        value of FNO.
+        BUFFER は収得/設定のためのバッファで、大きさは FNO の値によって異なる。
 
-        FNO =  0        712 bytes (32*20 + 6*12 bytes)
-        FNO =  1-20      32 bytes (31 bytes + $00)
-        FNO = 21-32       6 bytes ( 5 bytes + $00)
+        FNO =  0        712 バイト(32×20＋6×12 バイト)
+        FNO =  1～20     32 バイト(31 バイト＋$00)
+        FNO = 21～32      6 バイト( 5 バイト＋$00)
 
         pea     (BUFFER)
         move    MODE,-(sp)
@@ -785,102 +831,136 @@ RETURN  d0.l =  0       Completed normally
 
 ==============================================================================
 
-$ff22   _KNJCTRL        Call for kana-kanji conversion function call
+$ff22   _KNJCTRL        仮名漢字変換用ファンクションコールの呼び出し
 
-        This DOS call is used for the Japanese FP's function call.
+        この DOS コールは、日本語 FP のファンクションコールで使用する。
 
 ==============================================================================
 
-$ff23   _CONCTRL        Console control / direct output
+$ff23   _CONCTRL        コンソールの制御/直接出力
 
-ARGS    MD.w            Control mode (arguments vary according to this value)
-        CODE.w          1-byte code
-        MESPTR.l        Pointer to character string
-        ATR.w           Character attribute
-        X.w             Cursor position setting
-        Y.w             Cursor position setting
-        N.w             Cursor relative movement setting
-        MOD.w           Screen control setting
-        YS.w            Scroll limit setting
-        YL.w            Scroll limit setting
+引数    MD.w            コントロールモード(この値によって引数が異なる)
+        CODE.w          1 バイトコード
+        MESPTR.l        文字列のポインタ
+        ATR.w           文字属性
+        X.w             カーソル位置指定
+        Y.w             カーソル位置指定
+        N.w             カーソル相対移動指定
+        MOD.w           画面制御指定
+        YS.w            スクロール範囲指定
+        YL.w            スクロール範囲指定
 
-RETURN  MD = 0-13, 15, 17, 18
-                d0.l = 0 (when completed normally)
-        MD = 14, 16
-                the previous mode
+返値    MD = 0～1
+                表示後のカーソル位置
+                d0.hw   桁位置
+                d0.w    行〃
+        MD = 2
+                変更前の文字属性(-1 ならエラー)
+        MD = 3
+                変更前のカーソル位置(-1 ならエラー)
+                d0.hw   桁位置
+                d0.w    行〃
+        MD = 4～5、7～9、12～13
+                常に 0
+        MD = 6
+                d0.l =  0       正常終了
+                d0.l = -1       エラー(移動できない)
+        MD = 10、17～18
+                不定
+        MD = 11
+                d0.l =  0       正常終了
+                d0.l = -1       エラー(モードが不正若しくはカーソル位置が不正)
+                                ROM IOCS version 1.3 未満で後者の原因でエラー
+                                になった場合、-1 以外の負数になることがある。
+        MD = 14、16
+                変更前のモード
+        MD = 15
+                d0.l =  0       正常終了
+                d0.l = -1       エラー(範囲指定が不正)
 
-        Performs direct input / control according to value of control code MD.
-        This DOS call is supported by the CON device.
+        コントロールコード MD の値に従って、コンソールから直接入力/制御を行う。
+        この DOS コールは CON デバイスでサポートされる。
 
         MD = 0
-                Displays 1-byte code specified in CODE (IOCS _B_PUTC).
+                CODE で指定した 1 バイトコードを表示する(IOCS _B_PUTC)。
         MD = 1
-                Displays character string specified in MESPTR (IOCS _B_PRINT).
+                MESPTR で指定した文字列を表示する(IOCS _B_PRINT)。
         MD = 2
-                Sets character attribute specified in ATR (IOCS _B_COLOR).
+                ATR で指定した文字属性を設定する(IOCS _B_COLOR)。ATR = -1 の時
+                は現在の文字属性を収得する。
         MD = 3
-                Sets cursor position specified in X and Y (IOCS _B_LOCATE).
+                カーソルを X、Y で指定した位置に設定する(IOCS _B_LOCATE)。X =
+                -1 の時は現在のカーソル位置を収得する。
         MD = 4
-                Moves cursor a row down. On the bottom row, it scrolls up
-                (IOCS _B_DOWN_S).
+                カーソルを 1 行下に移動する。最下行でスクロールアップする
+                (IOCS _B_DOWN_S)。
         MD = 5
-                Moves cursor a row up. On top row, it scrolls down (IOCS _B_UP_S).
+                カーソルを 1 行上に移動する。先頭行でスクロールダウンする
+                (IOCS _B_UP_S)。
         MD = 6
-                Moves cursor N rows up without scrolling (IOCS _B_UP).
+                カーソルを N 行上に移動する。移動できない時はエラーになる
+                (IOCS _B_UP)。
         MD = 7
-                Moves cursor N rows down without scrolling (IOCS _B_DOWN).
+                カーソルを N 行下に移動する。移動できない時は最下行まで移動す
+                る(IOCS _B_DOWN)。
         MD = 8
-                Moves cursor N columns right without scrolling (IOCS _B_RIGHT).
+                カーソルを N 桁右に移動する。移動できない時は右端まで移動する
+                (IOCS _B_RIGHT)。
         MD = 9
-                Moves cursor N columns left without scrolling (IOCS _B_LEFT).
+                カーソルを N 桁左に移動する。移動できない時は左端まで移動する
+                (IOCS _B_LEFT)。
         MD = 10
-                Clears screen according to value of mode MOD (IOCS _B_CLR_ST).
+                モード MOD の値に従って、画面を消去する(IOCS _B_CLR_ST)。
 
-                MOD = 0         From cursor to right edge of last row
-                MOD = 1         From left edge of first row to cursor
-                MOD = 2         Entire screen (cursor moved to top row, left edge)
+                MOD = 0         カーソル位置から最終行右端まで
+                MOD = 1         先頭行左端からカーソル位置まで
+                MOD = 2         画面全体(カーソルは先頭行左端に移動する)
         MD = 11
-                Erases current row according too value of mode MOD (IOCS _ERA_ST).
+                モード MOD の値に従って、現在行を消去する(IOCS _ERA_ST)。
 
-                MOD = 0         From cursor to right edge of row
-                MOD = 1         From left edge or row to cursor
-                MOD = 2         Cursor's entire row
+                MOD = 0         カーソル位置から行の右端まで
+                MOD = 1         行の左端からカーソル位置まで
+                MOD = 2         カーソル行全体
         MD = 12
-                Inserts N rows at cursor row (IOCS _B_INS).
+                カーソル行に N 行挿入する(IOCS _B_INS)。
         MD = 13
-                Deletes N rows from cursor row (IOCS _B_DEL).
+                カーソル行から N 行削除する(IOCS _B_DEL)。
         MD = 14
-                Sets the function key row's mode according to the value of MOD and
-                returns the previous mode. Scroll limits are reset.
+                モード MOD の値に従って、ファンクションキー行のモードを設定し、
+                前のモードを返す。スクロール範囲はリセットされる。
 
-                MOD =  0        Display function keys (scroll limited to rows 0-31)
-                MOD =  1        Display modifier+function keys (same as above)
-                MOD =  2        Display nothing (same as above)
-                MOD =  3        Display nothing (scroll limited to rows 0-32)
-                MOD = -1        Get current mode.
+                MOD =  0        ファンクションキーを表示(スクロール範囲は 0 か
+                                ら 31 行分)
+                MOD =  1        シフトファンクションキーを表示(同上)
+                MOD =  2        何も表示しない(同上)
+                MOD =  3        何も表示しない(スクロール範囲は 0 から 32 行分)
+                MOD = -1        現在のモードを調べる
         MD = 15
-                Sets scroll limits with YS and YL. After scrolling, the cursor will
-                move to the left edge of the first row. The value of YS + YL sets a
-                limit of up to 32 when the function key row mode is 3 and 31 when
-                anything else. Absolute coordinates (0, YS) correspond to logical
-                coordinates (0, 0).
+                YS、YL でスクロール範囲を設定する。
+                スクロール後、カーソルは先頭行左端に移動する。
+                YS＋YL の値は、ファンクションキー行のモードが 3 の時は 32 まで、
+                それ以外は 31 までの範囲で指定する。
+                絶対座標の (0,YS) が 論理座標の (0,0) となる。
         MD = 16
-                Sets screen mode according to MOD; returns previous mode.
+                モード MOD に従って画面モードを設定し、前のモードを返す。
+                IOCS _TGUSEMD でグラフィック画面を使用中に設定していても、MOD
+                = 1、3～5 がエラーにならずに画面モードを変更してしまうので注意
+                すること。
 
-                MOD     Resolution      Graphics
-                0       768x512                 none
-                1       768x512            16 colors
-                2       512x512                 none
-                3       512x512            16 colors
-                4       512x512           256 colors
-                5       512x512         65536 colors
-                -1      Gets current mode.
+                MOD     表示画面        グラフィック
+                0       768×512     なし
+                1       768×512    16 色
+                2       512×512     なし
+                3       512×512    16 色
+                4       512×512   256 色
+                5       512×512 65536 色
+                -1      現在のモードを調べる。
         MD = 17
-                Turns cursor display mode on (IOCS _OS_CURON).
+                カーソルを表示するモードにする(IOCS _OS_CURON)。
         MD = 18
-                Turns cursor display mode off (IOCS _OS_CUROF).
+                カーソルを表示しないモードにする(IOCS _OS_CUROF)。
 
-        For MD = 6-9 and 12-13, when N = 0, it is treated as N = 1.
+        MD = 6～9、12～13 で N = 0 を指定した場合は N = 1 として扱われる。
 
 MD = 0
         move    CODE,-(sp)
@@ -907,18 +987,18 @@ MD = 3
         DOS     _CONCTRL
         addq.l  #6,sp
 
-MD = 4, 5, 17, 18
+MD = 4,5,17,18
         move    MD,-(sp)
         DOS     _CONCTRL
         addq.l  #2,sp
 
-MD = 6-9, 12-13
+MD = 6～9,12～13
         move    N,-(sp)
         move    MD,-(sp)
         DOS     _CONCTRL
         addq.l  #4,sp
 
-MD = 10, 11, 14, 16
+MD = 10,11,14,16
         move    MOD,-(sp)
         move    MD,-(sp)
         DOS     _CONCTRL
@@ -933,45 +1013,50 @@ MD = 15
 
 ==============================================================================
 
-$ff24   _KEYCTRL        Inspect console status / direct input
+$ff24   _KEYCTRL        コンソールの状態検査/直接入力
 
-ARGS    MD.w            Controld mode (arguments vary according to this value)
-        GROUP.w         Key code group
-        INSMODE.w       INS key mode (-1: ON, 0: OFF)
+引数    MD.w            コントロールモード(この値によって引数が異なる)
+        GROUP.w         キーコードグループ
+        INSMODE.w       INS キーのモード(-1:ON 0:OFF)
 
-RETURN  MD = 0, 1
-                The keycode input
+返値    MD = 0、1
+                入力されたキーコード
         MD = 2
-                Status of modifier keys (bit is 1 when pressed)
-
-                        bit 10  fullwidth
-                        bit  9  hiragana
+                シフトキーの状態(ビット 10～4 は 1 の時 LED 点灯、ビット 3～0
+                は 1 の時キーが押されている)
+                        bit 10  全角
+                        bit  9  ひらがな
                         bit  8  INS
                         bit  7  CAPS
-                        bit  6  code input
-                        bit  5  romaji
-                        bit  4  kana
-                        bit  3  OPT. 2
-                        bit  2  OPT. 1
+                        bit  6  コード入力
+                        bit  5  ローマ字
+                        bit  4  かな
+                        bit  3  OPT.2
+                        bit  2  OPT.1
                         bit  1  CTRL
                         bit  0  SHIFT
         MD = 3
-                Status of keys
+                キーの状態
+        MD = 4
+                常に 0
 
-        Performs direct input from console / status inspection according to value
-        of control code MD.
-        This DOS call is supported by the CON device.
+        コントロールコード MD の値に従って、直接コンソールから入力/状態検査を
+        行う。
+        この DOS コールは CON デバイスでサポートされる。
 
         MD = 0
-                Input a key.
+                キーを入力する。
+                Human68k version 3.02 では入力がない場合に入力待ちをしないが、
+                ASK68K 組み込み時は入力待ちをする(Human68k の他のバージョンは
+                未調査)。
         MD = 1
-                Do keycode readahead.
+                キーコードを先読みする。
         MD = 2
-                Inspect status of modifier keys.
+                シフトキーの状態を調べる。
         MD = 3
-                Inspect key status of keycode group specified in GROUP.
+                GROUP で指定したキーコードグループのキー状態を調べる。
         MD = 4
-                Toggle INS key ON or OFF.
+                INS キーを ON/OFF する。
 
 MD = 0～2
         move    MD,-(sp)
@@ -992,25 +1077,21 @@ MD = 4
 
 ==============================================================================
 
-$ff25   _INTVCS         Set vector handling address
+$ff25   _INTVCS         ベクタの処理アドレスの設定
 
-ARGS    INTNO.w         Vector number
-        JOBADR.l        Handling address for selected vector
+引数    INTNO.w         ベクタ番号
+        JOBADR.l        指定ベクタの処理アドレス
 
-RETURN  Previous handling address of selected vector
+返値    指定ベクタの前の処理アドレス
 
-        Sets JOBADR for the vector specified by INTNO, and returns the previously
-        set address.
+        ベクタ番号 INTNO で指定するベクタに JOBADR を設定し、以前の設定アドレ
+        スを返す。
 
-        INTNO =     0-$00ff     Interrupts
-        INTNO = $0100-$01ff     IOCS calls
-        INTNO = $ff00-$ffff     DOS calls
+        INTNO = $0000～$00ff    割り込み
+        INTNO = $0100～$01ff    IOCS コール
+        INTNO = $ff00～$ffff     DOS コール
 
-        When addresses for trap #10-14 or _EXITVC are changed, the work area in PSP
-        changes as well. Also, when further aborting in _ERRJVC, its sr and ssp are
-        changed to that of the moment this DOS call was executed. In the case of
-        _CTRLVC, in addition to the _ERRJVC treatment, the sr and ssp from aborting
-        via CTRL-C also change.
+        trap #10～14 及び _EXITVC のアドレスを変更した場合、PSP 内のワークも変  更される。また、_ERRJVC では更にアボート時の sr、ssp をこの DOS コール が実行された瞬間のものに変更する。_CTRLVC の場合は _CTRLVC のアドレス と PSP 内のワークを変更した後、更に _ERRJVC と同じ処理を行う。
 
         pea     (JOBADR)
         move    INTNO,-(sp)
@@ -1019,16 +1100,14 @@ RETURN  Previous handling address of selected vector
 
 ==============================================================================
 
-$ff26   _PSPSET         Make process stack pointer
+$ff26   _PSPSET         プロセス管理ポインタの作成
 
-ARGS    PSPADR.l        Process stack pointer's address (memory stack pointer + 16)
+引数    PSPADR.l        プロセス管理ポインタのアドレス(メモリ管理ポインタ+16)
 
-RETURN  Usually 0
+返値    常に 0
 
-        Prepares various information for when the program ends at the address
-        specified in PSPADR.
-        The process stack pointer PSPADR must be the address of a memory stack
-        pointer + $10; its size is 240 bytes.
+        PSPADR で指定したアドレスに、プログラム終了時の様々な情報を作成する。
+        プロセス管理ポインタ PSPADR はメモリ管理ポインタ＋$10 のアドレスでなくてはならず、その大きさは 240 バイト。
 
         pea     (PSPADR)
         DOS     _PSPSET
@@ -1036,30 +1115,28 @@ RETURN  Usually 0
 
 ==============================================================================
 
-$ff27   _GETTIM2        Get time (longword)
+$ff27   _GETTIM2        時刻を得る(ロングワード)
 
-RETURN  Current time
+返値    現在の時刻
 
                 %0000_0000_000t_tttt_00mm_mmmm_00ss_ssss
-                bit 20-16       hours (0-23)
-                bit 13- 8       minutes (0-59)
-                bit  5- 0       seconds (0-59)
+                bit 20～16      時(0～23 時)
+                bit 13～ 8      分(0～59 分)
+                bit  5～ 0      秒(0～59 秒)
 
-        Checks the current time. The difference between this and DOS _GETTIME is
-        that seconds are given in 1-second units, so the returned value must take
-        up a longword.
+        現在の時刻を調べる。DOS _GETTIME との違いは、秒が 1 秒単位なので返値が
+        ロングワードになっていることである。
 
 ==============================================================================
 
-$ff28   _SETTIM2        Set time (longword)
+$ff28   _SETTIM2        時刻の設定(ロングワード)
 
-ARGS    TIME.l          The time (format is same as return value of DOS _GETTIM2)
+引数    TIME.l          時刻(形式は DOS _GETTIM2 の返値と同じ)
 
-RETURN  Error code
+返値    エラーコード
 
-        Sets the time to the value of TIME. The difference between this and DOS
-        _SETTIME is that seconds are given in 1-second units, so TIME must take up
-        a longword.
+        時刻を TIME の値に設定する。DOS _SETTIME との違いは、秒が 1 秒単位なの
+        で TIME がロングワードになっていることである。
 
         move.l  TIME,-(sp)
         DOS     _SETTIM2
@@ -1067,23 +1144,24 @@ RETURN  Error code
 
 ==============================================================================
 
-$ff29   _NAMESTS        Filename expansion
+$ff29   _NAMESTS        ファイル名の展開
 
-ARGS    FILE.l          Pointer to filename
-        BUFFER.l        Pointer to buffer
+引数    FILE.l          ファイル名のポインタ
+        BUFFER.l        バッファのポインタ
 
-RETURN  Error code
+返値    エラーコード
 
-        Expands filename specified in FILE to the buffer specified in BUFFER.
-        The buffer is 88 bytes, and its contents are as below:
+        FILE で指定したファイルを、BUFFER で指定したバッファに展開する。
+        バッファは 88 バイトで、内容は以下の通り。
 
 offset  size
-0       1.b     NAMWLD  Number of wildcards (0: no wildcards -1: no file specified)
-1       1.b     NAMDRV  Drive number (A=0, B=1, ..., Z=25)
-2       65.b    NAMPTH  Path ('\' + subdirectory name if applicable + '\')
-67      8.b     NAMNM1  Filename (First eight characters)
-75      3.b     NAMEXT  Extension
-78      10.b    NAMNM2  Filename (remaining ten characters)
+0       1.b     NAMWLD  0:ワイルドカードなし -1:ファイル指定なし
+                        (ワイルドカードの文字数)
+1       1.b     NAMDRV  ドライブ番号(A=0,B=1,…,Z=25)
+2       65.b    NAMPTH  パス('\'＋あればサブディレクトリ名＋'\')
+67      8.b     NAMNM1  ファイル名(先頭 8 文字)
+75      3.b     NAMEXT  拡張子
+78      10.b    NAMNM2  ファイル名(残りの 10 文字)
 
         pea     (BUFFER)
         pea     (FILE)
@@ -1092,36 +1170,34 @@ offset  size
 
 ==============================================================================
 
-$ff2a   _GETDATE        Get date
+$ff2a   _GETDATE        日付を得る
 
-RETURN  Current date
+返値    現在の日付
 
                 %0000_0000_0000_0www_yyyy_yyym_mmmd_dddd
-                bit 18-16       Day of week (0-6)
-                bit 15- 9       Year minus 1980 (0-99)
-                bit  8- 5       Month (1 = January, ..., 12 = December)
-                bit  4- 0       Day of month (1-31)
+                bit 18～16      曜日(0～6)
+                bit 15～ 9      年-1980(0～99)
+                bit  8～ 5      月(1～12 月)
+                bit  4～ 0      日(1～31 日)
 
-        Gets the current date. Days of the week are 0-6 for Sunday through
-        Saturday; years are the year in the Gregorian calendar less 1980, but are
-        limited to 0-99.
+        現在の日付を調べる。曜日は 0～6 が日～土曜日を表し、年は西暦から 1980
+        を引いた値が 0～99 まで設定されている。
 
 ==============================================================================
 
-$ff2b   _SETDATE        Set date
+$ff2b   _SETDATE        日付の設定
 
-ARGS    DATE.w          The date
+引数    DATE.w          日付
 
-RETURN  Error code
+返値    エラーコード
 
-        Sets the date to the value of DATE. The format of DATE is as below; the
-        year is the year in the Gregorian calendar less 1980, limited to
-        values 0-99.
+        DATE の値を日付に設定する。DATE の形式は以下の通りで、年は西暦から
+        1980 を引いた値を 0～99 まで設定する。
 
         %yyyy_yyym_mmmd_dddd
-        bit 15- 9       Year minus 1980 (0-99)
-        bit  8- 5       Month (1 = January, ..., 12 = December)
-        bit  4- 0       Day of month (1-31)
+        bit 15～ 9      年-1980(0～99)
+        bit  8～ 5      月(1～12 月)
+        bit  4～ 0      日(1～31 日)
 
         move    DATE,-(sp)
         DOS     _SETDATE
@@ -1129,32 +1205,30 @@ RETURN  Error code
 
 ==============================================================================
 
-$ff2c   _GETTIME        Get time
+$ff2c   _GETTIME        時刻を得る
 
-RETURN  The current time (Only the lower order word has meaning)
+返値    現在の時刻(下位ワードのみ意味がある)
 
                 %tttt_tmmm_mmms_ssss
-                bit 15-11       Hours (0-23)
-                bit 10- 5       Minutes (0-59)
-                bit  4- 0       Seconds / 2 (0-29)
+                bit 15～11      時  (0～23 時)
+                bit 10～ 5      分  (0～59 分)
+                bit  4～ 0      秒/2(0～29 秒)
 
-        Gets the current time. The seconds in the return value are in units of
-        2 seconds; the value is the actual number of seconds divided by 2. The
-        difference between this and DOS _GETTIM2 is that dividing the seconds by
-        two makes the return value fit in a word.
+        現在の時刻を調べる。返値のうち秒は 2 秒単位で表し、実際の秒を 2 で割っ
+        た値になる。DOS _GETTIM2 との違いは、秒が 2 秒単位なので返値がワードに
+        なっていることである。
 
 ==============================================================================
 
-$ff2d   _SETTIME        Set time
+$ff2d   _SETTIME        時刻の設定
 
-ARGS    TIME.w          The time (format is same as return value of DOS _GETTIME)
+引数    TIME.w          時刻(形式は DOS _GETTIME の返値と同じ)
 
-RETURN  Error code
+返値    エラーコード
 
-        Sets time to value of TIME. In it, seconds are given in units of 2 seconds:
-        the actual seconds divided by 2. Consequently, its values are 0-29. The
-        difference between this and DOS _SETTIM2 is that the seconds are given in
-        2-second incremends, so TIME will fit into a word.
+        時刻を TIME の値に設定する。このうち秒は 2 秒単位で表し、実際の秒を 2
+        で割った値になる。したがって、設定する値は 0～29 まで。DOS _SETTIM2 と
+        の違いは、秒が 2 秒単位なので TIME がワードになっていることである。
 
         move    TIME,-(sp)
         DOS     _SETTIME
@@ -1162,11 +1236,11 @@ RETURN  Error code
 
 ==============================================================================
 
-$ff2e   _VERIFY         Set verify flag.
+$ff2e   _VERIFY         ベリファイフラグの設定
 
-ARGS    FLG.w           The verify flag (0: do not verify, 1: verify)
+引数    FLG.w           ベリファイフラグ(0:ベリファイしない 1:する)
 
-        Sets the verify flag.
+        ベリファイフラグを設定する。
 
         move    FLG,-(sp)
         DOS     _VERIFY
@@ -1174,18 +1248,19 @@ ARGS    FLG.w           The verify flag (0: do not verify, 1: verify)
 
 ==============================================================================
 
-$ff2f   _DUP0           Force-copy file handle
+$ff2f   _DUP0           ファイルハンドルの強制複写
 
-ARGS    FILENO.w        File handle
-        NEWNO.w         File handle before copy
+引数    FILENO.w        ファイルハンドル
+        NEWNO.w         複写先のファイルハンドル
 
-RETURN  Previous value of NEWNO (error code if negative)
+返値    NEWNO の前の値(負数ならエラーコード)
 
-        Forcibly copies file handle FILENO to another file handle NEWNO. This way,
-        you are given 2 file handles for 1 file, making it possible to perform that
-        file's operations with multiple file handles.
-        When closed, it returns to the original number.
-        NEWNO can be values 0-4; any higher should use DUP2.
+        ファイルハンドル FILENO を、2 個目の ファイルハンドル NEWNO に強制複写
+        する。これにより 1 個のファイルに 2 個のファイルハンドルが与えられ、同
+        一ファイルの操作を複数のファイルハンドルで行うことが出来るようになる。
+        クローズすると元の番号に戻る。
+        指定できる NEWNO は 0～4(標準ファイルハンドル)だけで、それより大きい数
+        のハンドルの場合は DUP2 で指定する。
 
         move    NEWNO,-(sp)
         move    FILENO,-(sp)
@@ -2749,12 +2824,9 @@ $fff6	_SUPER_JSR	スーパーバイザモードでのプログラムのサブル
 返値	d0-d7/a0-a6	処理に依存
 
 	JOBADR で指定したプログラムにスーパーバイザモードで jsr する.
-	DOS コールを実行する直前の d0-d7/a0-a6 が渡され、処理が戻るときにはそ
-	の時の d0-d7/a0-a6 が返るが、SR は変化しない.
-	SSP/USP はどのように渡されるか不定なので、スタックを用いて引数を渡すこ
-	とは出来ない.
-	この DOS コールでは、jsr することにより発生する暴走やバスエラーに対す
-	る処理を全く行わない.
+	DOS コールを実行する直前の d0-d7/a0-a6 が渡され、処理が戻るときにはそ	の時の d0-d7/a0-a6 が返るが、SR は変化しない.
+	SSP/USP はどのように渡されるか不定なので、スタックを用いて引数を渡すこ	とは出来ない.
+	この DOS コールでは、jsr することにより発生する暴走やバスエラーに対す	る処理を全く行わない.
 
 	pea	(JOBADR)
 	DOS	_SUPER_JSR
@@ -2773,10 +2845,8 @@ $fff7	_BUS_ERR	バスエラーが発生するかの検査
 	d0.l =  2	P1 から読み込んだ時にバスエラーが発生
 	d0.l = -1	エラー(引数が異常)
 
-	SIZE で指定されたサイズで P1 で指定したアドレスから読み込み、そのデータ
-	を P2 で指定したアドレスに書き込んでバスエラーが発生するかどうか調べる.
-	SIZE の値が異常な場合や SIZE = 2,4 で P1,P2 に奇数アドレスを指定した場
-	合は返値が -1 になる.
+	SIZE で指定されたサイズで P1 で指定したアドレスから読み込み、そのデータ	を P2 で指定したアドレスに書き込んでバスエラーが発生するかどうか調べる.
+	SIZE の値が異常な場合や SIZE = 2,4 で P1,P2 に奇数アドレスを指定した場	合は返値が -1 になる.
 
 	move	SIZE,-(sp)
 	pea	(P2)
@@ -2801,20 +2871,14 @@ $fff8	_OPEN_PR	バックグラウンドタスクの登録
 		d0.l = -27	既に同名タスクが存在する.
 		d0.l = -29	これ以上タスクを登録出来ない.
 
-	NAME で指定した 15 文字以内のスレッド名のバックグラウンドタスクを登録
-	する. 登録したスレッドはスリープ状態になる.
-	COUNT には、タスクを 1 回実行するのにタイマ割り込みを何回カウントする
-	かの回数を 2～255 で指定する. 0～1 の場合は 2 として扱う.
-	INIT_USP,INIT_SSP,INIT_PC は登録したタスクを実行する時のそれぞれのレジ
-	スタの初期値. システム用のスタックは 6KB 必要.
-	INIT_SR は $0000 若しくは $2000 を指定し、ユーザーモードかスーパーバイ
-	ザーモードのどちらかを撰択する.
+	NAME で指定した 15 文字以内のスレッド名のバックグラウンドタスクを登録する. 登録したスレッドはスリープ状態になる.
+	COUNT には、タスクを 1 回実行するのにタイマ割り込みを何回カウントするかの回数を 2～255 で指定する. 0～1 の場合は 2 として扱う.
+	INIT_USP,INIT_SSP,INIT_PC は登録したタスクを実行する時のそれぞれのレジスタの初期値. システム用のスタックは 6KB 必要.
+	INIT_SR は $0000 若しくは $2000 を指定し、ユーザーモードかスーパーバイザーモードのどちらかを撰択する.
 	その他のレジスタの初期値は全て 0.
 	BUFFER はタスク間通信のバッファのアドレスを指定する.
-	SLEEP_TIME は待ち時間をミリ秒単位で指定する. 0 を指定すると永久にスリ
-	ープする.
-	DOS _OPEN_PR によりバックグラウンドタスクとして登録されたスレッドは、
-	DOS _KEEPPR で常駐終了する.
+	SLEEP_TIME は待ち時間をミリ秒単位で指定する. 0 を指定すると永久にスリープする.
+	DOS _OPEN_PR によりバックグラウンドタスクとして登録されたスレッドは、DOS _KEEPPR で常駐終了する.
 	スレッドをメモリ上から消去する場合は DOS _KILL_PR を使用する.
 	BUFFER の内容は以下の通り.
 
@@ -2841,16 +2905,12 @@ $fff9	_KILL_PR	自分自身のプロセスの削除
 
 返値	エラーコード
 
-	自分自身のプロセスを削除する. 常駐終了していたプロセスの場合、同じ
-	プロセス ID を持つスレッド全てを削除し、確保されていたメモリを解放する.
-	この DOS コールを実行する前には、自分でオープンしたファイルは全て
-	クローズし、書き換えたベクタなども元に戻す. システムはスレッドの削除と
-	メモリの解放しか行わない.
-	プロセス内でいくつかの登録したスレッドを実行した後で DOS _EXIT や
-	DOS _EXIT2 で終了する場合、先にオープンしたスレッドを KILL_PR で削除す
-	る. メインのスレッドであるプロセスを削除した場合、その後の動作は保証さ
-	れない. 自分以外のプロセスを削除する場合は、DOS _SEND_PR で KILL コマ
-	ンドを送る.
+	自分自身のプロセスを削除する. 常駐終了していたプロセスの場合、同じ	プロセス ID を持つスレッド全てを削除し、確保されていたメモリを解放する.
+	この DOS コールを実行する前には、自分でオープンしたファイルは全て	クローズし、書き換えたベクタなども元に戻す. 
+	システムはスレッドの削除と	メモリの解放しか行わない.
+	プロセス内でいくつかの登録したスレッドを実行した後で DOS _EXIT や	DOS _EXIT2 で終了する場合、先にオープンしたスレッドを KILL_PR で削除す	る. 
+	メインのスレッドであるプロセスを削除した場合、その後の動作は保証さ	れない. 
+	自分以外のプロセスを削除する場合は、DOS _SEND_PR で KILL コマ	ンドを送る.
 
 ==============================================================================
 
@@ -2861,10 +2921,9 @@ $fffa	_GET_PR		スレッドの管理情報を得る
 
 返値	スレッド ID 若しくはエラーコード
 
-	指定された ID のスレッドの管理情報を、BUFFER で指定した 116 バイトのバ
-	ッファに複写する.
-	ID に -1 を指定し、BUFFER+96 にスレッドの名前を指定すると、スレッドの
-	ID が返る. また、ID に -2 を指定すると、自分自身の ID が返る.
+	指定された ID のスレッドの管理情報を、BUFFER で指定した 116 バイトのバッファに複写する.
+	ID に -1 を指定し、BUFFER+96 にスレッドの名前を指定すると、スレッドのID が返る. 
+	また、ID に -2 を指定すると、自分自身の ID が返る.
 
 offset	size
 0	1.l	NEXT_PTR	次のスレッドの管理情報格納領域
@@ -2975,15 +3034,12 @@ $fffd	_SEND_PR	スレッドにコマンド/データを送り、スリープし�
 
 	指定した ID のスレッドにコマンドやデータを送り、スリープしていたら起こす.
 	MY_ID に自分の ID、YOUR_ID に通信先のスレッドの ID を指定する.
-	CMDNO は通信の内容を表すワード値で、システムで定められているコマンド以
-	外はそれぞれのスレッド間で定義する. システムで予約しているコマンドは
-	$ff?? で、以下に示す値が定義されている.
+	CMDNO は通信の内容を表すワード値で、システムで定められているコマンド以外はそれぞれのスレッド間で定義する. システムで予約しているコマンドは$ff?? で、以下に示す値が定義されている.
 
 	$fff9	スレッドを消去するように要求する.
 	$fffb	強制スリープ状態から起こすだけで、タスク間通信バッファは変化しない.
 	$fffc	スリープするように要求する.
-		起こされた時にこのコマンドが送られていたら、すぐにタスク間通信
-		バッファの ID を -1 にしてスリープするべきである.
+		起こされた時にこのコマンドが送られていたら、すぐにタスク間通信バッファの ID を -1 にしてスリープするべきである.
 		スリープしないでタスク間通信バッファを監視している場合に有効.
 	$ffff	処理が終ったかどうか調べる. -28 が返れば、まだ処理中である.
 
@@ -2996,14 +3052,9 @@ offset	size
 8	1.w	COMMAND	コマンド番号
 10	1.w	ID	ID(-1 で通信許可)
 
-	YOUR_ID で指定したスレッドの、タスク間通信バッファの ID が -1 に設定さ
-	れていたら、そのバッファは書き込み可能なので、MY_ID と CMDNO をそれぞ
-	れ ID と COMMAND に設定し、BUFFER からのデータを LEN で指定したバイト
-	数だけ DATABUF に書き込み、LENGTH を LEN にする. また、指定したスレッ
-	ドがスリープしていたら起こす.
-	特に $fffb のコマンドは特殊処理され、指定したスレッドを起こすだけでタ
-	スク間通信バッファの ID が -1 でなくてもよく、その他のバッファも変化し
-	ない.
+	YOUR_ID で指定したスレッドの、タスク間通信バッファの ID が -1 に設定されていたら、そのバッファは書き込み可能なので、MY_ID と CMDNO をそれぞれ ID と COMMAND に設定し、BUFFER からのデータを LEN で指定したバイト数だけ DATABUF に書き込み、LENGTH を LEN にする. 
+	また、指定したスレッドがスリープしていたら起こす.
+	特に $fffb のコマンドは特殊処理され、指定したスレッドを起こすだけでタスク間通信バッファの ID が -1 でなくてもよく、その他のバッファも変化しない.
 	LEN が LENGTH より大きい時や書き込み不可の時はエラーになる.
 	Human68k version 3.02 では正常に動作しない(ID 検査に失敗する).
 
