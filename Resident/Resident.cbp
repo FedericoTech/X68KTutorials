@@ -19,7 +19,7 @@
 				<Option type="1" />
 				<Option compiler="human68k_gcc" />
 				<Linker>
-					<Add option="-Wl,-q,-Map=$(TARGET_OUTPUT_FILE).map,--cref" />
+					<Add option="-lm -Wl,-q,-Map=$(TARGET_OUTPUT_FILE).map,--cref" />
 				</Linker>
 				<ExtraCommands>
 					<Add after="human68k-objcopy -v -O xfile $(TARGET_OUTPUT_FILE) $(TARGET_OUTPUT_FILE).X" />
@@ -28,7 +28,24 @@
 		</Build>
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />
+			<Option weight="1" />
 		</Unit>
+		<Unit filename="clock.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="clock.h" />
+		
+		<Unit filename="my_math.c">
+			<Option compilerVar="CC" />
+			<Option target="lydux" />
+		</Unit>
+		<Unit filename="my_math.h">
+			<Option target="lydux" />
+		</Unit>
+		<Unit filename="utils.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="utils.h" />
 		<Extensions>
 			<lib_finder disable_auto="1" />
 		</Extensions>

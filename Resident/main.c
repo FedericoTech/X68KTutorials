@@ -1,15 +1,23 @@
 #ifdef __MARIKO_CC__
 	#include <doslib.h>
-	#include <iocslib.h>
-	#include <interrupt.h>
 #else
 	#include <dos.h>
-	#include <iocs.h>
-	#define interrupt __attribute__ ((interrupt_handler))
+	#include <stdio.h>
+	#define _mep dos_mep
+	#define _psp dos_psp
+
+	extern int _PSP;
+	#define _dos_getpdb() (void*)_PSP
+
+	#define oldvector _oldvector
+	#define keyword _keyword
 #endif
 
-#include <math.h>
-#include <stdarg.h>
+//#include "a.h"
+
+#include "utils.h"
+#include "clock.h"
+
 
 #define 	TIMER_C 	0x45		/* 0x45 vector number to hook  MFP Timer-C (Mouse/cursor/FDD control, etc.) */
 #define 	KEYWORDS	"MMV"
@@ -23,34 +31,28 @@ struct resident {
     void * oldvector;
 };
 
+
 extern char keyword[4];
 extern void * oldvector;
 
+int volatile can_be_declared_here;
+
+/**
+ * above can be declarations but not initializations nor functions.
+ * The very first thing below this comment is those assembly commands
+ * reserving space.
+ * The object file 'main.o' has to be linked first.
+ * You can achieve this by manipulating your '.cbp' project file and in
+ * <Unit filename="main.c"> adding the element <Option weight="1" />
+ * This way we will find these two variables right after the Program Segment Prefix struct
+ * at the beginning of the program.
+ */
+
+//these have to be the very first thing
 asm( "	_keyword:	.ds.b	4	    " );
 asm( "	_oldvector: .dc.l	0		" );
 
-int counter;
-int currentime = 0;
-volatile char mutex = 1;
-
-const int centerX = 500;
-const int centerY = 100;
-const float PI = M_PI;
-const float radians = (float)M_PI / 180.0f;
-
-const float hour_arm_length = 32.0f;
-const float minute_arm_length = 40.0f;
-const float second_arm_length = 50.0f;
-
-#define TEXT_PLANE 2
-
-void my_print(const char *format, ...);
-
-inline void calculate_arms(const float tick, const float armLength, short * endX, short * endY);
-
-void interrupt process_start();
-
-void showStatus(int status);
+int volatile an_initialized_here_but_not_avobe = 0;
 
 //entry point
 int main(int argc, char *argv[])
@@ -140,20 +142,10 @@ int main(int argc, char *argv[])
 
                 _dos_intvcs(TIMER_C, oldvector);
 
-                _dos_s_mfree(&resident_aux->procc.psp); //psp_addr
+                _dos_mfree(&resident_aux->procc.psp); //psp_addr
 
-                { // we remove the clock
-                    struct _txfillptr txfillptr = {
-                        /* unsigned short vram_page */  TEXT_PLANE, //0, 1, 2, 4. Plane 2 is fixed. It won't move up with the scroll
-                        /* short x */                   centerX - 50,
-                        /* short y */                   centerY - 50,
-                        /* short x1 */                  100,
-                        /* short y1 */                  100,
-                        /* unsigned short fill_patn */  0x0000
-                    };
-
-                    _iocs_txfill(&txfillptr);
-                }
+                // we remove the clock
+                clear_clock();
 
                 _dos_c_print("resident program stopped\r\n");
             } else {
@@ -164,237 +156,4 @@ int main(int argc, char *argv[])
     _dos_exit();
 }
 
-//this function is inline to have a copy of it where ever is used
-void my_print(const char* format, ...)
-{
-    //we get the current position of the cursor
-    int cursor_pos = _iocs_b_locate(-1, -1);
 
-    va_list args;
-    va_start(args, format);
-
-    //we move the cursor to the top left corner
-    _iocs_b_locate(0, 0);
-    //we print the message
-
-    vprintf(format, args);
-
-    //we re establish cursor's position
-    _iocs_b_locate((cursor_pos >> 16) & 0xffff, cursor_pos & 0xffff);
-
-    va_end(args);
-}
-
-inline void calculate_arms(const float tick, const float armLength, short* endX, short* endY)
-{
-    float angle = tick * 6.0f - 90.0f; // Angle of rotation in degrees (adjust as needed)
-
-    // Convert the angle to radians
-    float angleRadians = radians * angle;
-
-    // Calculate the endpoint coordinates based on the angle
-    *endX = (short) armLength * cos(angleRadians);
-    *endY = (short) armLength * sin(angleRadians); // Subtract because Y-axis is inverted
-}
-
-//the resident program is this interrupt
-void interrupt process_start() //it has to be an interrupt
-{
-    //we check whether the interrupt is still being processed
-    if(mutex){
-        mutex = 0; //we hold the mutex
-        //only do things every 200 cycles
-        if(++counter % 100 == 0){
-
-            int auxtime = _dos_gettim2();
-
-            //if time has changed...
-            if(auxtime != currentime){
-                currentime = auxtime;
-
-                //clear clock
-                {
-                    struct _txfillptr txfillptr = {
-                        /* unsigned short vram_page */  TEXT_PLANE, //0, 1, 2, 4. Plane 2 is fixed. It won't move up with the scroll
-                        /* short x */                   centerX - 50,
-                        /* short y */                   centerY - 50,
-                        /* short x1 */                  100,
-                        /* short y1 */                  100,
-                        /* unsigned short fill_patn */  0x0000
-                    };
-
-                    _iocs_txfill(&txfillptr);
-                }
-
-                //we draw the box
-                {
-                    struct _tboxptr tboxptr = {
-                        /* unsigned short vram_page */  TEXT_PLANE, //0, 1, 2, 4. Plane 2 is fixed. It won't move up with the scroll
-                        /* short x */                   centerX - 50,
-                        /* short y */                   centerY - 50,
-                        /* short x1 */                  100,
-                        /* short y1 */                  100,
-                        /* unsigned short line_style */ (0xf0 << (counter % 8)) | (0xf0 >> (8 - (counter % 8))) // dashed
-                    };
-
-                    _iocs_txbox(&tboxptr);
-                }
-
-
-                {
-                    //perpendicular line
-                    struct _tlineptr tlptr = {
-                        /* unsigned short vram_page */  TEXT_PLANE, //0, 1, 2, 4. Plane 2 is fixed. It won't move up with the scroll
-                        /* short x */                   centerX,
-                        /* short y */                   centerY,
-                        /* short x1 (length) */         0,  //for initialization purposes
-                        /* short y1 (length) */         0,  //for initialization purposes
-                        /* unsigned short line_style */ 0xff // solid
-                    };
-
-                    //vertical line
-                    struct _ylineptr ylineptr = {
-                        /* unsigned short vram_page */  TEXT_PLANE,
-                        /* short x */                   centerX,
-                        /* short y */                   centerY,
-                        /* short y1 */                  0,  //for initialization purposes,
-                        /* unsigned short line_style */ 0xff // solid
-                    };
-
-                    //horizontal line
-                    struct _xlineptr xlineptr = {
-                        /* unsigned short vram_page */  TEXT_PLANE,
-                        /* short x */                   centerX,
-                        /* short y */                   centerY,
-                        /* short x1 */                  0,  //for initialization purposes,
-                        /* unsigned short line_style */ 0xff // solid
-                    };
-
-                    char hour = (currentime >> 16);
-                    char minute = ((currentime >> 8) & 0x3F);
-                    char second = (currentime & 0x3F);
-
-
-                    float aux_hour = ((float) hour) + (1.0f / (float)minute);
-
-                    //hour
-                    //if the hour is in a vertical position...
-                    if(aux_hour == 12.0f || aux_hour == 24.0f || aux_hour == 6.0f || aux_hour == 18.0f){
-                        ylineptr.y1 = (int)(hour_arm_length * (aux_hour == 12.0f || aux_hour == 24.0f ? 1.0f : -1.0f));
-
-                        //we  draw the second arm vertically
-                        _iocs_txyline(&ylineptr);
-
-                    //if the hour is in an horizontal position...
-                    } else if (aux_hour == 9.0f || aux_hour == 21.0f || aux_hour == 3.0f || aux_hour == 15.0f){
-                         xlineptr.x1 = (int)(hour_arm_length * (aux_hour == 9.0f || aux_hour == 21.0f ? -1.0f : 1.0f));
-
-                         //we  draw the second arm horizontally
-                        _iocs_txxline(&xlineptr);
-                    //if in another position...
-                    } else {
-                        calculate_arms(
-                           aux_hour * 5.0f,
-                           hour_arm_length,
-                           &tlptr.x1,
-                           &tlptr.y1
-                        );
-                        //we  draw the second arm
-                        _iocs_txline(&tlptr);
-                    }
-
-                    //minute
-                    //if the minute is in a vertical position...
-                    if(minute == 0 || minute == 30){
-                        ylineptr.y1 = (int)second_arm_length * (minute == 30 ? 1 : -1);
-
-                        //we  draw the minute arm vertically
-                        _iocs_txyline(&ylineptr);
-                    //if the minute is in an horizontal position...
-                    } else if(minute == 15 || minute == 45) {
-                        xlineptr.x1 = (int)second_arm_length * (minute == 45 ? -1 : 1);
-
-                        //we  draw the second arm horizontally
-                        _iocs_txxline(&xlineptr);
-                    //if in another position...
-                    } else {
-                        calculate_arms(minute, minute_arm_length, &tlptr.x1, &tlptr.y1);
-
-                        //we  draw the second arm
-                        _iocs_txline(&tlptr);
-                    }
-
-                    //second
-                    //if the second is in a vertical position...
-                    if(second == 0 || second == 30){
-                        ylineptr.y1 = (int)second_arm_length * (second == 30 ? 1 : -1);
-
-                        //we  draw the second arm vertically
-                        _iocs_txyline(&ylineptr);
-                    //if the second is in a vertical position...
-                    } else if(second == 15 || second == 45) {
-                        xlineptr.x1 = (int)second_arm_length * (second == 45 ? -1 : 1);
-
-                        //we  draw the second arm horizontally
-                        _iocs_txxline(&xlineptr);
-                    //if in another position...
-                    } else {
-
-                        calculate_arms(second, second_arm_length, &tlptr.x1, &tlptr.y1);
-
-                        //we  draw the second arm
-                        _iocs_txline(&tlptr);
-                    }
-                }
-            }
-        }
-
-        mutex = 1; //we release the mutex
-    }
-}
-
-void showStatus(int status)
-{
-    if(status < 0){
-        switch(status){
-            case -1: _dos_c_print("Executed invalid function code\r\n"); break;
-            case -2: _dos_c_print("Specified file not found\r\n"); break;
-            case -3: _dos_c_print("Specified directory not found\r\n"); break;
-            case -4: _dos_c_print("Too many open files\r\n"); break;
-            case -5: _dos_c_print("Cannot access directory or volume label\r\n"); break;
-            case -6: _dos_c_print("Specified handle is not open\r\n"); break;
-            case -7: _dos_c_print("Memory manager region was destroyed\r\n"); break;
-            case -8: _dos_c_print("Not enough memory to execute\r\n"); break;
-            case -9: _dos_c_print("Invalid memory manager pointer specified\r\n"); break;
-            case -10: _dos_c_print("Illegal environment specified\r\n"); break;
-            case -11: _dos_c_print("Abnormal executable file format\r\n"); break;
-            case -12: _dos_c_print("Abnormal open access mode\r\n"); break;
-            case -13: _dos_c_print("Error in selecting a filename\r\n"); break;
-            case -14: _dos_c_print("Called with invalid parameter\r\n"); break;
-            case -15: _dos_c_print("Error in selecting a drive\r\n"); break;
-            case -16: _dos_c_print("Cannot remove current directory\r\n"); break;
-            case -17: _dos_c_print("Cannot ioctrl device\r\n"); break;
-            case -18: _dos_c_print("No more files found\r\n"); break;
-            case -19: _dos_c_print("Cannot write to specified file\r\n"); break;
-            case -20: _dos_c_print("Specified directory already registered\r\n"); break;
-            case -21: _dos_c_print("Cannot delete because file exists\r\n"); break;
-            case -22: _dos_c_print("Cannot name because file exists\r\n"); break;
-            case -23: _dos_c_print("Cannot create file because disk is full\r\n"); break;
-            case -24: _dos_c_print("Cannot create file because directory is full\r\n"); break;
-            case -25: _dos_c_print("Cannot seek to specified location\r\n"); break;
-            case -26: _dos_c_print("Specified supervisor mode with supervisor status on\r\n"); break;
-            case -27: _dos_c_print("Thread with same name exists\r\n"); break;
-            case -28: _dos_c_print("Interprocess communication buffer is write-protected\r\n"); break;
-            case -29: _dos_c_print("Cannot start any more background processes\r\n"); break;
-            case -32: _dos_c_print("Not enough lock regions\r\n"); break;
-            case -33: _dos_c_print("Locked; cannot access\r\n"); break;
-            case -34: _dos_c_print("Handler for specified drive is opened\r\n"); break;
-            case -35: _dos_c_print("Symbolic link nest exceeded 16 steps (lndrv)\r\n"); break;
-            case -80: _dos_c_print("File exists\r\n"); break;
-            default: printf("unknown status %d\r\n", status);
-        }
-        return;
-    }
-
-    printf("Status: %d\r\n", status);
-}
