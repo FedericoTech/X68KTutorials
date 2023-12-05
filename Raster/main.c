@@ -1,4 +1,29 @@
+
+#ifdef __MARIKO_CC__
+    #include <doslib.h>
+    #include <iocslib.h>
+#else
+    #include <dos.h>
+    #include <iocs.h>
+    #include <string.h>
+
+    #define _filbuf dos_filbuf
+
+    #define _iocs_sp_regst(spno, x, y, code, prw) \
+        _iocs_sp_regst( \
+           spno & VERTICAL_BLANKING_DETECTION, \
+           spno & ~VERTICAL_BLANKING_DETECTION, \
+           x, \
+           y, \
+           code, \
+           prw \
+       )
+
+    #define interrupt __attribute__ ((interrupt_handler))
+#endif
+
 #include "utils.h"
+
 
 #define DMA_DIR_A_TO_B 0
 #define DMA_DIR_B_TO_A 1

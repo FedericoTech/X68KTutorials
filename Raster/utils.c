@@ -1,5 +1,12 @@
 #include "utils.h"
 
+#ifdef __MARIKO_CC__
+    #include <iocslib.h>
+#else
+    #include <iocs.h>
+    #define interrupt __attribute__ ((interrupt_handler))
+#endif
+
 static volatile uint32_t _time = 0;
 
 static void interrupt timer_interrupt()
@@ -114,7 +121,7 @@ char * loadData(char * buffer, const char * filename, int8_t config)
     );
 
     if(buffer == NULL){
-        buffer = _dos_malloc(status);
+        buffer = (char *) _dos_malloc(status);
     }
 
     status2 = _dos_read(file_handler, buffer, status);
