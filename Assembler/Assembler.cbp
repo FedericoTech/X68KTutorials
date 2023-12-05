@@ -22,11 +22,16 @@
 					<Add option="-Wl,-q,-Map=$(TARGET_OUTPUT_FILE).map,--cref" />
 				</Linker>
 				<ExtraCommands>
-					<Add after="human68k-objcopy -v -O xfile $(TARGET_OUTPUT_FILE) $(TARGET_OUTPUT_FILE).X" />
+					<Add after="human68k-objcopy.bat -v -O xfile $(TARGET_OUTPUT_FILE) $(TARGET_OUTPUT_FILE).X &amp;&amp; del /Q $(TARGET_OUTPUT_FILE)" />
 				</ExtraCommands>
 			</Target>
 		</Build>
-		<Unit filename="helloworld.s" />
+		<Unit filename="assembler_lydux.S">
+			<Option target="lydux" />
+		</Unit>
+		<Unit filename="assembler_mariko.s">
+			<Option target="default" />
+		</Unit>
 		<Extensions />
 	</Project>
 </CodeBlocks_project_file>
