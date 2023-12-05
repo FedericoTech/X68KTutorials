@@ -6,14 +6,14 @@
 	#define _mep dos_mep
 	#define _psp dos_psp
 
-	extern int _PSP;
-	#define _dos_getpdb() (void*)_PSP
+	//extern int _PSP;
+	//#define _dos_getpdb() (void*)_PSP
 
 	#define oldvector _oldvector
 	#define keyword _keyword
 #endif
 
-//#include "a.h"
+//#include "main.h"
 
 #include "utils.h"
 #include "clock.h"
@@ -27,6 +27,9 @@ struct resident {
         struct _mep mep; //16   bytes
         struct _psp psp; //240 bytes
     } procc;    //256 bytes
+#ifndef __MARIKO_CC__
+    char dummy[0xf4]; //human68k/lib/crt0.o in lydux
+#endif
     char keyword[4];    //here the program starts
     void * oldvector;
 };
@@ -84,7 +87,8 @@ int main(int argc, char *argv[])
 
             //if we find the process
             if(strncmp(KEYWORDS, keyword, 3) == 0){
-                oldvector = resident_aux->oldvector;
+                // oldvector = resident_aux->oldvector //seems to work this way too but to be sure I use _iocs_b_lpeek
+                oldvector = (void *) _iocs_b_lpeek(&resident_aux->oldvector);
                 break;
             }
         }

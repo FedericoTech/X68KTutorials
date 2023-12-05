@@ -19,8 +19,6 @@
 	#define _tlineptr iocs_tlineptr
 	#define _ylineptr iocs_ylineptr
 	#define _xlineptr iocs_xlineptr
-
-	#define _iocs_txline(ptr) _iocs_txline(REMOVE_AMPERSAND(ptr))
 #endif
 
 
@@ -30,8 +28,6 @@
 #include "utils.h"
 
 #define TEXT_PLANE 2
-
-
 
 int counter;
 int currentime = 0;

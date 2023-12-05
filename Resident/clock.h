@@ -7,8 +7,6 @@
 	#define interrupt __attribute__ ((interrupt_handler))
 #endif
 
-
-
 void interrupt process_start();
 
 void clear_clock();
