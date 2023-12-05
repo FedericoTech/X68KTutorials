@@ -19,10 +19,10 @@
 				<Option type="1" />
 				<Option compiler="human68k_gcc" />
 				<Linker>
-					<Add option="-Wl,-q,-Map=$(TARGET_OUTPUT_FILE).map,--cref" />
+					<Add option="-lm -Wl,-q,-Map=$(TARGET_OUTPUT_FILE).map,--cref" />
 				</Linker>
 				<ExtraCommands>
-					<Add after="human68k-objcopy -v -O xfile $(TARGET_OUTPUT_FILE) $(TARGET_OUTPUT_FILE).X" />
+					<Add after="human68k-objcopy.bat -v -O xfile $(TARGET_OUTPUT_FILE) $(TARGET_OUTPUT_FILE).X" />
 				</ExtraCommands>
 			</Target>
 		</Build>

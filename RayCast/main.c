@@ -6,6 +6,11 @@
 #else
 	#include <dos.h>
 	#include <iocs.h>
+	#include <stdio.h>
+
+	#define _lineptr iocs_lineptr
+	#define _fillptr iocs_fillptr
+
 	#define interrupt __attribute__ ((interrupt_handler))
 #endif
 
