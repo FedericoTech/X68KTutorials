@@ -1,3 +1,27 @@
+#ifdef __MARIKO_CC__
+    #include <doslib.h>
+    #include <iocslib.h>
+#else
+    #include <dos.h>
+    #include <iocs.h>
+    #include <stdio.h>
+    #define interrupt __attribute__ ((interrupt_handler))
+
+    #define _filbuf dos_filbuf
+    #define _chain iocs_chain
+    #define _chain2 iocs_chain2
+
+    #define _iocs_sp_regst(spno, x, y, code, prw) \
+        _iocs_sp_regst( \
+           spno & VERTICAL_BLANKING_DETECTION, \
+           spno & ~VERTICAL_BLANKING_DETECTION, \
+           x, \
+           y, \
+           code, \
+           prw \
+       )
+#endif
+
 #include "utils.h"
 #include <signal.h>
 #include <string.h>
@@ -74,7 +98,7 @@ void interrupt vsync_disp();
 
 void init();
 
-void terminate();
+void termin();
 
 int main(void)
 {
@@ -103,13 +127,10 @@ int main(void)
     s_stop[0] = loadData(NULL, "/sonic_sp/s_stop_0.spt", fconf.config);
     s_stop[1] = loadData(NULL, "/sonic_sp/s_stop_1.spt", fconf.config);
 
+
     //loafing files searched with patterns
     {
-        #ifdef __MARIKO_CC__
         struct _filbuf sf;
-        #else
-        struct dos_filbuf sf;
-        #endif
 
         int cont = 0;
 
@@ -149,11 +170,7 @@ int main(void)
 
     //loafing files searched with patterns
     {
-        #ifdef __MARIKO_CC__
         struct _filbuf sf;
-        #else
-        struct dos_filbuf sf;
-        #endif
 
         int cont = 0;
 
@@ -218,7 +235,6 @@ int main(void)
 
                             sp_register.flags.pcg = cont2;
 
-                            #ifdef __MARIKO_CC__
                             status = _iocs_sp_regst(
                                 cont | VERTICAL_BLANKING_NO_DETECT,     //int_ spno sprite number (0-127) //int_ mode bit 31 0: Vertical blanking interval detection post-setting 1: Not detected
                                 16 + j + x,                             //int_ x X coordinates (0-1023 16 displayed on the far left
@@ -226,17 +242,7 @@ int main(void)
                                 sp_register.code,                       //code pattern code
                                 SPRITE_PRI_SP                           //int_ prw priority
                             );
-                            #else
-                            //we set up the sprite.
-                            status = _iocs_sp_regst(
-                                cont,                           //int_ spno sprite number (0-127)
-                                VERTICAL_BLANKING_DETECTION,    //int_ mode bit 31 0: Vertical blanking interval detection post-setting 1: Not detected
-                                16 + j + x,                     //int_ x X coordinates (0-1023 16 displayed on the far left
-                                16 + i + y,                     //int_ y Y " (" " Top ")
-                                sp_register.code,               //code pattern code
-                                SPRITE_PRI_SP                   //int_ prw priority
-                            );
-                            #endif
+
                             if(++cont > 127){
                                 goto end;
                             }
@@ -254,7 +260,6 @@ int main(void)
 
                             sp_register.flags.pcg = cont2;
 
-                            #ifdef __MARIKO_CC__
                             status = _iocs_sp_regst(
                                 cont | VERTICAL_BLANKING_NO_DETECT,     //int_ spno sprite number (0-127) //int_ mode bit 31 0: Vertical blanking interval detection post-setting 1: Not detected
                                 16 + j + x,                             //int_ x X coordinates (0-1023 16 displayed on the far left
@@ -262,17 +267,7 @@ int main(void)
                                 sp_register.code,                       //code pattern code
                                 SPRITE_PRI_SP                           //int_ prw priority
                             );
-                            #else
-                            //we set up the sprite.
-                            status = _iocs_sp_regst(
-                                cont,                           //int_ spno sprite number (0-127)
-                                VERTICAL_BLANKING_DETECTION,    //int_ mode bit 31 0: Vertical blanking interval detection post-setting 1: Not detected
-                                16 + j + x,                     //int_ x X coordinates (0-1023 16 displayed on the far left
-                                16 + i + y,                     //int_ y Y " (" " Top ")
-                                sp_register.code,               //code pattern code
-                                SPRITE_PRI_SP                   //int_ prw priority
-                            );
-                            #endif
+
                             if(++cont > 127){
                                 goto end;
                             }
@@ -292,7 +287,7 @@ int main(void)
         end: ;
     }
 
-    signal(SIGINT, terminate);	/* Processing routine settings when is pressed CTRL-C */
+    signal(SIGINT, termin);	/* Processing routine settings when is pressed CTRL-C */
 
     _iocs_vdispst(
         &vsync_disp,
@@ -307,24 +302,13 @@ int main(void)
         int cont2;
         int cont3;
 
-        #ifdef __MARIKO_CC__
         struct _chain sonic_animation[2];
-        #else
-        struct iocs_chain sonic_animation[2];
-        #endif
 
-        #ifdef __MARIKO_CC__
         struct _chain2 dma_tails_walk;
         struct _chain2 dma_tails_run;
         struct _chain2 dma_tails_still;
-        #else
-        struct iocs_chain2 dma_tails_walk;
-        struct iocs_chain2 dma_tails_run;
-        struct iocs_chain2 dma_tails_still;
-        #endif
 
         uint8_t *still = t_still[frame_t_still];
-
 
         sonic_animation[0].addr = NULL;
         sonic_animation[0].len = 1152;
@@ -405,7 +389,7 @@ int main(void)
         }
     }
 
-    terminate();
+    termin();
 
     _dos_exit();
 }
@@ -422,7 +406,7 @@ void init()
     _iocs_b_curoff();
 }
 
-void terminate()			/* Processing routine when pressed CTRL-C */
+void termin()			/* Processing routine when pressed CTRL-C */
 {
     _dos_mfree(s_still);
     _dos_mfree(s_look_u);
@@ -507,7 +491,7 @@ char * loadData(char * buffer, const char * filename, int8_t config)
 
     //if any error...
     if(file_handler < 0){
-        terminate();
+        termin();
         _dos_c_print("Can't open the file\r\n");
         _dos_c_print(filename);
         _dos_c_print("\r\n");
@@ -541,7 +525,7 @@ char * loadData(char * buffer, const char * filename, int8_t config)
 
     //if any error...
     if(status < 0){
-        terminate();
+        termin();
         _dos_c_print("Can't close the file\r\n");
         _dos_c_print(getErrorMessage(status));
         _dos_exit2(status);

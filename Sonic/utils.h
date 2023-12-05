@@ -1,16 +1,6 @@
 #ifndef _UTILS_H_
 #define _UTILS_H_
 
-#ifdef __MARIKO_CC__
-    #include <doslib.h>
-    #include <iocslib.h>
-#else
-    #include <dos.h>
-    #include <iocs.h>
-    #include "newlib_fixes.h"
-    #define interrupt __attribute__ ((interrupt_handler))
-#endif
-
 #include <stdint.h>
 
 #define OPEN_ACCESS_DICTIONARY           0x80    //0b10000000 //1 not for users

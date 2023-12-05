@@ -1,5 +1,12 @@
 #include "utils.h"
 
+#ifdef __MARIKO_CC__
+    #include <iocslib.h>
+#else
+    #include <iocs.h>
+    #define interrupt __attribute__ ((interrupt_handler))
+#endif
+
 static volatile uint32_t _time = 0;
 
 static void interrupt timer_interrupt()
