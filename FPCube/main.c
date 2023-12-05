@@ -4,12 +4,17 @@
 #else
 	#include <dos.h>
 	#include <iocs.h>
+	#include <stdio.h>
 	#define interrupt __attribute__ ((interrupt_handler))
+	#define _putptr iocs_putptr
+	#define _lineptr iocs_lineptr
+	#define _paintptr iocs_paintptr
+
 #endif
 
 #include <stdint.h>
 #include <signal.h>
-#include <stdio.h>
+
 
 #define TRUE 1
 #define FALSE 0
