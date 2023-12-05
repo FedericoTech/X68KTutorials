@@ -1,9 +1,13 @@
 #ifdef __MARIKO_CC__
 	#include <doslib.h>
 	#include <iocslib.h>
+
+	#define NULL 0
 #else
 	#include <dos.h>
 	#include <iocs.h>
+	#include <string.h>
+	#include <stdio.h>
 	#define interrupt __attribute__ ((interrupt_handler))
 #endif
 
@@ -48,7 +52,7 @@
 
 #define G_PALETTE_START 0xe82000    //graphic pallette
 
-#define NULL 0
+
 
 volatile short palette0[256];
 volatile short palette1[256];
@@ -62,7 +66,7 @@ short *scroll_b;
 
 void init();
 
-void terminate();
+void termin();
 
 void interrupt vsync_disp();
 
@@ -71,6 +75,8 @@ void interrupt crtcras();
 void interrupt hsyncst15();
 
 void interrupt hsyncst31();
+
+volatile int page_num;
 
 int main(void)
 {
@@ -91,6 +97,8 @@ int main(void)
 
     init();
 
+    fconf.config = 0;
+
     //we open the palette file
     file_handler = _dos_open(
         "landscap.pal",
@@ -99,8 +107,9 @@ int main(void)
 
     //if any error...
     if(file_handler < 0){
-        _dos_c_print("Can't open the file\r\n");
-        terminate();
+        _dos_c_print("Can't open the file landscap.pal\r\n");
+        _dos_getchar();
+        termin();
     }
 
     //we read the whole palette file
@@ -119,8 +128,9 @@ int main(void)
 
     //if any error...
     if(status < 0){
-        _dos_c_print("Can't close the file\r\n");
-        terminate();
+        _dos_c_print("Can't close the file landscap.pal\r\n");
+        _dos_getchar();
+        termin();
     }
 
 
@@ -132,8 +142,9 @@ int main(void)
 
     //if any error...
     if(file_handler < 0){
-        _dos_c_print("Can't open the file\r\n");
-        terminate();
+        _dos_c_print("Can't open the file landscap.dmp\r\n");
+        _dos_getchar();
+        termin();
     }
 
     _dos_read(file_handler, (char*)GVRAM_PAGE_0, sizeof (short) * (512 * 512));
@@ -142,8 +153,9 @@ int main(void)
 
     //if any error...
     if(status < 0){
-        _dos_c_print("Can't close the file\r\n");
-        terminate();
+        _dos_c_print("Can't close the file landscap.dmp\r\n");
+        _dos_getchar();
+        termin();
     }
 
     //we open the palette file
@@ -154,8 +166,9 @@ int main(void)
 
     //if any error...
     if(file_handler < 0){
-        _dos_c_print("Can't open the file\r\n");
-        terminate();
+        _dos_c_print("Can't open the file colours.pal\r\n");
+        _dos_getchar();
+        termin();
     }
 
     num_color = 0;
@@ -175,8 +188,9 @@ int main(void)
 
     //if any error...
     if(status < 0){
-        _dos_c_print("Can't close the file\r\n");
-        terminate();
+        _dos_c_print("Can't close the file colours.pal\r\n");
+        _dos_getchar();
+        termin();
     }
 
     //we open the palette file
@@ -187,8 +201,9 @@ int main(void)
 
     //if any error...
     if(file_handler < 0){
-        _dos_c_print("Can't open the file\r\n");
-        terminate();
+        _dos_c_print("Can't open the file colours.dmp\r\n");
+        _dos_getchar();
+        termin();
     }
 
     _dos_read(file_handler, (char*)GVRAM_PAGE_1, sizeof (short) * (512 * 512));
@@ -197,8 +212,9 @@ int main(void)
 
     //if any error...
     if(status < 0){
-        _dos_c_print("Can't close the file\r\n");
-        terminate();
+        _dos_c_print("Can't close the file colours.dmp\r\n");
+        _dos_getchar();
+        termin();
     }
 
     _iocs_vdispst(
@@ -229,7 +245,7 @@ int main(void)
     //waiting for a keystroke.
     _dos_getchar();
 
-    terminate();
+    termin();
 }
 
 void init()
@@ -245,7 +261,8 @@ void init()
     _iocs_b_curoff(); //disable the cursor
 
     _iocs_g_clr_on();
-    _iocs_vpage(1);
+
+     _iocs_vpage(1);
 
     //if any error...
     if(status < 0){
@@ -254,7 +271,7 @@ void init()
     }
 }
 
-void terminate()
+void termin()
 {
     /* Un interrupt */
 	_iocs_vdispst(
@@ -281,12 +298,14 @@ void terminate()
 
 void interrupt vsync_disp()
 {
-    //copy palette 0
-    //memcpy((short *)G_PALETTE_START, (short *) palette0, 512);
-    _iocs_b_memset((short *)G_PALETTE_START, (short *) palette0, 512);
-
     scroll_a = (short *) Y_SCROLL_PAGE_A;
     scroll_b = (short *) Y_SCROLL_PAGE_B;
+
+    //copy palette 0
+    memcpy((short *)G_PALETTE_START, (short *) palette0, 512);
+    //_iocs_b_memset((void *)G_PALETTE_START, (void *) palette0, 512);
+
+
 
     _iocs_vpage(1);
 /*
@@ -310,13 +329,15 @@ void interrupt vsync_disp()
 
 void interrupt crtcras()
 {
+    scroll_a = (short *) Y_SCROLL_PAGE_C;
+    scroll_b = (short *) Y_SCROLL_PAGE_D;
+
     //copy palette 1
     memcpy((short *)G_PALETTE_START, (short *) palette1, 512);
     //_iocs_b_memset((short *)G_PALETTE_START, (short *) palette1, 512);
-    //_iocs_b_memset((short *)G_PALETTE_START, (short *) palette1, 512);
 
 
-/*
+    /*
     _iocs_dmamove(
         &palette1,                   //buffer A, the source
         (short*)G_PALETTE_START,    //buffer B, the destination
@@ -327,14 +348,11 @@ void interrupt crtcras()
         ),
         512             //size of the memory block we are moving
     );
-*/
+    */
+
     _iocs_vpage(2);
     page_num = 2;
     y = 256;
-
-    scroll_a = (short *) Y_SCROLL_PAGE_C;
-    scroll_b = (short *) Y_SCROLL_PAGE_D;
-
 }
 
 void interrupt hsyncst31()
@@ -346,8 +364,13 @@ void interrupt hsyncst31()
 
 void interrupt hsyncst15()
 {
+    /*
     y += 2;
 
     *scroll_a = y;
     *scroll_b = y;
+
+    */
+    scroll_a += 2;
+    *scroll_b += 2;
 }
