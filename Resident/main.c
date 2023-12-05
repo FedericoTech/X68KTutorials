@@ -28,7 +28,7 @@ struct resident {
         struct _psp psp; //240 bytes
     } procc;    //256 bytes
 #ifndef __MARIKO_CC__
-    char dummy[0xf4]; //human68k/lib/crt0.o in lydux
+    char dummy[0xfa]; //human68k/lib/crt0.o in lydux
 #endif
     char keyword[4];    //here the program starts
     void * oldvector;
