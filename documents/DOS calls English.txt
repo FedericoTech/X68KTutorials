@@ -28,9 +28,9 @@ $ff13   _COUTSNS        Inspect RS-232C output status
 $ff17   _FATCHK         Inspect file allocation status
 $ff18   _HENDSP         Kanji conversion line control
 $ff19   _CURDRV         Get current drive									_dos_curdrv()
-$ff1a   _GETSS          Get character string (no break check)
+$ff1a   _GETSS          Get character string (no break check)				int _dos_getss(struct _inpptr *inpptr)
 $ff1b   _FGETC          Read 1 byte from file
-$ff1c   _FGETS          Read character string from file
+$ff1c   _FGETS          Read character string from file						int _dos_fgets(struct _inpptr *inpptr, int_ fno)
 $ff1d   _FPUTC          Write 1 byte to file
 $ff1e   _FPUTS          Write character string to file
 $ff1f   _ALLCLOSE       Close all files
@@ -59,7 +59,7 @@ $ff33   _BREAKCK        Set break check
 $ff34   _DRVXCHG        Drive exchange
 $ff35   _INTVCG         Get vector handling address							void* _dos_intvcg(int intno)
 $ff36   _DSKFRE         Get remaining disk space
-$ff37   _NAMECK         Expand filename
+$ff37   _NAMECK         Expand filename										int _dos_nameck(const char *file, struct _nameckbuf *buffer)
 $ff39   _MKDIR          Make subdirectory
 $ff3a   _RMDIR          Remove subdirectory
 $ff3b   _CHDIR          Change working directory
@@ -168,7 +168,7 @@ $ff8f   _ASSIGN         Get/set/delete virtual drive/directory allocation
 
 $ffaa   _FFLUSH_SET     Set FFLUSH mode (unlisted)
 $ffab   _OS_PATCH       Update internal OS handler (unlisted)
-$ffac   _GETFCB         Get file control block pointer (unlisted)
+$ffac   _GETFCB         Get file control block pointer (unlisted)			union _fcb *_dos_getfcb (unsigned int_ fno)
 $ffad   _S_MALLOC       Reserve memory block under main memory manager		void* _dos_s_malloc(int md, int size)
 																			void* _dos_s_malloc0(int md, int size, struct _psp *pspadr)
 $ffae   _S_MFREE        Relinquish memory block under main memory manager	int _dos_s_mfree(void* memptr)
@@ -180,12 +180,12 @@ $fff2   _ERRJVC         (address to execute at error abort)
 
 $fff3   _DISKRED        Block device direct input
 $fff4   _DISKWRT        Block device direct output
-$fff5   _INDOSFLG       Get pointer to OS' work area
+$fff5   _INDOSFLG       Get pointer to OS' work area						struct _indos *_dos_indosflg()
 $fff6   _SUPER_JSR      Subroutine call										void _dos_super_jsr(void (*func)(), struct _dregs *inregs, struct _dregs *outregs)
 $fff7   _BUS_ERR        Inspect bus error occurrence						int _dos_bus_err(void *s_addr, void *d_addr, int mode) / _dos_memcpy(void *s_addr, void *d_addr, int mode)
 $fff8   _OPEN_PR        Register background task							int _dos_open_pr(const char *name, int counter, int usp, int ssp, int sr, int pc, struct _prcctrl *buff, long sleep_time)
 
-$fff9   _KILL_PR        Self process deletion									int _dos_kill_pr()
+$fff9   _KILL_PR        Self process deletion								int _dos_kill_pr()
 $fffa   _GET_PR         Get thread management info							int _dos_get_pr(int tid, struct _prcptr *buff)
 $fffb   _SUSPEND_PR     Force-sleep thread									int _dos_suspend_pr(int tid)
 $fffc   _SLEEP_PR       Sleep												int _dos_sleep_pr(long time)
@@ -359,7 +359,7 @@ RETURN  usually 0
         ^P, and ^N.
 
         pea     (MESPTR)
-        TWO _PRINT
+        DOS _PRINT
         addq.l #4,sp
 
 ==============================================================================

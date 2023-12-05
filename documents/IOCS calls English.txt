@@ -100,14 +100,14 @@ $ 5c _DAYASC Day of the week data binary → string conversion
 $ 5d _ALARMMOD Alarm Allow / Prohibit
 $ 5e _ALARMSET alarm setting
 $ 5f _ALARMGET Get alarm settings
-$ 60 _ADPCMOUT ADPCM output
-$ 61 _ADPCMINP ADPCM input
-$ 62 _ADPCMAOT ADPCM output (array chain)
-$ 63 _ADPCMAIN ADPCM input (array chain)
-$ 64 _ADPCMLOT ADPCM output (link array chain)
-$ 65 _ADPCMLIN ADPCM input (link array chain)
-$ 66 _ADPCMSNS ADPCM status check
-$ 67 _ADPCMMOD ADPCM execution control
+$ 60 _ADPCMOUT ADPCM output													void _iocs_adpcmout(const void *addr, int mode, int len)
+$ 61 _ADPCMINP ADPCM input													void _iocs_adpcminp(void *addr, int mode, int len)
+$ 62 _ADPCMAOT ADPCM output (array chain)									void _iocs_adpcmlot(const struct _chain2 *addr, int mode)
+$ 63 _ADPCMAIN ADPCM input (array chain)									void _iocs_adpcmain(const struct _chain *addr, int mode, int cnt)
+$ 64 _ADPCMLOT ADPCM output (link array chain)								void _iocs_adpcmaot(const struct _chain *addr, int mode, int cnt)
+$ 65 _ADPCMLIN ADPCM input (link array chain)								void _iocs_adpcmlin(const struct _chain2 *addr, int mode)
+$ 66 _ADPCMSNS ADPCM status check											int _iocs_adpcmsns()
+$ 67 _ADPCMMOD ADPCM execution control										void _iocs_adpcmmod (int mode)
 $ 68 _OPMSET OPM register setting
 $ 69 _OPMSNS OPM Status check
 $ 6a _OPMINTST OPM interrupt setting
@@ -137,18 +137,18 @@ $ 81 _B_SUPER Supervisor / user mode switching								int _iocs_b_super(long b_s
 $ 82 _B_BPEEK Read 1 byte from the specified address						int _iocs_b_bpeek (const void *addr)
 $ 83 _B_WPEEK Read one word from the specified address						int _iocs_b_wpeek (const void *addr)
 $ 84 _B_LPEEK Read 1 longword from the specified address					int _iocs_b_lpeek (const void *addr)
-$ 85 _B_MEMSTR Read multiple bytes from the specified address				void _iocs_b_memstr(const void *addr, void *buf, int_ cnt)
+$ 85 _B_MEMSTR Read multiple bytes from the specified address				void _iocs_b_memstr(const void *addr, void *buf, int cnt)
 $ 86 _B_BPOKE Write 1 byte to the specified address
 $ 87 _B_WPOKE Write one word to the specified address
 $ 88 _B_LPOKE Write to specified address 1 longword
-$ 89 _B_MEMSET Write multiple bytes to the specified address 				void _iocs_b_memset(void *addr, const void *buf, int_ cnt)	
-$ 8a _DMAMOVE DMA transfer
-$ 8b _DMAMOV_A DMA transfer (array chain)
-$ 8c _DMAMOV_L DMA transfer (link array chain)
-$ 8d _DMAMODE DMA status check
+$ 89 _B_MEMSET Write multiple bytes to the specified address 				void _iocs_b_memset(void *addr, const void *buf, int cnt)	
+$ 8a _DMAMOVE DMA transfer													void _iocs_dmamove(void *addr1, void *addr2, int mode, int cnt)
+$ 8b _DMAMOV_A DMA transfer (array chain)									void _iocs_dmamov_a(const struct _chain *addr1, void *addr2, int mode, int cnt)
+$ 8c _DMAMOV_L DMA transfer (link array chain)								void _iocs_dmamov_l(const struct _chain2 *addr1, void *addr2, int mode)
+$ 8d _DMAMODE DMA status check												int _iocs_dmamode()
 $ 8e _BOOTINF Get boot information
 $ 8f _ROMVER ROM version
-$ 90 _G_CLR_ON Graphic screen initialization and display mode setting
+$ 90 _G_CLR_ON Graphic screen initialization and display mode setting		void _iocs_g_clr_on()
 $ 91 (Unpublished) Graphic screen mode setting
 $ 92 (Unpublished) Priority setting
 $ 93 (Unpublished) Screen display and special mode settings
@@ -172,18 +172,18 @@ $ ad _B_CONMOD Cursor and scroll settings
 $ ae _OS_CURON Cursor display
 $ af _OS_CUROF Cursor erase
 $ b0 _DRAWMODE Graphic drawing mode setting
-$ b1 _APAGE Graphic drawing page settings									int _iocs_apage (int)
-$ b2 _VPAGE Graphic screen display page settings							int _iocs_vpage (int)
+$ b1 _APAGE Graphic drawing page settings									int _iocs_apage (int mode)
+$ b2 _VPAGE Graphic screen display page settings							int _iocs_vpage (int mode)
 $ b3 _HOME Graphic screen display position setting
 $ b4 _WINDOW Graphic drawing window settings
 $ b5 _WIPE Clear graphic screen
 $ b6 _PSET Graphic screen point set
 $ b7 _POINT Get points on the graphic screen
-$ b8 _LINE Graphic screen line
-$ b9 _BOX Graphic screen box
+$ b8 _LINE Graphic screen line												int _iocs_line(const struct _lineptr *lineptr)
+$ b9 _BOX Graphic screen box												int _iocs_box(const struct _boxptr *boxptr)
 $ ba _FILL Graphic screen box fill
 $ bb _CIRCLE Graphic screen circle
-$ bc _PAINT Graphic screen paint
+$ bc _PAINT Graphic screen paint											int _iocs_paint(struct _paintptr *ptr)
 $ bd _SYMBOL Graphic screen symbol
 $ be _GETGRM Graphic screen dot-by-dot reading
 $ bf _PUTGRM Graphic screen dot-by-dot writing
@@ -855,7 +855,8 @@ Return value d0.b Display attribute before change (If it is a negative number, t
 
 $ 23 _B_LOCATE Move cursor
 
-Argument d1.w digit position (however, when d1.w = -1, only the cursor position is obtained)
+Argument 
+	d1.w digit position (however, when d1.w = -1, only the cursor position is obtained)
 	d2.w line 〃
 
 Cursor position before moving the return value (If -1, the cursor position is specified incorrectly)
@@ -2346,7 +2347,7 @@ Return value d0.l Hours, minutes and seconds of elapsed time (0 to 23:59:59 "99 
 $ 80 _B_INTVCS Vector setting
 
 Argument 
-	d1.w Vector number ($0000 - $00ff: Interrupt $0100 - $01ff: IOCS call)
+	d1.w Vector number ($0000 - $00ff: Interrupt, $0100 - $01ff: IOCS call)
 	a1.l processing address
 
 Return value Processing address before change
