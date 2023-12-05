@@ -5,6 +5,13 @@
 	#include <dos.h>
 	#include <iocs.h>
 	#define interrupt __attribute__ ((interrupt_handler))
+
+	#define _tboxptr iocs_tboxptr
+	#define _txfillptr iocs_txfillptr
+	#define _trevptr iocs_trevptr
+	#define _xlineptr iocs_xlineptr
+	#define _ylineptr iocs_ylineptr
+	#define _tlineptr iocs_tlineptr
 #endif
 
 char volatile mutex = 0;
