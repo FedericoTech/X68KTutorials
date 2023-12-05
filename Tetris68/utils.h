@@ -7,6 +7,11 @@
 #else
     #include <dos.h>
     #include <iocs.h>
+    #include <string.h>
+    #include <stdlib.h>
+
+    #define random rand
+
     #define interrupt __attribute__ ((interrupt_handler))
 #endif
 
