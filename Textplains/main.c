@@ -5,6 +5,10 @@
 	#include <dos.h>
 	#include <iocs.h>
 	#define interrupt __attribute__ ((interrupt_handler))
+
+	#define _txfillptr iocs_txfillptr
+
+	#define random rand
 #endif
 
 const unsigned short colours[] = {
