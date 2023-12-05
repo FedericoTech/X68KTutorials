@@ -85,7 +85,7 @@ version_chk:
     cmp.w	#$200,d0			; Error before version 1.99
     blt		ver_err
     cmp.w	#$231,d0			; Version 2.50 and above
-    bhi		ver_err				; 2.50 is judget to be equivalent to 3.00
+    bhi		ver_err				; 2.50 is judged to be equivalent to 3.00
     clr.l	d0					; Others are recognized as 2.00
     rts
 cl_cpy:						    ; copy command line
