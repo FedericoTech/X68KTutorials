@@ -4,7 +4,10 @@
 #else
 	#include <dos.h>
 	#include <iocs.h>
+    #include <stdio.h>
 	#define interrupt __attribute__ ((interrupt_handler))
+
+	#define _chain2 iocs_chain2
 #endif
 
 #include <limits.h>
@@ -131,12 +134,8 @@ int main(int argc, char *argv[])
 
 
 
-//we declare an array of structs that will point to each chunk of music
-#ifdef __MARIKO_CC__
+        //we declare an array of structs that will point to each chunk of music
         struct _chain2 music[num_of_chunks];
-#else
-        struct iocs_chain2 music[num_of_chunks];
-#endif
         //the last one points to the first one.
         music[num_of_chunks - 1].next = &music[0];
 

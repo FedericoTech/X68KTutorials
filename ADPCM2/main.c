@@ -4,7 +4,10 @@
 #else
 	#include <dos.h>
 	#include <iocs.h>
+	#include <stdio.h>
 	#define interrupt __attribute__ ((interrupt_handler))
+
+	#define _chain iocs_chain
 #endif
 
 #include <limits.h>
@@ -129,13 +132,8 @@ int main(int argc, char *argv[])
         int c = 0;
         int offset = 0;
 
-
-//we declare an array of structs that will point to each chunk of music
-#ifdef __MARIKO_CC__
+        //we declare an array of structs that will point to each chunk of music
         struct _chain music[size / MUSIC_CHUNK];
-#else
-        struct iocs_chain music[size / MUSIC_CHUNK];
-#endif
 
         //we point each element of the array to a chunk of music
         while(offset < size){

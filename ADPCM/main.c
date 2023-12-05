@@ -4,6 +4,7 @@
 #else
 	#include <dos.h>
 	#include <iocs.h>
+	#include <stdio.h>
 	#define interrupt __attribute__ ((interrupt_handler))
 #endif
 
