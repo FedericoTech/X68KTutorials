@@ -1,4 +1,6 @@
 *.depend
 *.layout
+*.save
 *.map
+*.o
 /*/.objs/*

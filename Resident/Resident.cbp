@@ -23,6 +23,7 @@
 					<Add option="-lm -Wl,-q,-Map=$(TARGET_OUTPUT_FILE).map,--cref" />
 				</Linker>
 				<ExtraCommands>
+					<Add before="calculate_size.bat" />
 					<Add after="human68k-objcopy.bat -v -O xfile $(TARGET_OUTPUT_FILE) $(TARGET_OUTPUT_FILE).X &amp;&amp; del /Q $(TARGET_OUTPUT_FILE)" />
 				</ExtraCommands>
 			</Target>
@@ -31,9 +32,12 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="clock.h" />
+		<Unit filename="crt0_size.h">
+			<Option target="lydux" />
+		</Unit>
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />
-			<Option weight="1" />
+			<Option weight="0" />
 		</Unit>
 		<Unit filename="utils.c">
 			<Option compilerVar="CC" />

@@ -1,0 +1,1 @@
+docker run --rm -v %cd%:/source_code -w /source_code human64k16.04:devel /bin/bash -c "./calculate_size.sh"

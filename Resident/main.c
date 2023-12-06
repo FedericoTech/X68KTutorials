@@ -3,6 +3,7 @@
 #else
 	#include <dos.h>
 	#include <stdio.h>
+	#include "crt0_size.h"
 	#define _mep dos_mep
 	#define _psp dos_psp
 
@@ -28,7 +29,7 @@ struct resident {
         struct _psp psp; //240 bytes
     } procc;    //256 bytes
 #ifndef __MARIKO_CC__
-    char dummy[0xfa]; //human68k/lib/crt0.o in lydux
+    char dummy[CRT0_SIZE]; //human68k/lib/crt0.o in lydux
 #endif
     char keyword[4];    //here the program starts
     void * oldvector;
