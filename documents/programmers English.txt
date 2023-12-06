@@ -1,0 +1,1065 @@
+        - PROGRAMMER'S MANUAL -
+
+================================================== ============================
+
+・Status after starting the user program
+
+register
+
+a0		Memory management pointer address
+a1		Address of end of program +1
+a2		command line address
+a3		environment address
+a4		Program execution start address
+sr		user mode
+usp		parent stack
+ssp		system stack
+Other Indeterminate
+
+memory
+    · The maximum available memory is allocated.
+
+Command line structure
+    · LASCIIZ format. The first byte contains the length of the string, followed by the string, and the
+    A 0 is added to the end of the string.
+
+environment
+    · The address of the environment variable area specified by the parent process is passed as is. 
+		Therefore, if the parent process specifies its own area and changes the contents with DOS _SETENV, 
+		the parent's environment variables will also be changed.
+		
+    · If you want to pass a different environment variable area to a child process, 
+		allocate memory separately and prepare a new area.
+		
+    · If the environment variable area is not secured, it will be -1. 
+		In general usage, the area allocated by the shell is passed, but for example, 
+		if you execute from the PROGRAM= line without specifying the ENVSET= line in CONFIG.SYS, -1 will be passed.
+
+structure of the environment
+    · The first 4 bytes indicate the size of the environment variable area.
+
+    · Each environment variable is separated by 1 byte of 0, 
+		and an additional 0 byte is appended to the end of the environment variable.
+
+================================================== ============================
+
+・Memory management pointer
+
+offset size
+0 		1.l Previous memory management pointer (if 0, start)
+4 		1.l Memory management pointer of the process that allocated this memory (if 0, there is no parent)
+8 		1.l Address of end of this memory block +1
+12 		1.l Next memory management pointer (end if 0)
+
+			The memory management pointer always starts at an address where the lower 4 bits are 0 (16-byte boundary), 
+				and the beginning exists within the supervisor area of the OS main body.
+
+			The fourth byte (the most significant byte of the process that secured the memory) 
+				indicates the attributes of that memory block.
+
+        $ff Resident process (KEEP)
+        $fe unknown(MEMDRV)
+        $fd submemory block
+
+================================================== ============================
+
+・Process management pointer (256 bytes)
+
+offset 	size
+$0000 	 1.l 	Previous memory management pointer (if 0, start) 							┐
+$0004 	 1.l 	Process management pointer of parent process (if 0, there is no parent) 	│Memory management
+$0008 	 1.l 	Address of end of this memory block +1 									│ Pointer
+$000c 	 1.l 	Next memory management pointer (end if 0) 								┘
+
+$0010 	 1.l 	Environment address (-1 not reserved)
+$0014 	 1.l 	Return address upon exit
+$0018 	 1.l 	Return address when interrupted by CTRL+C
+$001c 	 1.l 	Return address when interrupted due to error
+$0020 	 1.l 	Command line address
+$0024 	12.b	Process file handler usage
+					(In use in order of bits 0 to 7 of $24 to $2f = 1)
+$0030 	 1.l 	BSS start address
+$0034 	 1.l 	Heap start address (same as BSS)
+$0038 	 1.l 	Initial stack address (end of heap +1)
+$003c 	 1.l 	Parent process USP
+$0040 	 1.l 	SSP of parent process
+$0044 	 1.w 	SR of parent process
+$0046 	 1.w 	SR at abort
+$0048 	 1.l 	SSP at abort
+$004c 	 1.l 	trap #10 vector
+$0050 	 1.l 	trap #11 vector
+$0054 	 1.l 	trap #12 vector
+$0058 	 1.l 	trap #13 vector
+$005c 	 1.l 	trap #14 vector
+$0060 	 1.l 	shell startup flag (0: normal startup -1: startup as shell)
+$0064 	 1.b 	Module number
+$0065 	 3.b 	(unused)
+$0068 	 1.l 	Memory management pointer for loaded child process
+$006a 	 5.l 	(unused)
+$0080 	 2.b 	Executable file drive letter
+$0082 	66.b	Path name of executable file
+$00c4 	24.b	Executable file name
+$00dc 	 9.l 	(unused)
+
+$0100 (start of program)
+
+================================================== ============================
+
+・Memory map
+
+address
+$0000_0000 		Exception vector table 	(manufacturer reservation: $00 to $3f)
+$0000_0100 				〃 				(User interrupt: $40 to $ff)
+$0000_0400 		IOCS call vector table
+$0000_0800 		IOCS work
+$0000_1000 		ROM Debugger Work(1)
+$0000_1800 		DOS call vector table
+$0000_1c00 		Human68k Work
+$0000_2000 		FD IPL / HD IPL MENU
+$0000_2400 		HD IPL
+$0000_2800 		ROM debugger work (2)
+$0000_3800 		Unused (HD IPL also uses $2400 and above at startup)
+$0000_6800 		Human68k / SSP
+
+$00c0_0000 		GV-RAM(2MB)
+$00e0_0000 		TV-RAM(512KB)
+$00e8_0000 		CRTC
+$00e8_2000 		VC
+$00e8_4000 		DMAC
+$00e8_6000 		Area set
+$00e8_8000 		MFP
+$00e8_a000 		RTC
+$00e8_c000 		Printer
+$00e8_e000 		System port
+$00e9_0000 		OPM
+$00e9_2000 		ADPCM
+$00e9_4000 		FDC
+$00e9_6000 		SPC (SCSI model) / HDC (SASI model)
+$00e9_8000 		SCC
+$00e9_a000 		i8255(joystick)
+$00e9_c000 		I/O controller
+$00e9_e000 		Coprocessor I/O 		0
+$00e9_e080 				〃 				1
+$00ea_0000 		SCSI board (SPC port and SCSI ROM, 8KB)
+$00ea_ff80 		Expansion area set (X68030)
+$00ec_0000 		User I/O (can be used with expansion board, 64KB)
+$00ed_0000 		SRAM(16KB)
+$00ed_4000 		Reserve (48KB)
+$00ee_0000 		Unused (128KB)
+$00f0_0000 		CGROM(768KB)
+
+(X68000 SASI)
+$00fc_0000 		The same contents as $fe0000 to $ffffff are read.
+$00fe_0000 		ROM Debugger
+$00fe_4fc0 		ROM Human IPL
+$00fe_5000 		Human68k version 1.00
+$00ff_0000 		IPL/ROM IOCS
+$00ff_dc00 		ROM DISK
+
+(X68000 SCSI)
+$00fc_0000 		SCSI IOCS / SCSI IPL(8KB)
+$00fe_0000 		ROM Debugger 			(same as SASI model	)
+$00fe_4fc0 		ROM Human IPL 			( 			〃		)
+$00fe_5000 		Human68k version 1.00 	( 			〃 		)
+$00ff_0000 		IPL/ROM IOCS(64KB)
+
+(X68030)
+$00fc_0000 		SCSI IPL header section (512byte)
+$00fc_0200 		Human68k version 2.15
+$00fc_e000 		FLOAT2.X version 2.02
+$00fd_3800 		ROM Debugger
+$00ff_0000 		IPL / ROM IOCS / SCSI IOCS(64KB)
+
+$0100_0000~ 	Reservation
+
+Note: 	Only immediately after reset, $0000 to $ffff can read the same contents as $ff0000 to $ffffff.
+
+================================================== ============================
+
+・CRTC
+
+address 	size
+$e80000 	1.w 	R00 	Horizontal total 						┐
+$e80002 	1.w 	R01 	Horizontal synchronization end position │Horizontal timing control
+$e80004 	1.w 	R02 	Horizontal display start position 		│
+$e80006 	1.w 	R03 	Horizontal display end position 		┘
+$e80008 	1.w 	R04 	Vertical total 							┐
+$e8000a 	1.w 	R05 	Vertical synchronization end position 	│Vertical timing control
+$e8000c 	1.w 	R06 	Vertical display start position 		│
+$e8000e 	1.w 	R07 	Vertical display end position 			┘
+$e80010 	1.w 	R08 	External synchronization horizontal adjustment: Horizontal position fine adjustment
+$e80012 	1.w 	R09 	Raster number: For raster interrupt
+$e80014 	1.w 	R10 	X position 								┐Text screen scroll
+$e80016 	1.w 	R11 	Y position 								┘
+$e80018 	1.w 	R12 	X0 										┐
+$e8001a 	1.w 	R13 	Y0 										│
+$e8001c 	1.w 	R14 	X1 										│
+$e8001e 	1.w 	R15 	Y1 										│Graphic screen scroll
+$e80020 	1.w 	R16 	X2 										│
+$e80022 	1.w 	R17 	Y2 										│
+$e80024 	1.w 	R18 	X3 										│
+$e80026 	1.w 	R19 	Y3 										┘
+$e80028 	1.w 	R20 	memory mode/display mode control
+$e8002a 	1.w 	R21 	simultaneous access/raster copy/high-speed clear plane selection
+$e8002c 	1.w 	R22 	For raster copy operation: raster number
+$e8002e 	1.w 	R23 	Text Screen Access Mask Pattern
+$e80481 	1.b 	Operation Image capture/high-speed clear/raster copy control
+
+================================================== ============================
+
+・Video controller
+
+address 	size
+$e82000 	256.w 	Graphic Palette
+$e82200 	 16.w 	Text palette (palette block 0)
+$e82220 	240.w 	Sprite palette (〃 1-15)
+$e82400 	  1.w	R0 (screen mode setting)
+$e82500 	  1.w	R1 (priority control)
+$e82600 	  1.w	R2 (special priority/screen display)
+
+================================================== ============================
+
+・System port
+
+address
+$e8e001 #1 		Contrast
+                bit 3～0 	CONTRAST 		  0:Dark～$f:Bright
+$e8e003 #2 		Display/3D scope
+                bit 3 		TV CTRL 	 Read 	0: Display power ON 				1: OFF
+										Write 	0: Display control signal 0 		1:Same 1
+                bit 1 		3D-L 			  	0: 3D scope 	left shutter-CLOSE 	1:OPEN
+                bit 0 		3D-R 			  	0: 〃 			Right	〃 	 CLOSE 	1:OPEN
+$e8e005 #3 		Color image unit (bit 4~0)
+$e8e007 #4 		Keyboard/NMI/Dot Clock
+                bit 3 		KEY CTRL 	Read 	0: Keyboard not connected 			1: Connected
+										Write	0: Key data cannot be sent 			1: Permitted
+                bit 2 		NMI RESET 			0: Do not reset NMI 				1: Yes
+                bit 1 		HRL 				0: Division ratio 1/2, 1/3, 1/6		1: 1/2,1/4,1/8
+$e8e009 #5 ROM/DRAM wait
+                bit 7～4 	ROM Wait Control
+                bit 3～0 	DRAM Wait Control
+                                The number of weights is set value + 2. 
+								However, DRAM access is 0 during static column operation 
+								and 4 when spanning between pages.
+$e8e00b #6 MPU type/operating clock
+                bit 7～4 	MPU Type
+                                  $f:68000 	$e:68020	$d:68030 $c:68040
+                bit 3～0 	MPU Clock(MHz)
+                                  $f:10 	$e:16 	$d:20 	$c:25 	$b:33 	$a:40 	$9:50
+$e8e00d #7 SRAM write
+                bit 7～0 	SRAM Write Enable Control
+                                SRAM writable for $31.
+$e8e00f #8 Power off the main unit
+                bit 3～0 	Power Off Control
+                                If you write $00, $0f, $0f in that order, the power will turn off.
+
+================================================== ============================
+
+・SRAM
+
+Address 	size 	Contents (initial value)
+$00ed0000 	 8.b 	Memory check data ('X68000W')
+$00ed0008 	 1.l 	Implemented main memory capacity
+						(SASI model: $0010_0000 SCSI model: $0020_0000 X68030: $0040_0000)
+$00ed000c 	 1.l 	Pointer to ROM startup address (1.l) ($00fc_0000)
+						In the case of $00fc_nnnn, boot from SCSI with ID=nnnn/4.
+$00ed0010 	 1.l 	SRAM startup address ($00ed_0100)
+$00ed0014 	 1.l 	Time (-1) until power source is turned off after activation by alarm. Minutes.
+						The value of argument d2.l-1 specified by IOCS _ALARMSET is saved.
+$00ed0018 	 1.w 	Highest priority boot device (0).
+						$0000: STD(2HD → HD → ROM → RAM)
+						$8n00: SASI-HD n (n is drive number)
+						$9n70: 2HDn
+						$a000: ROM (usually SCSI ROM)
+						$b000: RAM (usually SRAM)
+						Values other than the above are considered STD. If you cannot start from anything other than STD, try starting from STD.
+$00ed001a 	 1.w 	RS-232C settings ($4e07). Same argument as IOCS _SET232C.
+						bit 15~14: Stop bit (0,3:2bit 1:1bit 2:1.5bit)
+						bit 13~12: Parity (0,2: None 1: Odd number 3: Even number)
+						bit 11~10: Bit length (0:5bit 1:6bit 2:7bit 3:8bit)
+						bit 9: XON/XOFF processing (0:OFF 1:ON)
+						bit 8: SI/SO processing (0:OFF 1:ON) *Use prohibited
+						bit 3~0: Transfer speed (bps, 0:75 1:150 2:300 3:600 4:1200
+                              5:2400 6:4800 7:9600)
+                              (8:17361 can also be specified for X68030 only)
+$00ed001c 	 1.b 	Key LED state at startup (0). The state when the power source is turned off is saved.
+						bit 7: unused
+						bit 6: Full-width each %0: Off %1: On
+						bit 5: Hiragana
+						bit 4: INS
+						bit 3: CAPS
+						bit 2: Code input
+						bit 1: Roman alphabet
+						bit 0: Kana
+$00ed001d 	 1.b 	Screen mode at startup (16). The value of argument d1.w specified in IOCS CRTMOD.
+						The error display routine in ROM IOCS only supports mode 16, 
+						so avoid setting values other than 16 if possible.
+						Human68k always boots in mode 16.
+$00ed001e 	 1.l 	Action when triggered by an alarm (0).
+					The value of argument a1.l specified by IOCS _ALARMSET.
+						0: Starts up normally (boots from specified media). 
+							If the time until turning off is other than -1, turn off the main unit after the specified time.
+						$01-$3f: Control your TV. If the time to turn off is -1, only the main unit will turn off after 1 minute. 
+							Otherwise, turn off the main unit and his TV after the specified time.
+						$40~: Address specification from $0000_0040 to $00ff_ffff. 
+							If the first byte is $60, he calls that address while remaining the supervisor, 
+							and turns off the body when he returns from that subroutine.
+						-1: Starts up normally (boots from specified media). It does not control the TV. 
+							If the time until turning off is other than -1, the main unit will be turned off after the specified time.
+$00ed0022 	 1.l 	Time to start with alarm ($ffff_0000).
+					The value of argument d1.l specified by IOCS _ALARMSET.
+						bit 31-28: unused (0)
+						bit 27~24: Day of the week (0~6)
+						bit 23~16: Day ($01~$31, BCD 2 digits)
+						bit 15~8: Hour ($00~$23, BCD 2 digits)
+						bit 7~0: Minute ($00~$59, BCD 2 digits)
+					If you specify $f for the day of the week and $ff for the date and time, it will be left unspecified.
+$00ed0026 	 1.b 	Alarm prohibition/permission (7) 0: Permit 7: Prohibit
+$00ed0027 	 1.b 	Whether to use OPT.2 keys for TV control (0).
+						0: Use 1: Do not use
+$00ed0028 	 1.b 	System default value for contrast (14). 0-15.
+$00ed0029 	 1.b 	Whether to eject the FD when the main unit is turned off (0). 0: No 1: Yes
+$00ed002a 	 1.b	Code for TV control when the main unit is turned off ($0d)
+$00ed002b 	 1.b	Keyboard layout (0). 0: JIS array 1: Aiueo array
+$00ed002c 	 1.b	Calculator text font (0). 0:LCD 1:Normal font
+$00ed002d 	 1.b	SRAM usage status (0). 0: Unused 1: SRAMDISK 2: Program
+$00ed002e 	 1.w	System default value of text palette 0 ($0000)
+$00ed0030 	 1.w	System default value of text palette 1 ($f83e)
+$00ed0032 	 1.w	System default value of text palette 2 ($ffc0)
+$00ed0034 	 1.w	System default value of Text Palette 3 ($fffe)
+$00ed0036 	 1.w	System default values ​​for text palettes 4 to 7 ($de6c)
+$00ed0038 	 1.w 	System default value for text palettes 8 to 15 ($4022)
+$00ed003a 	 1.b 	Time until key auto-repeat starts (3). 0～15.200+100N[ms]
+$00ed003b 	 1.b 	Key repeat interval (2). 0～15.30+5N^2[ms]
+$00ed003c 	 1.l 	Printer timeout time ($0008_0000)
+$00ed0040 	 1.l 	Accumulated operating time since the SRAM was initialized (0). Minutes.
+					Accumulated every time the main unit is turned off and the software is reset.
+$00ed0044 	 1.l 	Number of times the unit was turned off since SRAM was initialized (0)
+						It is added each time the main unit is turned off.
+$00ed0048 	 1.l 	ROMDISK FAT start address (X68000:$00ff_dc00 X68030:$00ff_f400)
+$00ed004c 	 1.w 	ROM DISK BPB: Number of bytes per sector (1024)
+$00ed004e 	 1.b 	ROM DISK BPB: Number of sectors per cluster (1)
+$00ed004f 	 1.b 	ROM DISK BPB: Number of FAT areas (1)
+$00ed0050 	 1.w 	ROM DISK BPB: Number of reserved areas (0)
+$00ed0052 	 1.w 	ROM DISK BPB: Number of root directory entries (32)
+$00ed0054 	 1.w 	ROM DISK BPB: Number of sectors in total area (X68000:9 X68030:3)
+$00ed0056 	 1.b 	ROM DISK BPB: Media Byte ($f9)
+$00ed0057 	 1.b 	ROM DISK BPB: Number of sectors per FAT area (1)
+$00ed0058 	 1.b 	Using ROM debugger(0). $00:OFF $ff:ON
+$00ed0059 	 1.b 	$7c,$7e,$5c(\~|) character conversion flag (0)
+						bit 2: Conversion of $7c %0:｜ %1:｜(dashed line)
+						bit 1: $7e conversion %0:￣ %1:～
+						bit 0: Conversion of $5c %0:\ %1:\
+$00ed005a 	 1.b 	Number of SASI-HD connections (0). 0-15.
+						If the number of units exceeds the specified number, an error will occur at the IOCS level.
+$00ed005b 	 1.b 	System reservation(0)
+$00ed005c 	 1.w 	RSDRV.SYS: Extended RS-232C settings (0 when not used, initial value when used $4e07)
+$00ed005e 	 1.w 	RSDRV.SYS: Same as above. Please refer to $00ed001a for the contents of each.
+$00ed0060 	 1.w 	RSDRV.SYS: Same as above. However, if bit 3~0 = 8, it is 19200bps
+$00ed0062 	 1.w 	RSDRV.SYS: Same as above.
+$00ed0064 	11.b 	System reservation(0)
+$00ed006f 	 1.b 	SCSI: SCSI application flag ($00). $00:Disabled $56='V':Enabled
+$00ed0070 	 1.b 	SCSI: SCSI related flags (0). Bits 7 to 4 are valid for X68030 and later.
+                        bit 7: Number of words transferred per DMA
+                                 (Variable with %0:256 bytes %1:$cc0, usually 512 bytes)
+                        bit 6: Ignore device type at boot time
+                                 (boot only %0:0,4,5,7,$84
+                                  %1:Ignore device type)
+                        bit 5: DMA burst mode (currently fixed at %0)
+                                 (%0: Auto request maximum speed
+                                  %1: Initial auto request, subsequent external request forwarding)
+                        bit 4: Transfer mode (%0: DMA transfer %1: MPU transfer)
+                        bit 3: SCSI type (%0: built-in %1: expansion board)
+                        bit 2～0: ID number of main unit
+$00ed0071 	 1.b 	SCSI: SASI flag(0). SASI when connecting a SASI disk to SCSI
+                      Set the bit corresponding to the ID to %1.
+$00ed0072 	 2.b 	SX-WINDOW: SX-WINDOW environment flag ($0000). In use by 'SX'.
+$00ed0074 	 1.b 	SX-WINDOW: Mouse pointer movement amount (0, 6 when used).
+                             Slow $03~$0a Fast
+$00ed0075 	 1.b 	SX-WINDOW: Mouse double click interval (0, 6 when used).
+                             Short $00~$0c Long
+$00ed0076 	 1.b 	SX-WINDOW: Text Palette Hue (0, 96 when used). H($00~$bf)
+$00ed0077 	 1.b 	SX-WINDOW: Text palette saturation (0, 2 when used). S($00～$1f)
+$00ed0078 	 1.b 	SX-WINDOW: Text palette brightness (0, when used %11111_110).
+                             V0,V1($88～$ff)
+$00ed0079 	 1.b 	SX-WINDOW: Text palette brightness (0, when used %00_10000_0).
+                             V1,V2,V3($82～$ba)
+$00ed007a 	 1.b 	SX-WINDOW: Text palette brightness (0, %0000_0000 when used).
+                             V3($00～$e0)
+$00ed007b 	 1.b 	SX-WINDOW: Printer driver (PRTD) ID(0)
+                             0:SHARP CZ 24 pin 5:EPSON ESC/P24-J84･C
+                             1:EPSON ESC/P24-J83･C 6:ADOBE PostScript
+                             2:NEC PC-PR*** 7:CANON LIPS3
+                             3: SHARP CZ 48 pin 8: EPSON ESC/Page
+                             4:CANON BJ-***          
+$00ed007c 	 1.b 	SX-WINDOW: bit 7 to 4: Version number (0, when used %0010_0011)
+                                      %0000: SXWIN.X Ver.1.0
+                                      %0001: SXWIN.X Ver.1.1
+                                      %0010: SXWIN.X Ver.3.0
+                           bit 3~0: File save mode
+                           (bit 1:DIRDTOP.SX saved)
+                           (bit 0:SYSDTOP.SX saved)
+$00ed007d 	 1.b 	SX-WINDOW: Background picture (PICT) ID(0)
+                             0: System 0 1: System 1 2: User defined
+$00ed007e 	 1.b 	SX-WINDOW: Screen mode(0)
+                             bit 7: %0:768x512,16 colors %1:Specified by lower bit
+                             bit 6: %0:Display screen mode %1:Real screen mode
+                             bit 5~0: Value in IOCS_CRTMOD
+$00ed007f 	 1.b 	System reservation(0)
+$00ed0080 	 4.w 	SX-WINDOW: Window margin left, top, right, bottom (0,0,0,0)
+$00ed0088 	 8.b 	System reservation(0)
+$00ed0090 	 1.b 	X68030: Standard cache state (0). %0:Disabled %1:Enabled
+                          bit 1: data cache
+                          bit 0: Instruction cache
+$00ed0091 	 1.b 	X68030: Boot sound settings (0). 0: OPM Playing off Other: On
+$00ed0092 	 1.b 	X68030: Weight value (0) equivalent to 10MHz. If it is 0, it is considered as 10.
+$00ed0093 	 1.b 	X68030: Weight value (0) equivalent to 16MHz. If it is 0, it is considered as 4.
+$00ed0094 	 1.b 	VENUS-X: User extensions using vx.r, vcc.r, etc. (0)
+$00ed0095 	 1.b 	XEiJ: User extension with XEiJ (0)
+                        bit 0: Synchronous frequency %0: For CRT %1: For LCD
+$00ed0096 	 2.b 	System reservation(0)
+$00ed0098 	 2.b 	Mach-2: Magic number (0). $4368 when used.
+$00ed009a 	 1.b 	Mach-2: Upper limit of transfer cycle for synchronous transfer (0)
+$00ed009b 	 1.b 	Mach-2: Operation mode (0)
+                          bit 3=%1: Parity check
+                          bit 2=%1:Limited speed
+                          bit 1=%1: Burst transfer
+                          bit 0=%1:RAM BIOS
+$00ed009c 	 4.b 	Unused(0)
+$00ed00a0 	 8.b 	Mach-2: Flags for each SCSI ID
+                          bit 7=%1: Enable synchronous transfer
+                          bit 2~0: If this value is the same as the main unit ID, it will be recognized as a drive.
+                                   not aware
+$00ed00a8 	 1.l 	Mach-2: Block for soft transfer (bit specified in 512KB units) (0)
+                          %0: Don't do it %1: Do it
+$00ed00ac 	 1.l 	Mach-2: Perform normal bus cycles (disable short bus cycles)
+                        Block (bit specified in 512KB units) (0) %0: Not performed %1: Performed
+$00ed00b0 	80.b 	System reservation(0)
+
+$00ed0100  768.b 	SRAM program start address (0)
+$00ed0400 	15KB 	SRAMDISK start address (0)
+$00ed3fff 			SRAM final address (0)
+
+remarks:
+· At startup, the 8-byte check data from $00ed0000 is confirmed, and if it is corrupted, the SRAM is initialized. 
+	The initial values in the ROM are written to $00ed0000 to $00ed005a, and 0 is written to $00ed005b to $00ed00101 (~$00ed3fff for X68030).
+
+· Even if a write is performed to write-protected SRAM, it will be ignored and no exception will occur. 
+	However, a bus error occurs with PhantomX.
+
+================================================== ============================
+
+・CGROM
+
+address 	font size 			type 		count 	code(JIS)
+$f00000 	Full-width 16x16 	Non-kanji 	 752 	High:$21~$78, Low:$21~$7e
+$f05e00 	〃 16x16 			1st level 	3008	$30~$4f
+$f1d600 	〃 16x16 			2nd level 	3478 	$50~$74
+$f388c0 	(unused)
+$f3a000 	1/4 square 8x8 		ANK 		 256 	$00~$ff
+$f3a800 	Half-width 8x16 	〃 			 256 	〃
+$f3b800 	1/4 square 12x12 	〃 			 256 	〃
+$f3d000 	Half-width 12x24 	〃 			 256 	〃
+$f40000 	Full-width 24x24 	Non-kanji 	 752 	High:$21~$78, Low:$21~$7e
+$f4d380 	〃 24x24 			1st level 	3008 	$30~$4f
+$f82180 	〃 24x24 			2nd level 	3478 	$50 to $74
+$fbf3b0 	(unused)
+$fbf400 	1/4 square 6x12 	ANK 		 256 	$00~$ff (X68030, X68030 Compact only)
+
+The addresses of the following fonts differ depending on the IOCS ROM version.
+$xxxxxx 1/4 square 6x12 ANK 256 $00~$ff
+
+address 	_ROMVER 	model
+$ffcff6 	$10_870318 	X68000 first generation (early model)
+$ffd018 	$10_870507 	X68000 First generation (late model) ~ SUPER [*1]
+$ffd344 	$11_910111 	X68000 XVI
+$ffd45e 	$12_911024 	X68000 Compact
+
+$fbf400 	$13_921127 	X68030 / X68030 Compact
+
+$fef400 $16_xxxxxx XEiJ (X68000 Emulator in Java) IPLROM 1.6
+         Reference: https://twitter.com/kamadox/status/1508778031007285255
+
+*1 ... There are three types of ROM for which IOCS _ROMVER returns $10_870507, 
+		and although some codes are different, the address of the quarter-width ANK font is the same for all.
+
+================================================== ============================
+
+·interrupt
+
+level 	device 	level2 	vector 	factor
+7 		NMI 	--- 	$1f 	INTERRUPT switch (auto vector)
+6 		MFP 	15 		$4f 	CRTC H-SYNC (horizontal synchronization signal)
+        │ 		14 		$4e 	CRTC specified raster scan
+        │ 		13 		$4d 	Timer-A (timer that uses V-DISP as input)
+        │ 		12 		$4c 	Key data received
+        │ 		11 		$4b 	〃 Reception error
+        │ 		10 		$4a 	〃 Send
+        │ 		9 		$49 	〃 Sending error
+        │ 		8 		$48 	Timer-B (USART serial clock generation)
+        │ 		7 		--- 	(unused)
+        │ 		6 		$46 	CRTC V-DISP (vertical synchronization signal)
+        │ 		5 		$45 	Timer-C (8bit general-purpose timer)
+        │ 		4 		$44 	Timer-D(〃)
+        │ 		3 		$43 	OPM
+        │ 		2 		$42 	Front power switch OFF detection
+        │ 		1 		$41 	External power OFF detection (expansion I/O slot)
+        └ 		0 		$40 	RTC Alarm
+5 		SCC 	--- 	$50-$5f	RS-232C/mouse data reception
+4 		--- 	--- 	--- 	For expansion I/O slot
+3 		DMAC 	--- 	$64-$6b	DMA transfer end/error
+2 		---		---		---		For expansion I/O slot
+1		IOC 	3 		$60 	FDC
+        │ 		3 		$61 	FD
+        │ 		1 		$62 	HD
+        └ 		0	 	$63 	Printer (BUSY signal)
+
+================================================== ============================
+
+・X file header structure
+
+offset	size
+$00 	2.b 	Identifier 'HU'(0x48 0x55)
+$02 	1.b 	Reservation(0)
+$03 	1.b 	Load mode (0: Normal 1: Smallest block 2: High address)
+$04 	1.l 	Base address
+$08 	1.l 	Execution start address
+$0c 	1.l 	Text section size
+$10 	1.l 	Data section size
+$14 	1.l 	block storage section size (includes .comm .stack)
+$18 	1.l 	Relocation table size
+$1c 	1.l 	symbol table size
+$20 	1.l 	SCD line number table size
+$24 	1.l 	SCD symbol table size
+$28 	1.l 	SCD string table size
+$2c 	4.l 	Reserve(0)
+$3c 	1.l 	Position of bound module list from the beginning of the file
+
+Total 64 ($40) bytes
+
+  The executable file is stored in a state where it has been loaded and relocated to the base address. 
+  Therefore, if the actual load address is equal to the base address, there is no need to perform relocation. 
+  If the two are not equal, add the difference. 
+  The execution start address also stores the value added to the base address, so add the difference here as well.
+
+・Relocation processing
+
+  Relocation is performed by repeating the following procedure for the size of the relocation table.
+
+1) Let A be the program start address and B be the base address.
+2) Subtract B from A and call this C.
+3) Obtain one word from the relocation table and set it as D.
+4) If D is 1, obtain 1 longword from the relocation table and use it as a new D.
+5) If the least significant bit of D is 0 (an even number), 
+	add D to A and add C to the 1 longword from the address of A.
+6) If the least significant bit of D is 1 (an odd number), 
+	add D-1 to A and add C to one word from the address 
+	of A (word-sized relocation is not normally used).
+
+・Section order
+
+1.		Header ($40 bytes)
+2.		Text section
+3.		Data section
+3-1.	Section information ($40 bytes)
+			In executable files created in SX mode, the virtual object *SYSTEM* is linked 
+			at the beginning of the data section, and section information is output.
+3-2.	".data"
+3-3.	".rdata" entity
+3-4.	The entity of ".rldata"
+3-5.	Relative offset table (n*4 bytes)
+			This is output when a pointer to a relative section is used in ".rdata" and ".rldata" in 
+			an executable file created in SX mode.
+4. 		Block storage section
+			The entity is not output.
+4-1.	".bss"
+4-2.	".common"
+4-3.	".stack"
+5. 		Relocation table
+6. 		Symbol table
+7.		SCD table
+8. 		If bound, repeat steps 1-7.
+9. 		Bind list
+
+  A relative section is a type of offset definition, and its area is not output to the executable file except for 
+  the entities ".rdata" and ".rldata", but it is defined in the following order.
+
+1.".rdata"
+2.".rbss"
+3.".rcommon"
+4.".rstack"
+5.".rldata"
+6.".rlbss"
+7.".rlcommon"
+8.".rlstack"
+
+・Bind list structure
+
+offset	size
+$00 	 8.b	File name (File names starting with $e5 should be $05. Fill in the rest with spaces.)
+$08 	 3.b	Extension (fill in the rest with spaces)
+$0b 	 1.b	Attribute (%XLAD_VSHR. However, specifying anything other than ASHR will of course result in an error)
+$0c 	10.b	8 or more bytes of remaining file name (fill in the rest with $00)
+$16 	 1.w	Last modified time
+					%mmmS_SSSS_HHHH_HMMM(H:Hour Mm:Minute S:Second)
+$18 	 1.w	Last modified date
+					%mmmD_DDDD_YYYY_YYYM(Y:Year Mm:Month D:Day)
+$1a 	 1.b 	Special attribute change prohibition flag	┐ Used in BIND.X
+$1b 	 1.b 	Special attribute (%00A0_0SHR) 				┘
+$1c 	 1.l 	Offset from start of bind file
+
+Total 32 ($20) bytes
+
+	It has almost the same structure as a directory entry. Please note that the upper and lower bytes of 
+		the year, month, day, and time are reversed just like the directory entry.
+
+	If the remaining file size is 0 bytes, the list ends, and if it is 32 bytes or more, there 
+		is more to come. Otherwise (1 to 31 bytes), the structure is abnormal.
+
+・Z file header structure
+
+offset size
+$00 	1.w		First identifier $601a
+$02 	1.l		Text section size
+$06 	1.l		Data section size
+$0a 	1.l		Block storage section size (including .comm .stack)
+$0e 	8.b 	Reserve(0)
+$16 	1.l 	Execution start address
+$1a 	1.w 	Second identifier $ffff
+
+Total 28($1c) bytes
+
+================================================== ============================
+
+・Disk map
+
+        2HD
+
+sector
+	0 		IPL
+	1~2 	First FAT
+	3~4 	2nd FAT (unused)
+	5-10 	Root directory (6 sectors)
+	11~1231	Data area
+
+		hard disk
+
+sector
+	0 	HD IPL Menu Program
+    4 	System area for management information
+ 5-20 	vacancies
+21-24 	HD IPL
+25～?? 	First FAT
+??～?? 	Second FAT (unused)
+??～?? 	Root directory (16 sectors)
+??～?? 	Data area
+??～?? 	Unmanaged area (for alternative truck)
+
+2HD IPL
+    A program that starts from $2000 searches for HUMAN.SYS from the 5th record of the booted drive 
+		(the first 32 records of the root directory), and if it is an X-format executable file that 
+		starts from $6800, it loads and executes it. .
+	This IPL is written when the disk is formatted.
+	The total number of sectors (from low to high) is written in the 18th to 20th bytes, 
+	and the media type is written in the 21st byte.
+
+First FAT
+		FAT (File Allocation Table) manages the association of files on the disk, 
+		and one file is used for each 1024-byte file. 
+		However, since FAT is allocated first, one FAT is used even for a 0-byte file. 
+		After that, it increases by one in units of 1024 bytes.
+		The first two portions of the FAT area are determined by the system; 
+			for a 2HD, it is 3 bytes of $feffff; for a hard disk, depending on the space reserved, 
+			it is 3 bytes of $f8ffff for up to 4MB, and 4 bytes of $f8ffffff for 5MB or more. Become a part-time worker.
+		There are two types of FAT: 1.5byteFAT and 2byteFAT. 1.5byteFAT is up to 4MB, and 2byteFAT is up to 5MB.
+
+        1.5byteFAT fe ff ff ML lH hm ･･･ Read in the order of HML hml
+          2byteFAT f8 ff ff ff AB CD ab cd ･･･ ABCD abcd 〃
+
+┌──────────┬────────────┬─────────────────────┐
+│1.5byteFAT│ 2byteFAT   │ Contents            │
+├──────────┼────────────┼─────────────────────┤
+│ $000	   │ 	$0000   │Unused area          │
+│$002~$ff6 │$0002~$fff6 │Next FAT number      │
+│ $ff7	   │ $fff7      │Unusable cluster     │
+│$ff8~$fff │$fff8~$ffff │End with this cluster│
+└──────────┴────────────┴─────────────────────┘
+
+        FAT termination usually uses $fff and $ffff (others are not supported).
+
+directory entry
+
+offset 	size
+$00 	 8.b 	File name (If the first character is $e5, it is the deleted file; if it is $00, it is the end of the directory. 
+					File names starting with $e5 are $05. Fill in the rest with spaces.)
+$08 	 3.b 	Extension (fill in the rest with spaces)
+$0b 	 1.b 	Attribute (%XLAD_VSHR)
+$0c 	10.b 	8 or more bytes of remaining file name (fill in the rest with $00)
+$16 	 1.w 	Last modified time
+					%mmmS_SSSS_HHHH_HMMM(H:Hour Mm:Minute S:Second)
+$18 	 1.w 	Last modified date
+					%mmmD_DDDD_YYYY_YYYM(Y:Year Mm:Month D:Day)
+$1a 	 1.w 	First FAT number
+$1c 	 1.l 	file size
+
+Note: The byte arrangement of word/longword data from 16 to $1c is little-endian.
+
+HD IPL menu program
+	A program that starts at $2000 and selects which system to boot if the HD is used on multiple systems.
+    If you have all the space on a single system, simply load and run the HD IPL on $2400.
+    This IPL is written when the disk is formatted.
+
+System area for management information
+          Write information when securing multiple systems on the HD.
+         Management information is divided into 16 blocks of 16 bytes each, 
+		 with drive information written in the first block and system information written in the remaining 15 blocks.
+        
+		(1)	First drive information block
+        4.b 	'X68K'
+        1.l 	Maximum record number
+        1.l 	First record number of alternate track
+        1.l 	Shipping Zone Record Number
+        (2)Other 15 blocks
+        8.b 	System name
+        1.l 	First record number
+        1.l 	record length
+
+		If the most significant 8 bits of the first record are not 0, the area is currently invalid.
+        Data is written at FORMAT initialization.
+		Anything other than the first 16 bytes can be rewritten by FORMAT area reservation/selection/release.
+
+(Reference) Drive information block value
+Capacity 	Maximum record 	Alternative record 	HD OFF record
+10MB 			$09f54 			$09f54 				$0af50
+20MB 			$139c8 			$139c8 				$15660
+40MB 			$27930 			$27930 				$2acc0
+
+*There is information that a 20MB alternative record costs $13c98, but this has not been confirmed.
+
+HD IPL
+	It runs from $2400 and searches for HUMAN.SYS among the first 32 files in the root directory 
+		of the booted drive, and if it is an X-format executable file that runs from $6800, 
+		it loads and executes it. 
+	However, this file must be copied into contiguous sectors.
+
+Unmanaged area (for alternative truck)
+          Not normally used. This is a replacement for a defective truck.
+
+================================================== ============================
+
+・FDC result status
+
+Result status 0(ST0)
+        bit 7 6 5  4  3  2  1 0
+           ┌─┬─┬──┬──┬──┬──┬─┬─┐
+           │IC │SE│EC│NR│HD│ US│
+           └─┴─┴──┴──┴──┴──┴─┴─┘
+
+        bit 7~6 IC Interrupt Code (indicates interrupt factor)
+                        %00: Normal termination of command (NT: Normal Terminate)
+                        %01: Abnormal termination of command (AT: abnormal Terminate)
+                        %10: The given command was invalid
+                                                (IC: Invalid Command)
+                        %11: There was a state transition in the device
+                                                (AI: Attention Interrupt)
+        bit 5 SE Seek End
+                        %0: Normal operation
+                        %1: SEEK/RECALIBRATE command execution finished
+        bit 4 EC Equipment Check
+                        %0: Normal operation
+                        %1: Fault signal received from drive / RECALIBRATE
+                            Command execution error (track 0 not found)
+        bit 3 NR Not Ready
+                        %0: Normal operation
+                        %1: Specified drive is not ready
+        bit 2 HD Head Address (head number when requesting interrupt)
+                        %0: Surface
+                        %1: Back side
+        bit 1~0 US1~US0
+                        Unit Select n (drive number at the time of interrupt request)
+                        %00: Drive #0
+                        %01: 〃 #1
+                        %10: 〃 #2
+                        %11: 〃 #3
+
+Result status 1(ST1)
+        bit 7  6 5  4  3  2  1 0
+           ┌──┬─┬──┬──┬─┬──┬──┬──┐
+           │EN│ │DE│OR│ │ND│NW│MA│
+           └──┴─┴──┴──┴─┴──┴──┴──┘
+
+        bit 7 EN End of Cylinder
+                        %0: Normal operation
+                        %1: Exceeds the last sector given by the EOT parameter in the command.
+                            and tried to read/write
+        bit 5 DE Data Error
+                        %0: Normal operation
+                        %1: CRC error detected in ID or data on disk
+                                                (Excluding READ ID command)
+        bit 4 OR Over Run
+                        %0: Normal operation
+                        %1: The host did not respond within the specified time during data transfer.
+        bit 2 ND No Data
+                        %0: Normal operation
+                        %1: Specified sector not found
+        bit 1 NW Not Writable
+                        %0: Normal operation
+                        %1: Received Write Protect signal during write operation
+        bit 0 MA Missing Address Mark
+                        %0: Normal operation
+                        %1: Address mark not found
+
+Result status 2 (ST2)
+        bit 7 6  5  4  3  2  1  0
+           ┌─┬──┬──┬──┬──┬──┬──┬──┐
+           │ │CM│DD│NC│SH│SN│BC│MD│
+           └─┴──┴──┴──┴──┴──┴──┴──┘
+
+        bit 6 CM Control Mark
+                        %0: DAM detected when executing READ DELETED DATA
+                            Normal operation
+                        %1: DDAM is detected when executing READ DATA/READ DIAGNOSTIC/SCAN.
+                            put out
+        bit 5 DD Data Error in Data Field
+                        %0: Normal operation
+                        %1: CRC error detected in data
+        bit 4 NC No Cylinder
+                        %0: Normal operation
+                        %1: When the ND bit of ST1 is %1, the C byte of ID matches.
+                            and not $ff
+        bit 3 SH Scan Equal Hit
+                        %0: Normal operation
+                        %1: Equal condition was met with SCAN command
+        bit 2 SN Scan Not Satisfied
+                        %0: Normal operation
+                        %1: SCAN command does not satisfy the condition until the last sector
+        bit 1 BC Bad Cylinder
+                        %0: Normal operation
+                        %1: When the ND bit of ST1 is %1, the C byte of ID is $ff
+                            (except for the READ DIAGNOSTIC command)
+        bit 0 MD Missing Address Mark in Data Field
+                        %0: Normal operation
+                        %1: Data address mark not found
+
+Result status 3 (ST3)
+        bit 7 6  5  4  3  2  1 0
+          ┌──┬──┬──┬──┬──┬──┬─┬─┐
+          │FT│WP│RY│T0│TS│HD│ US│
+          └──┴──┴──┴──┴──┴──┴─┴─┘
+
+        bit 7 FT drive Fault signal status
+        bit 6 WP drive Write Protect signal status
+        bit 5 RY drive Ready signal status
+        bit 4 T0 Drive Track0 signal status
+        bit 3 TS drive Two Side signal status
+        bit 2 HD value of HD specified in command phase
+        bit 1~0 US1~US0
+                        US1, US0 values ​​specified in the command phase
+
+*ST3 is returned only by the SENSE DEVICE STATUS command.
+
+
+================================================== ============================
+
+・System file
+
+Title display file
+		If Human68k has a file called TITLE.SYS when it starts up, it will display the title according to 
+			TITLE.SYS instead of the standard title.
+        TITLE.SYS is a file that is less than $10044 bytes and has two types: text title and bit image title.
+        
+		The text title is prepared for command mode and displays the character string of the title display file. 
+		Control codes and escape sequences can also be used, but the first byte must not be 0.
+        Bit image titles are for visual purposes and display bit image data. 
+		The first byte must be 0. If the character attribute is 0, the cursor and function keys will be erased.
+
+offset size
+ 0 	 1.b	0 (fixed)
+ 1 	 1.b 	Character attributes
+ 2	 1.b 	Specify the text plane to fill (0: There is no surface to fill.
+                        1: Plain 0 2: Plain 1 4: Plain 2 8: Plain 3)
+ 3 	 1.b 	Specifying the text plane to display (1,2,4,8: same as above)
+ 4 	 1.w 	Palette of text colors 4 to 7
+ 6 	 1.w 	〃 8～15 〃
+ 8 	52.b 	Shell specification (right side of "SHELL="),0
+60 	 1.w 	Display start X coordinate
+62 	 1.w 	〃 Y coordinate
+64 	 1.w 	Number of dots in the X direction of bit image data
+66 	 1.w	〃Y〃
+68 	??? bit image data
+
+External character file
+        When Human68k starts up, if there is a file called USKCG.SYS, it reads it into the external character 
+			area in the OS as a external character file.
+	   USKCG.SYS is a file less than $10000 bytes, and its creation/modification is done with USKCGM.X.
+           The full-width kanji code can be either JIS or S-JIS, but please note that the JIS kanji code has low/high reversed.
+
+offset	size
+0 		34.b 	Not used
+34 		 1.w 	Kanji code
+36 		16.w 	Font data
+		 1.w 	Half-width external characters S-JIS code
+        16.b 	Font data
+        …
+         1.w 	16x16 to 24x24 switching code ($ffff)
+         1.w 	Kanji code
+        72.b 	Font data
+         1.w 	Half-width external characters S-JIS code
+        48.b 	Font data
+
+key definition file
+		When Human68k starts up, if a file called KEY.SYS exists, it is defined as function key data.
+		KEY.SYS is a 712 byte file created/modified by KEY.X.
+        For keys that start with $fe, the 8 characters after $fe are used for display purposes, and the 9th character becomes the real key code. Strings must always end with 0.
+
+offset size
+  0 32.b*10	F0~F9
+320 32.b*10	Shift+F0～F9
+640  6.b 	ROLL UP
+646  6.b 	ROLL DOWN
+652  6.b 	INS
+658  6.b 	DEL
+664  6.b 	Up cursor key
+670  6.b 	Left	〃
+676  6.b 	Right	〃
+682  6.b 	Lower	〃
+688  6.b 	CLR
+694  6.b 	HELP
+700  6.b 	HOME
+706  6.b 	UNDO
+
+beep audio file
+    Human68k reads BEEP.SYS into the OS as an ADPCM data file when you specify "BELL = BEEP.SYS" in CONFIG.SYS.
+	The data is read from ADPCM at a sampling frequency of 15.6KHz and within $ffff bytes.
+
+================================================== ============================
+
+・ASCII control code
+
+$00 	NUL 	Blank :Null
+$01 	SOH 	TC 1:Start of Heading
+$02 	STX 	Start of Text TC 2:Start of Text
+$03 	ETX 	End of Text TC 3:End of Text
+$04 	EOT 	End of Transmission TC 4:End of Transmission
+$05 	ENQ 	Inquiry TC 5:Enquiry
+$06 	ACK 	Acknowledgment TC 6:Acknowledge
+$07 	BEL 	Warning Bell :Bell
+$08 	BS 		Back Space FE 0:Back Space
+$09 	HT 		Horizontal Tabulation FE 1:Horizontal Tabulation
+$0a 	LF 		Line feed FE 2:Line Feed
+$0b 	VT 		Vertical Tab FE 3:Vertical Tabulation
+$0c 	FF 		Format feed FE 4:From Feed
+$0d 	CR 		Return FE 5:Carriage Return
+$0e 	SO 		Shift Out :Shift Out
+$0f 	SI 		Shift In :Shift In
+$10 	DLE 	transmission control extension TC 7:Data Link Escape
+$11 	DC1 	Device Control 1 DC 1:Device Control 1
+$12 	DC2 	Device control 2 DC 2:〃 2
+$13 	DC3 	Device control 3 DC 3:〃 3
+$14 	DC4 	Device control 4 DC 4:〃 4
+$15 	NAK 	Negative Acknowledge TC 8:Negative Acknowledge
+$16 	SYN 	Synchronous signal TC 9:Synchronous idle
+$17 	ETB 	End of Transmission Block TC10:End of Transmission Bock
+$18 	CAN 	Cancel :Cancel
+$19 	EM 		End of Medium
+$1a 	SUB 	Substitute Character
+$1b 	ESC 	extension:Escape
+$1c 	FS(→) 	File separation character IS 4:File Separator
+$1d 	GS(←) 	Group separation character IS 3:Group 〃
+$1e 	RS(↑) 	Record Separate Character IS 2:Record 〃
+$1f 	US(↓) 	Unit separation character IS 1:Unit 〃
+$20 	SPC 	interval:Space
+$7f 	DEL 	Delete :Delete
+
+TC = Transmission Control Characters
+FE = Format Effectors
+DC = Device Control Characters
+IS = Information Separators
+
+・ASCII control codes valid for IOCS
+
+$07 	BEL 	Ring the bell
+$08 	BS 		Move 1 character to the left
+$09 	HT 		Move to next tab position
+                        (Moves to the 1st column one line below to the right of the maximum tab position)
+$0a 	LF 		Move down one line (carry up one line at the last line)
+$0b 	VT 		Move up one line (invalid when in the first line)
+$0c 	FF 		Move right one character
+$0d 	CR 		Move to left edge
+$1a 	SUB 	Move to the left end of the first line after clearing the screen
+$1b 	ESC 	start escape sequence
+$1e 	RS 		Move to the left end of the first row
+
+================================================== ============================
+
+・Escape sequence
+
+[{pl};{pc}H 	Move ({pl}=0 or if omitted {pl}=1, if {pl}>last line {pl}=last line)
+                    ({pc}=0 or if omitted {pc}=1, if {pc}>last digit {pc}=last digit)
+[{pl};{pc}f 	Same as above.
+={l}{c} 		Same as above ({l},{c} is the character with $20 added to the line/column position and cannot be omitted)
+[{pn}A 			{pn} Move up line ({pn}=0 or {pn}=1 if omitted)
+[{pn}B 			{pn} move down line(〃)
+[{pn}C 			{pn} Move character to the right (〃)
+[{pn}D 			{pn} Move character left (〃)
+[0J 			Erase from the cursor position to the last column of the last line (0 can be omitted)
+[1J 			Erase from the left edge of the first line to the cursor position
+[2J 			Move to the left end of the first line after clearing the screen
+* 				Same as above
+[0K 			Erase from the cursor position to the last digit (0 can be omitted)
+[1K 			Erase from left edge to cursor position
+[2K 			Erase cursor line
+[{pn}M 			Delete {pn} lines below the cursor line ({pn}=0 or {pn}=1 if omitted)
+					The rows after the deleted row are moved up and moved to the left end of the first 
+					row of the moved up rows.
+[{pn}L 			Insert {pn} blank lines below the cursor line
+                                                  ({pn}=0 or {pn}=1 if omitted)
+                The line below the cursor line moves down to the left edge of the first inserted line.
+D 				Move down one line (move up one line at the last line)
+E 				Move one line down to the left (〃)
+M 				Move up one line (go down one line at the first line)
+[s 				Save cursor position and character display attributes
+[u 				Return to saved cursor position and character display attributes
+[>5l 			Show cursor
+[>5h 			Erase cursor
+[{ps}m 			Set character display attributes
+                             (Multiple {ps} can be specified by separating them with ;; if omitted, {ps}=0)
+                {ps} function
+                0 Return to default settings
+                1 Emphasis toggle (alternate between 30-33, 40-43 and 34-37, 44-47)
+                7 Reverse toggle (change 30-33, 34-37 and 40-43, 44-47 alternately)
+                30-33 black, light blue, yellow, white
+                34～37 〃 Emphasis
+                40～43 〃 Reversal
+                44～47 〃 Reversal emphasis
+
+Added: Human68k
+[6n 			After execution, notify the cursor position to the console input in the 
+				form of ESC[{pl};{pc}R 
+				*Does not work properly in any version of Human68k 
+				(when the digit position is 100 or more, the tens place is suppressed by zero)
+[>1h 			Erase/release the function key row and move it to the left end of the first row
+[>1l 			Display/occupy the function key row and move to the left end of the first row
+
+Added: ROM IOCS version 1.3 / IOCS.X・HIOCS.X
+[?4h 			Make smooth scrolling
+[?4l 			Jump	〃
+[{pn}P 			Delete {pn} characters from cursor position
+[{pn}X 			From cursor position {pn} Turn off character attributes and delete
+[{pn}@ 			Insert {pn} spaces at cursor position with attributes off
+
+Added: Console Driver Type-D
+0 		Interrupt loading into the backscroll buffer
+1 		〃 	Resume
+
+Added: condrv(em).sys + HIOCS PLUS
+0 Interrupt loading into the backscroll buffer
+1 〃 Resume
+2 Prohibit display of system status
+3 〃 Allow
+
+Note
+- If a position that cannot be moved is specified in the cursor movement sequence, the cursor will not move.
+- Line position and column position start from 1.
+
+================================================== ============================
