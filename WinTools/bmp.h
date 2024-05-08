@@ -20,14 +20,6 @@ enum ColorModes
 
 #pragma pack(push)
 #pragma pack(1)
-struct RGB4 {
-    uint8_t pixel0 :4;
-    uint8_t pixel1 :4;
-};
-#pragma pack(pop)
-
-#pragma pack(push)
-#pragma pack(1)
 struct RGB1 {
     uint8_t pixel0 :1;
     uint8_t pixel1 :1;
@@ -39,6 +31,17 @@ struct RGB1 {
     uint8_t pixel7 :1;
 };
 #pragma pack(pop)
+
+
+#pragma pack(push)
+#pragma pack(1)
+struct RGB4 {
+    uint8_t pixel0 :4;
+    uint8_t pixel1 :4;
+};
+#pragma pack(pop)
+
+
 
 
 #pragma pack(push)
@@ -76,8 +79,8 @@ typedef struct : public RGB24 {
 
 #pragma pack(push)
 #pragma pack(1)
-    typedef struct {
-        uint16_t sys;                   //2 Contains the characters "BM" that identify the file type
+    struct BmpHeader {
+        char sys[2];                   //2 Contains the characters "BM" that identify the file type
         uint32_t file_size;             //4 File size
         uint16_t reserved1;             //2 Unused
         uint16_t reserved2;             //2 Unused
@@ -95,8 +98,12 @@ typedef struct : public RGB24 {
         uint32_t num_important_colours; //4 Number of significant colors
 
         void printHeader();
-    } BmpHeader;
+
+        friend std::ostream &operator << (std::ostream &, const BmpHeader &);
+    };
 #pragma pack(pop)
+
+std::ostream &operator<<  (std::ostream &o, const BmpHeader &header);
 
 class Bmp {
 
@@ -152,19 +159,19 @@ class Bmp {
 
         uint8_t * getImage();
 
-        int32_t getNumPixels();
+        int32_t getNumPixels() const;
 
-        uint16_t getNumOfColours();
+        uint16_t getNumOfColours() const;
 
-        uint8_t getBitsPerPixel();
+        uint8_t getBitsPerPixel() const;
 
-        uint8_t getPaletteSize();
+        uint8_t getPaletteSize() const;
 
-        int32_t getWidth();
+        int32_t getWidth() const;
 
-        int32_t getHeight();
+        int32_t getHeight() const;
 
-        int hasPalette();
+        int hasPalette() const;
 };
 
 #endif

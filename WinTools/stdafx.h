@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <cstring>
 #include <stdint.h>
 #include <cmath>
 #include <tr1/functional>

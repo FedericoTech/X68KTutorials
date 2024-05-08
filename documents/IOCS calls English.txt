@@ -38,7 +38,7 @@ $ 1e _B_CURON Cancel cursor pause
 $ 1f _B_CUROFF Cursor pause
 $ 20 _B_PUTC character display
 $ 21 _B_PRINT String display
-$ 22 _B_COLOR Display color setting
+$ 22 _B_COLOR Display color setting											int_ _iocs_b_color (int_ color)
 $ 23 _B_LOCATE Move cursor													int _iocs_b_locate(int x, int y)
 $ 24 _B_DOWN_S Move cursor down one line
 $ 25 _B_UP_S Move cursor up one line
@@ -838,14 +838,14 @@ Return value d0.l Cursor position after display
 $ 22 _B_COLOR Display color setting
 
 Argument d1.w Display attribute
-	d1.w = 0 Text palette 0 (usually black)
-		  1 〃 1 (〃 light blue)
-		  2 〃 2 (〃 yellow)
-		  3 〃 3 (〃 white)
-		+4 emphasis
-		+8 reversal
-		+12 Reverse emphasis
-		 -1 Examine the attribute
+		d1.w = 	0 Text palette	0 (usually black)
+				1 〃 			1 (〃 light blue)
+				2 〃 			2 (〃 yellow)
+				3 〃 			3 (〃 white)
+				+4 emphasis
+				+8 reversal
+				+12 Reverse emphasis
+				-1 Examine the attribute
 
 Return value d0.b Display attribute before change (If it is a negative number, the display attribute specification is abnormal)
 

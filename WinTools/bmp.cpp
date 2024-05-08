@@ -1,27 +1,29 @@
 
 #include "bmp.h"
 
-void BmpHeader::printHeader()
+std::ostream &operator<<  (std::ostream &o, const BmpHeader &header)
 {
-    char sys[3];
-    memcpy(&sys, &this->sys, 2);
+    char sys[3] = {0};
+    std::memcpy(&sys, header.sys, 2);
 
-    std::cout << "header.sys " << sys << "\0"
-        << std::endl << "header.file_siz "               << file_size
-        << std::endl << "header.reserved1 "              << reserved1
-        << std::endl << "header.reserved2 "              << reserved2
-        << std::endl << "header.starting "               << starting
-        << std::endl << "header.header_size "            << header_size
-        << std::endl << "header.witdth "                 << witdth
-        << std::endl << "header.height "                 << height
-        << std::endl << "header.color_planes "           << color_planes
-        << std::endl << "header.bits_per_pixel "         << bits_per_pixel
-        << std::endl << "header.compression_method "     << compression_method
-        << std::endl << "header.image_raw_size "         << image_raw_size
-        << std::endl << "header.horizontal_resolution "  << horizontal_resolution
-        << std::endl << "header.colours_per_pallete "    << colours_per_pallete
-        << std::endl << "header.num_important_colours "  << num_important_colours
+	o <<                "header.sys "                   << sys
+        << std::endl << "header.file_siz "               << header.file_size
+        << std::endl << "header.reserved1 "              << header.reserved1
+        << std::endl << "header.reserved2 "              << header.reserved2
+        << std::endl << "header.starting "               << header.starting
+        << std::endl << "header.header_size "            << header.header_size
+        << std::endl << "header.witdth "                 << header.witdth
+        << std::endl << "header.height "                 << header.height
+        << std::endl << "header.color_planes "           << header.color_planes
+        << std::endl << "header.bits_per_pixel "         << header.bits_per_pixel
+        << std::endl << "header.compression_method "     << header.compression_method
+        << std::endl << "header.image_raw_size "         << header.image_raw_size
+        << std::endl << "header.horizontal_resolution "  << header.horizontal_resolution
+        << std::endl << "header.colours_per_pallete "    << header.colours_per_pallete
+        << std::endl << "header.num_important_colours "  << header.num_important_colours
         << std::endl;
+
+	return o;
 }
 
 Bmp Bmp::fromBmpFile(const char *fileName) {
@@ -41,16 +43,16 @@ Bmp Bmp::fromBmpFile(const char *fileName) {
     BmpHeader header;
 
     //we retrieve the header
-    imageFileIn.read((char *)&header, sizeof(header));
+    imageFileIn.read(reinterpret_cast<char*>(&header), sizeof(header));
 
-    header.printHeader();
+    std::cout << header;
 
     bmp.has_palette = header.colours_per_pallete > 0;
     bmp.width = header.witdth;
     bmp.height = header.height;
     bmp.colours_per_pallete = header.colours_per_pallete;
     bmp.image_raw_size = header.image_raw_size;
-    bmp.bits_per_pixel = (ColorModes) header.bits_per_pixel;
+    bmp.bits_per_pixel = static_cast<ColorModes>(header.bits_per_pixel);
 
     //if there is a palette...
     if(bmp.has_palette){
@@ -83,7 +85,7 @@ Bmp Bmp::fromBmpFile(const char *fileName) {
 
         std::puts("before reading");
 
-        imageFileIn.read((char*)bmp.palette, size_this_palette);
+        imageFileIn.read(reinterpret_cast<char*>(bmp.palette), size_this_palette);
 /*
         for(int cont = 0; cont < num_of_colours; cont++){
             printf(
@@ -111,20 +113,20 @@ Bmp Bmp::fromBmpFile(const char *fileName) {
 
     std::puts("after creating the buffer\n");
 
-    imageFileIn.read((char*) buffer, bmp.image_raw_size);
+    imageFileIn.read(reinterpret_cast<char*>(buffer), bmp.image_raw_size);
 
     switch(header.bits_per_pixel)
     {
         case 32:
-            bmp.convertFrom32Bits2Native16((RGB32 *) buffer);
+            bmp.convertFrom32Bits2Native16(reinterpret_cast<RGB32 *>(buffer));
             bmp.bits_per_pixel = CM_16BIT;
             break;
         case 24:
-            bmp.convertFrom24Bits2Native16((RGB24 *) buffer);
+            bmp.convertFrom24Bits2Native16(reinterpret_cast<RGB24 *>(buffer));
             bmp.bits_per_pixel = CM_16BIT;
             break;
         case 16:
-            bmp.convertFrom16Bits2Native16((uint16_t *) buffer, false);
+            bmp.convertFrom16Bits2Native16(reinterpret_cast<uint16_t *>(buffer), false);
             bmp.bits_per_pixel = CM_16BIT;
             break;
         case 8:
@@ -133,7 +135,7 @@ Bmp Bmp::fromBmpFile(const char *fileName) {
             bmp.bits_per_pixel = CM_8BIT;
             break;
         case 4:
-            bmp.convertFrom4Bits2Native4((RGB4 *)buffer);
+            bmp.convertFrom4Bits2Native4(reinterpret_cast<RGB4 *>(buffer));
 
             //bmp.image = (uint8_t *) buffer;
             bmp.bits_per_pixel = CM_4BIT;
@@ -159,37 +161,37 @@ uint8_t * Bmp::getImage()
     return image;
 } //getImage
 
-uint8_t Bmp::getBitsPerPixel()
+uint8_t Bmp::getBitsPerPixel() const
 {
     return bits_per_pixel;
 } //getBitsPerPixel
 
-uint16_t Bmp::getNumOfColours()
+uint16_t Bmp::getNumOfColours() const
 {
     return pow(2, (uint16_t) bits_per_pixel);
 } //getNumOfColours
 
-uint8_t Bmp::getPaletteSize()
+uint8_t Bmp::getPaletteSize() const
 {
     return sizeof(RGBQUAD) * getNumOfColours();
 } //getPaletteSize
 
-int Bmp::hasPalette()
+int Bmp::hasPalette() const
 {
     return has_palette;
 } //hasPalette
 
-int32_t Bmp::getWidth()
+int32_t Bmp::getWidth() const
 {
     return width;
 } //getWidth
 
-int32_t Bmp::getHeight()
+int32_t Bmp::getHeight() const
 {
     return height;
 } //getHeight
 
-int32_t Bmp::getNumPixels()
+int32_t Bmp::getNumPixels() const
 {
     return width * height;
 } //getHeight
@@ -200,7 +202,7 @@ void Bmp::convertFrom32Bits2Native16(RGB32 *buffer)
 
     int32_t num_of_pixels = getNumPixels();
 
-    uint16_t *img = (uint16_t *) malloc(sizeof(uint16_t) * num_of_pixels);
+    uint16_t *img = reinterpret_cast<uint16_t *>(malloc(sizeof(uint16_t) * num_of_pixels));
 
     if(img == nullptr){
         std::puts("cannot allocate\n");
@@ -216,7 +218,7 @@ void Bmp::convertFrom32Bits2Native16(RGB32 *buffer)
         );
     }
 
-    image = (uint8_t *) img;
+    image = reinterpret_cast<uint8_t *>(img);
 } //convertFrom32Bits
 
 void Bmp::convertFrom24Bits2Native16(RGB24 *buffer)
@@ -247,7 +249,7 @@ void Bmp::convertFrom24Bits2Native16(RGB24 *buffer)
         );
     }
 
-    image = (uint8_t *) img;
+    image = reinterpret_cast<uint8_t *>(img);
 
     std::puts("after loop");
 
@@ -259,7 +261,7 @@ void Bmp::convertFrom16Bits2Native16(uint16_t * buffer, bool format)
 {
     std::puts(__FUNCTION__);
 
-    image = (uint8_t *) buffer;
+    image = reinterpret_cast<uint8_t *>(buffer);
 } //convertFrom16Bits
 
 void Bmp::convertFrom8Bits2Native8(uint8_t * buffer)
@@ -277,7 +279,7 @@ void Bmp::convertFrom8Bits2Native8(uint8_t * buffer)
 
     image = (uint8_t *) img;
     */
-    image = (uint8_t *) buffer;
+    image = buffer;
 } //convertFrom8Bits2Native8
 
 void Bmp::convertFrom4Bits2Native4(RGB4 * buffer)
@@ -316,7 +318,7 @@ void Bmp::convertFrom4Bits2Native4(RGB4 * buffer)
     }
 
     delete[] image;
-    image = (uint8_t *) img;
+    image = reinterpret_cast<uint8_t *>(img);
 }
 
 
@@ -351,7 +353,7 @@ void Bmp::convertFrom8To16Bits()
         );
     }
 
-    image = (uint8_t *) buffer;
+    image = reinterpret_cast<uint8_t *>(buffer);
 } //convertFrom8Bits
 
 void Bmp::convertFrom4To16Bits()
@@ -370,7 +372,7 @@ void Bmp::convertFrom4To16Bits()
         exit(1);
     }
 
-    RGB4 * img = (RGB4 *)image;
+    RGB4 * img = reinterpret_cast<RGB4 *>(image);
 
     int cont2 = 0;
     for(int cont = 0; cont < num_of_pixels; cont++){
@@ -395,7 +397,7 @@ void Bmp::convertFrom4To16Bits()
     }
 
     delete[] image;
-    image = (uint8_t *) buffer;
+    image = reinterpret_cast<uint8_t *>(buffer);
 
 } //convertFrom4Bits
 
@@ -423,7 +425,7 @@ void Bmp::turnImage()
             }
 
             //we take the image as 16 bits per pixel
-            uint16_t *img = (uint16_t *) image;
+            uint16_t *img = reinterpret_cast<uint16_t *>(image);
 
             uint32_t k = 0;
             //this loop goes from bottom to top
@@ -438,7 +440,7 @@ void Bmp::turnImage()
             }
 
             delete[] image; //we free the previous image
-            image = (uint8_t *) buffer; //we set the current image
+            image = reinterpret_cast<uint8_t *>(buffer); //we set the current image
 
             break;
         }
@@ -467,7 +469,7 @@ void Bmp::turnImage()
             }
 
             delete[] image; //we free the previous image
-            image = (uint8_t *) buffer; //we set the current image
+            image = reinterpret_cast<uint8_t *>(buffer); //we set the current image
 
             break;
 
@@ -477,7 +479,7 @@ void Bmp::turnImage()
             std::puts("turning in 4 bits\n");
 
             //we take the image as 4bit per pixel
-            RGB4 * img = (RGB4 *)image;
+            RGB4 * img = reinterpret_cast<RGB4 *>(image);
 
             //char *buffer = (char *) malloc(sizeof(char) * num_of_pixels);
             char *buffer = new (std::nothrow) char[num_of_pixels];
@@ -572,7 +574,7 @@ int Bmp::saveImage(const char *fileDest)
         case CM_16BIT:
             {
                 //we take the image as 16bit per pixel
-                uint16_t * img = (uint16_t *)image;
+                uint16_t * img = reinterpret_cast<uint16_t *>(image);
 
                 //uint16_t * buffer = (uint16_t *) malloc(sizeof(uint16_t) * num_of_pixels);
                 uint16_t * buffer = new (std::nothrow) uint16_t[num_of_pixels];
@@ -587,7 +589,7 @@ int Bmp::saveImage(const char *fileDest)
                     buffer[cont] = REVERSE_BYTES_16(img[cont]);
                 }
 
-                fImage.write((char*)buffer, sizeof(uint16_t) *  num_of_pixels);
+                fImage.write(reinterpret_cast<char*>(buffer), sizeof(uint16_t) *  num_of_pixels);
 
                 delete[] buffer;
                 buffer = nullptr;
@@ -596,12 +598,12 @@ int Bmp::saveImage(const char *fileDest)
             }
         case CM_8BIT:
             {
-                fImage.write((char*)image, num_of_pixels);
+                fImage.write(reinterpret_cast<char*>(image), num_of_pixels);
                 break;
             }
         case CM_4BIT:
             {
-                fImage.write((char*)image, num_of_pixels / 2);
+                fImage.write(reinterpret_cast<char*>(image), num_of_pixels / 2);
             }
             break;
     }
@@ -625,7 +627,7 @@ int Bmp::saveDump(const char *fileDest)
             {
                 std::puts("dumping in 16 bit\n");
                 //we take the image as 16bit per pixel
-                uint16_t * img = (uint16_t *)image;
+                uint16_t * img = reinterpret_cast<uint16_t *>(image);
 
                 //uint16_t * buffer = (uint16_t *) malloc(sizeof(uint16_t) * num_of_pixels);
 
@@ -643,7 +645,7 @@ int Bmp::saveDump(const char *fileDest)
                     buffer[cont] = REVERSE_BYTES_16(img[cont]);
                 }
 
-                fImage.write((char*)buffer, sizeof(uint16_t) *  num_of_pixels);
+                fImage.write(reinterpret_cast<char*>(buffer), sizeof(uint16_t) *  num_of_pixels);
 
                 delete[] buffer;
                 buffer = nullptr;
@@ -665,7 +667,7 @@ int Bmp::saveDump(const char *fileDest)
                     buffer[cont] = REVERSE_BYTES_16(image[cont]);
                 }
 
-                fImage.write((char*)buffer, sizeof(uint16_t) *  num_of_pixels);
+                fImage.write(reinterpret_cast<char*>(buffer), sizeof(uint16_t) *  num_of_pixels);
 
                 delete[] buffer;
                 buffer = nullptr;
@@ -675,7 +677,7 @@ int Bmp::saveDump(const char *fileDest)
             {
                 std::puts("dumping in 4 bit\n");
                 //we take the image as 4bits per pixel
-                RGB4 * img = (RGB4 *)image;
+                RGB4 * img = reinterpret_cast<RGB4 *>(image);
 
                 //uint16_t * buffer = (uint16_t *) malloc(sizeof(uint16_t) * num_of_pixels);
                 uint16_t * buffer = nullptr;
@@ -694,7 +696,7 @@ int Bmp::saveDump(const char *fileDest)
                     buffer[k++] = REVERSE_BYTES_16(img[cont].pixel0);
                 }
 
-                fImage.write((char*)buffer, sizeof(uint16_t) *  num_of_pixels);
+                fImage.write(reinterpret_cast<char*>(buffer), sizeof(uint16_t) *  num_of_pixels);
 
                 delete[] buffer;
                 buffer = nullptr;
@@ -740,7 +742,7 @@ int Bmp::savePalette(const char *fileDest)
 
         std::ofstream fPalette(fileDest, std::ofstream::binary);
 
-        fPalette.write((char*)buffer, sizeof(uint16_t) * getNumOfColours());
+        fPalette.write(reinterpret_cast<char*>(buffer), sizeof(uint16_t) * getNumOfColours());
 
         fPalette.close();
 
@@ -755,10 +757,10 @@ int Bmp::saveTiles(const char *fileDest)
 {
     std::puts(__FUNCTION__);
 
-    if(!has_palette
-       || bits_per_pixel != CM_4BIT
-       || width % 8 != 0
-       || height % 8 != 0
+    if(!has_palette //the image does not have a palete.
+       || bits_per_pixel != CM_4BIT //the image is not 4 bits
+       || width % 8 != 0            //the width is not multiple of 8
+       || height % 8 != 0           //the height is not multiple of 8
     ){
         std::puts("file needs to be multiple of 8 or bpp not 4bit");
         return 1;
@@ -775,7 +777,7 @@ int Bmp::saveTiles(const char *fileDest)
     }
 
     //we convert 8 to 4 bits.
-    RGB4 *img = (RGB4 *) image;
+    RGB4 *img = reinterpret_cast<RGB4 *>(image);
 
     int cont2 = 0;
     for(int cont = 0; cont < num_of_pixels/2; cont++){
@@ -788,10 +790,10 @@ int Bmp::saveTiles(const char *fileDest)
 
     int cont7 = 0;
 
-    for(int cont = 0; cont < (int) height; cont += 8){
-        for(int cont2 = 0; cont2 < (int) width; cont2 += 8){
-            for(int cont5 = 0; cont5 < 8; cont5++){
-                for(int cont6 = 0; cont6 < 8; cont6++){
+    for(int cont = 0; cont < (int) height; cont += 8){          //image 8 pixel row by image 8 pixel row
+        for(int cont2 = 0; cont2 < (int) width; cont2 += 8){    //image 8 pixel column by image 8 pixel column
+            for(int cont5 = 0; cont5 < 8; cont5++){             // tile row by tile row
+                for(int cont6 = 0; cont6 < 8; cont6++){         // tole column by tile column
 
                     buffer2[cont7++] = buffer[
                         cont * width
@@ -821,7 +823,7 @@ int Bmp::saveTiles(const char *fileDest)
 
     std::ofstream fTiles(fileDest, std::ofstream::binary);
 
-    fTiles.write((char*)exit_buffer, num_of_pixels/2);
+    fTiles.write(reinterpret_cast<char*>(exit_buffer), num_of_pixels/2);
 
     fTiles.close();
 
@@ -838,10 +840,10 @@ int Bmp::saveSprites(const char *fileDest)
 {
     std::puts(__FUNCTION__);
 
-    if(!has_palette
-       || bits_per_pixel != CM_4BIT
-       || width % 16 != 0
-       || height % 16 != 0
+    if(!has_palette                     //image has not palete
+       || bits_per_pixel != CM_4BIT     //image is not 4 bits
+       || width % 16 != 0               //the width is not multiple of 16
+       || height % 16 != 0              //the hight is not multiple of 16
     ){
         std::puts("file needs to be multiple of 16 or bpp not 4bits");
         return 1;
@@ -881,11 +883,11 @@ int Bmp::saveSprites(const char *fileDest)
 
     int cont7 = 0;
 
-    for(int cont = 0; cont < (int) height; cont += 16){
-        for(int cont2 = 0; cont2 < (int) width; cont2 += 16){
-            for (int cont4 = 0; cont4 < 16; cont4 += 8) {
-                for(int cont5 = 0; cont5 < 16; cont5++){
-                    for(int cont6 = 0; cont6 < 8; cont6++){
+    for(int cont = 0; cont < (int) height; cont += 16){         //image 16 pixel row by image 16 pixel row
+        for(int cont2 = 0; cont2 < (int) width; cont2 += 16){   //image 16 pixel column by image 16 pixel column
+            for (int cont4 = 0; cont4 < 16; cont4 += 8) {       //sprite 8 pixel column by sprite 8 pixel column
+                for(int cont5 = 0; cont5 < 16; cont5++){        //sprite 16 pixel row by 16 pixel row
+                    for(int cont6 = 0; cont6 < 8; cont6++){     //pixel by pixel
 
                         buffer2[cont7++] = buffer[
 
@@ -920,7 +922,7 @@ int Bmp::saveSprites(const char *fileDest)
 
     std::ofstream fTiles(fileDest, std::ofstream::binary);
 
-    fTiles.write((char*)exit_buffer, num_of_pixels/2);
+    fTiles.write(reinterpret_cast<char*>(exit_buffer), num_of_pixels/2);
 
     fTiles.close();
 

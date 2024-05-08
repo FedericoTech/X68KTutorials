@@ -12,15 +12,19 @@ int main(int argc, char *argv[])
     switch(option){
     case 3:
         {
-
+            //we load a 24 bit image
             Bmp bmp = Bmp::fromBmpFile("assets/24BitsLandScape.bmp");
 
+            //we save it as an image
             bmp.saveImage("../LdImgDmp16/default/16BitLandSc.pic");
 
+            //we save load a 4 but image
             Bmp bmp2 = Bmp::fromBmpFile("assets/4BitsSonic.bmp");
 
+            //we turn it into 16 bits
             bmp2.convertTo16Bits();
 
+            //we save it as an image
             bmp2.saveImage("../LdImgDmp16/default/16BSonic.pic");
 
         }
@@ -28,15 +32,19 @@ int main(int argc, char *argv[])
 
     case 4:
         {
-
+            //we open a 24 bit image
             Bmp bmp = Bmp::fromBmpFile("assets/24BitsLandScape.bmp");
 
+            //we save it as an image (16 bit conversion is implicit)
             bmp.saveImage("../LoadImg16b/default/16BitLandSc.pic");
 
+            //we open a 4 bit image
             Bmp bmp2 = Bmp::fromBmpFile("assets/4BitsSonic.bmp");
 
+            //we turn it into 16 bit
             bmp2.convertTo16Bits();
 
+            //we save it as a 16 bit image
             bmp2.saveImage("../LoadImg16b/default/16BSonic.pic");
 
         }
@@ -55,20 +63,26 @@ int main(int argc, char *argv[])
 
     case 6:
         {
+            //we load an 8 bit image
             Bmp bmp1 = Bmp::fromBmpFile("assets/8BitsColors.bmp");
 
+            //we save it as an image
             bmp1.saveImage("../LoadImg8b/default/8BitsColors.pic");
 
+            //we save the palete
             bmp1.savePalette("../LoadImg8b/default/8BitsColors.pal");
 
         }
         break;
     case 7:
         {
+            //we load an image
             Bmp bmp2 = Bmp::fromBmpFile("assets/4BitsLandScape.bmp");
 
+            //we save it as a dump
             bmp2.saveDump("../LdImgDmp4/default/4BitLandSc.dmp");
 
+            //we save the palete
             bmp2.savePalette("../LdImgDmp4/default/4BitLandSc.pal");
         }
         break;
@@ -81,6 +95,7 @@ int main(int argc, char *argv[])
 
             bmp2.savePalette("../LoadImg4b/default/4BitLandSc.pal");
             */
+
 
             Bmp bmp2 = Bmp::fromBmpFile("assets/Antonio4b.bmp");
 
