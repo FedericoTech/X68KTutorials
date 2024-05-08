@@ -7,7 +7,7 @@ int main(int argc, char *argv[])
 {
     uint8_t option = atoi(argv[1]);
 
-    option = 5;
+    option = 7;
 
     switch(option){
     case 3:

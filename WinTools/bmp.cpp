@@ -317,7 +317,7 @@ void Bmp::convertFrom4Bits2Native4(RGB4 * buffer)
         }
     }
 
-    delete[] image;
+    //delete[] image;
     image = reinterpret_cast<uint8_t *>(img);
 }
 
@@ -680,6 +680,7 @@ int Bmp::saveDump(const char *fileDest)
                 RGB4 * img = reinterpret_cast<RGB4 *>(image);
 
                 //uint16_t * buffer = (uint16_t *) malloc(sizeof(uint16_t) * num_of_pixels);
+
                 uint16_t * buffer = nullptr;
 
                 try {
@@ -689,13 +690,12 @@ int Bmp::saveDump(const char *fileDest)
                     exit(1);
                 }
 
-                int k = 0;
+
                 //reverse the bytes for the bigendien
-                for(int cont = 0; cont < num_of_pixels / 2; cont++){
+                for(int cont = 0, k = 0; cont < num_of_pixels / 2; cont++){
                     buffer[k++] = REVERSE_BYTES_16(img[cont].pixel1);
                     buffer[k++] = REVERSE_BYTES_16(img[cont].pixel0);
                 }
-
                 fImage.write(reinterpret_cast<char*>(buffer), sizeof(uint16_t) *  num_of_pixels);
 
                 delete[] buffer;

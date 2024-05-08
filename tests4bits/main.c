@@ -65,7 +65,6 @@ int main(void)
 
 //Painted with the CPU START
     {
-
         uint16_t *vram_addr = (void *)GVRAM_PAGE_3;
         int cont, cont2;
 
@@ -80,6 +79,15 @@ int main(void)
             for(cont2 = 0; cont2 < 512; cont2++){
                 //we copy 2 bytes at the time
                 *vram_addr++ = colour;
+                /*
+                *vram_addr++ = colour;
+                *vram_addr++ = colour;
+                *vram_addr++ = colour;
+                *vram_addr++ = colour;
+                *vram_addr++ = colour;
+                *vram_addr++ = colour;
+                *vram_addr++ = colour;
+                */
             }
         }
         _dos_super(status);
@@ -90,9 +98,10 @@ int main(void)
 //Painted with _dmamove START
     {
         int cont;
+        int iterations = (512 * 512 * sizeof(uint16_t)) / DMA_MAX_BLAST;
         colour = 0x0002;
 
-        for(cont = 0; cont < (512 * 512 * sizeof(uint16_t)) - DMA_MAX_BLAST; cont += DMA_MAX_BLAST){
+        for(cont = 0; cont < iterations; cont++){
             //we check that the dma has finished
             while(_iocs_dmamode() != DMA_STATUS_IDLE){
                 printf("wait for dma\n");
@@ -100,7 +109,7 @@ int main(void)
 
             _iocs_dmamove(
                 &colour,                        //buffer A, the source
-                (void *)GVRAM_PAGE_2 + cont,    //buffer B, the destination
+                (void *)GVRAM_PAGE_2 + cont * DMA_MAX_BLAST,    //buffer B, the destination
                 DMA_MODE(
                      DMA_DIR_A_TO_B,    //from A to B
                      DMA_A_FIXED,       //keep reading from colour
@@ -120,8 +129,6 @@ int main(void)
         struct _chain data[iterations];
 
         colour = 0x0003;
-
-        printf("%d \n", iterations);
 
         for(cont = 0; cont < iterations; cont++){
             data[cont].addr = (void *) (GVRAM_PAGE_1 + cont * DMA_MAX_BLAST);
@@ -157,31 +164,31 @@ int main(void)
 
         chunk6.addr = (void *) GVRAM_START + DMA_MAX_BLAST * 6;
         chunk6.len = DMA_MAX_BLAST;
-        chunk6.next = &chunk1;
+        chunk6.next = &chunk1;  //deliberately shuffled
 
         chunk5.addr = (void *) GVRAM_START + DMA_MAX_BLAST * 5;
         chunk5.len = DMA_MAX_BLAST;
-        chunk5.next = &chunk2;
+        chunk5.next = &chunk2;  //deliberately shuffled
 
         chunk4.addr = (void *) GVRAM_START + DMA_MAX_BLAST * 4;
         chunk4.len = DMA_MAX_BLAST;
-        chunk4.next = &chunk3;
+        chunk4.next = &chunk3;  //deliberately shuffled
 
         chunk3.addr = (void *) GVRAM_START + DMA_MAX_BLAST * 3;
         chunk3.len = DMA_MAX_BLAST;
-        chunk3.next = &chunk7;
+        chunk3.next = &chunk7;  //deliberately shuffled
 
         chunk2.addr = (void *) GVRAM_START + DMA_MAX_BLAST * 2;
         chunk2.len = DMA_MAX_BLAST;
-        chunk2.next = &chunk4;
+        chunk2.next = &chunk4;  //deliberately shuffled
 
         chunk1.addr = (void *) GVRAM_START + DMA_MAX_BLAST;
         chunk1.len = DMA_MAX_BLAST;
-        chunk1.next = &chunk5;
+        chunk1.next = &chunk5;  //deliberately shuffled
 
         chunk0.addr = (void *) GVRAM_START;
         chunk0.len = DMA_MAX_BLAST;
-        chunk0.next = &chunk6;
+        chunk0.next = &chunk6;  //deliberately shuffled
 
         while(_iocs_dmamode() != DMA_STATUS_IDLE){
             printf("wait for dma\n");
@@ -198,22 +205,6 @@ int main(void)
         );
     }
 //Painted with _dmamov_l END
-
-
-    /*
-
-    vram_addr = (void *)GVRAM_START;
-
-    //each row
-    for(cont = 0; cont < 512; cont++){
-        //each column
-        for(cont2 = 0; cont2 < 512; cont2++){
-            //we copy 2 bytes at the time
-            *vram_addr++ = 0x0004;
-        }
-    }
-
-   */
 
     _dos_c_print("Press a key.\r\n");
 
