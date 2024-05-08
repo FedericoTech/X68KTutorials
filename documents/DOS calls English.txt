@@ -33,7 +33,7 @@ $ff1b   _FGETC          Read 1 byte from file
 $ff1c   _FGETS          Read character string from file						int _dos_fgets(struct _inpptr *inpptr, int_ fno)
 $ff1d   _FPUTC          Write 1 byte to file
 $ff1e   _FPUTS          Write character string to file
-$ff1f   _ALLCLOSE       Close all files
+$ff1f   _ALLCLOSE       Close all files										void _dos_allclose()
 
 $ff20   _SUPER          Set supervisor/user mode							int _dos_super(long stack)
 $ff21   _FNCKEY         Get/set redefinable keys
@@ -1600,7 +1600,8 @@ Return error code
 
 Read from $ ff3f _READ file
 
-Argument FILENO.w file handle
+Argument
+	FILENO.w file handle
 	BUFFER.l Read buffer pointer
 	LEN.l Number of bytes to read
 
@@ -2113,30 +2114,30 @@ Return error code
 	If it has been converted, it will be returned with the absolute drive name).
 
 offset	size
-0 1.b Attribute to search ┐
-1 1.b 〃 Drive number │
-2 1.l Sector number of the directory being searched │ Inside Human68k
-6 1.w Number of remaining sectors in the directory │ Used.
-		(Valid only for root) │ When destroyed
-8 1.w │_NFILES from the beginning of the sector on the directory is not possible.
-		Offset (No corresponding file when -1) │
-10 8.b File name to search │
-18 3.b 〃 Extension ┘
-21 1.b Properties
-22 1.w Last change time
-24 1.w Last change date
-26 1.l File size
-30 23.b File name (main file name +'.' + Extension +0)
+	 0 	 1.b Attribute to search 	------------------------┐
+	 1 	 1.b 	〃 	Drive number							│
+	 2 	 1.l Sector number of the directory being searched	│ Inside Human68k
+	 6 	 1.w Number of remaining sectors in the directory	│ Used.
+			(Valid only for root) 							│ When destroyed
+	 8 	 1.w Offset											│ _NFILES from the beginning of the sector on the directory is not possible.
+			(No corresponding file when -1)					│
+	10 	 8.b File name to search 							│
+	18 	 3.b 	〃 	Extension 		------------------------┘
+	21 	 1.b Properties
+	22 	 1.w Last change time
+	24 	 1.w Last change date
+	26 	 1.l File size
+	30 	23.b File name (main file name + '.' + Extension + 0)
 
 	However, when TwentyOne is resident, some of the inside information is changed, and inside TwentyOne
 	If the filename buffer EXBUF is insufficient, error code -8 is returned.
 
 offset	size
-0-9 10.b (same as standard)
-10 1.l Extended buffer address
-14 6.b TwentyOne Extended flag'Twenty'
-20 1.b Error flag (0: OK 1: ERR)
-21 32.b (same as standard)
+	0-9 10.b (same as standard)
+	10 	 1.l Extended buffer address
+	14 	 6.b TwentyOne Extended flag'Twenty'
+	20 	 1.b Error flag (0: OK 1: ERR)
+	21 	32.b (same as standard)
 
 	move	ATR,-(sp)
 	pea (FIL)
