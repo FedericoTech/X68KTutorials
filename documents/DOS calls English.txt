@@ -70,7 +70,7 @@ $ff3f   _READ           Read from file
 
 $ff40   _WRITE          Write to file
 $ff41   _DELETE         Delete file
-$ff42   _SEEK           Move file pointer
+$ff42   _SEEK           Move file pointer									long _dos_seek (int fno, int offset, int mode)
 $ff43   _CHMOD          Get/set file attributes
 $ff44   _IOCTRL         Device driver ioctrl direct I/O
 $ff45   _DUP            Copy file handle
@@ -1662,7 +1662,8 @@ Return error code
 
 $ ff42 _SEEK Move file pointer
 
-Argument FILENO.w file handle
+Argument 
+	FILENO.w file handle
 	OFFSET.l offset
 	MODE.w move mode
 

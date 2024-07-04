@@ -20,7 +20,7 @@ $ 0c _TVCTRL TV control
 $ 0d _LEDMOD LED mode setting
 $ 0e _TGUSEMD Screen usage settings
 $ 0f _DEFCHR Gaiji definition
-$ 10 _CRTMOD CRT mode setting
+$ 10 _CRTMOD CRT mode setting												int _iocs_crtmod()
 $ 11 _CONTRAST Contrast setting
 $ 12 _HSVTORGB HSV → RGB conversion
 $ 13 _TPALET Text palette setting
@@ -68,7 +68,7 @@ $ 3c _INIT_PRN Printer initialization
 $ 3d _SNSPRN Check if it can be output to the printer
 $ 3e _OUTLPT Printer direct output
 $ 3f _OUTPRN Printer output
-$ 40 _B_SEEK Disc Seek
+$ 40 _B_SEEK Disc Seek														int _iocs_b_seek (int drive, int recno)
 $ 41 _B_VERIFY Disc verification
 $ 42 _B_READDI Read for diagnostic disk
 $ 43 _B_DSKINI Drive Initialization
@@ -112,9 +112,9 @@ $ 68 _OPMSET OPM register setting
 $ 69 _OPMSNS OPM Status check
 $ 6a _OPMINTST OPM interrupt setting
 $ 6b _TIMERDST Timer-D Interrupt setting									int _iocs_timerdst(const void *addr, int mode, int cnt)	
-$ 6c _VDISPST Vertical sync interrupt setting
-$ 6d _CRTCRAS Raster interrupt setting
-$ 6e _HSYNCST Horizontal sync interrupt setting
+$ 6c _VDISPST Vertical sync interrupt setting								int _iocs_vdispst(const void *, int, int)
+$ 6d _CRTCRAS Raster interrupt setting										int _iocs_crtcras(const void *addr, int luster)
+$ 6e _HSYNCST Horizontal sync interrupt setting								int _iocs_hsyncst(const void *addr)
 $ 6f _PRNINTST Printer interrupt setting
 $ 70 _MS_INIT Mouse initialization
 $ 71 _MS_CURON Mouse cursor display											void _iocs_ms_curon(void)
@@ -174,8 +174,8 @@ $ af _OS_CUROF Cursor erase
 $ b0 _DRAWMODE Graphic drawing mode setting
 $ b1 _APAGE Graphic drawing page settings									int _iocs_apage (int mode)
 $ b2 _VPAGE Graphic screen display page settings							int _iocs_vpage (int mode)
-$ b3 _HOME Graphic screen display position setting
-$ b4 _WINDOW Graphic drawing window settings
+$ b3 _HOME Graphic screen display position setting							int _iocs_home (int page, int x, int y)
+$ b4 _WINDOW Graphic drawing window settings								int _iocs_window (int sx, int sy, int ex, int ey)
 $ b5 _WIPE Clear graphic screen
 $ b6 _PSET Graphic screen point set
 $ b7 _POINT Get points on the graphic screen
@@ -193,13 +193,13 @@ $ c2 _SP_OFF ​​Sprite Erase
 $ c3 _SP_CGCLR Clear sprite pattern
 $ c4 _SP_DEFCG Sprite pattern definition
 $ c5 _SP_GTPCG Sprite pattern loading
-$ c6 _SP_REGST Sprite register settings
-$ c7 _SP_REGGT Read sprite register
+$ c6 _SP_REGST Sprite register settings										int _iocs_sp_regst (int spno, int x, int y, int code, int prw)
+$ c7 _SP_REGGT Read sprite register											int _iocs_sp_reggt (int spno, int *x, int *y, int *code, int *prw)
 $ c8 _BGSCRLST Background scroll register setting
 $ c9 _BGSCRLGT Reading background scroll register
 $ ca _BGCTRLST Background control register settings
 $ cb _BGCTRLGT Read background control register
-$ cc _BGTEXTCL Clear background text
+$ cc _BGTEXTCL Clear background text										int _iocs_bgtextcl (int page, int code)
 $ cd _BGTEXTST Background text setting
 $ ce _BGTEXTGT Reading background text
 $ cf _SPALET Sprite palette settings
@@ -220,46 +220,51 @@ $ fe _IPLERR Reboot
 $ ff _ABORTJOB Abort
 
 ================================================= ============================
+https://gamesx.com/wiki/doku.php?id=x68000:keycodes
 
-・ Key scan code
+Key Status
 
-Key code Key input status bit
- Group 7 6 5 4 3 2 1 0
+Group＼Bits		7		6		5		4		3		2		1		0
 
-	0 6 & 5% 4 $ 3 # 2 "1! ESC
-	1 BS \ | ^ ~-= 0 9) 8 (7'
-	2 U Y T R E W Q TAB
-	3 S A CR [{@` P O I
-	4; + L K J H G F D
-	5 N B V C X Z]}: *
-	6 DEL HOME SPACE _ /?.>, <M
-	7 CLR ↓ → ↑ ← UNDO R_DOWN R_UP
-	8 4 + 9 8 7-* /
-	9 0 ENTER 3 2 1 = 6 5
-	a XF3 XF2 XF1 HELP registration symbol.,
-	b Hira INS CAPS Code Low-Major Kana XF5 XF4
-	c F4 F3 F2 F1 F0 COPY BREAK Full-width
-	d F9 F8 F7 F6 F5
-	e OPT.2 OPT.1 CTRL SHIFT
+	0			6&		5%		4$		3#		2“		1!		ESC	
+	1			BS		\|		^~		-=		0		9)		8(		7`
+	2			U		Y		T		R		E		W		Q		TAB
+	3			S		A		CR		[{		@`		P		O		I
+	4			;+		L		K		J		H		G		F		D
+	5			N		B		V		C		X		Z		]}		:*
+	6			DEL		HOME	SPACE	_		/?		.>		,<		M
+	7			CLR		↓		→		↑		←		UNDO	R_DOWN	R_UP
+	8			4		+		9		8		7		-		*		/
+	9			0		ENTER	3		2		1		=		6		5
+	A			XF3		XF2		XF1		HELP	登録		記号		.		,
+	B			ひら		INS		CAPS	コード		ﾛ-ﾏ字	かな		XF5		XF4
+	C			F4		F3		F2		F1		F0		COPY	BREAK	全角
+	D									F9		F8		F7		F6		F5
+	E											OPT.2	OPT.1	CTRL	SHIFT
 
-	Scan code = key code group x 8 + key input status bit
+================================================= ============================
 
-          10: TAB 20: D 30: M 40: / 50 :, 60: Full-width 70: SHIFT
-01: ESC 11: Q 21: F 31 :, <41: * 51 :. 61: BREAK 71: CTRL
-02: 1! 12: W 22: G 32:.> 42:-52: Symbol 62: COPY 72: OPT.1
-03: 2 "13: E 23: H 33: /? 43: 7 53: Registration 63: F0 73: OPT.2
-04: 3 # 14: R 24: J 34: _ 44: 8 54: HELP 64: F1
-05: 4 $ 15: T 25: K 35: SPACE 45: 9 55: XF1 65: F2
-06: 5% 16: Y 26: L 36: HOME 46: + 56: XF2 66: F3
-07: 6 & 17: U 27:; + 37: DEL 47: 4 57: XF3 67: F4
-08: 7 '18: I 28 :: * 38: R_UP 48: 5 58: XF4 68: F5
-09: 8 (19: O 29:]} 39: R_DOWN 49:6 59: XF5 69: F6
-0a: 9) 1a: P 2a: Z 3a: UNDO 4a: = 5a: Kana 6a: F7
-0b: 0 1b: @ `2b: X 3b: ← 4b: 1 5b: Roman character 6b: F8
-0c:-= 1c: [{2c: C 3c: ↑ 4c: 2 5c: Code 6c: F9
-0d: ^ ~ 1d: CR 2d: V 3d: → 4d: 3 5d: CAPS
-0e: \ | 1e: A 2e: B 3e: ↓ 4e: ENTER 5e: INS
-0f: BS 1f: S 2f: N 3f: CLR 4f: 0 5f: Hiragana
+Scan Codes
+
+	scan code = key code group * 8 + key input status bit
+
+			10:TAB		20:D		30:M		40:/		50:,		60:全角		70:SHIFT
+01:ESC		11:Q		21:F		31:,<		41:*		51:.		61:BREAK	71:CTRL
+02:1!		12:W		22:G		32:.>		42:-		52:記号		62:COPY		72:OPT.1
+03:2”		13:E		23:H		33:/?		43:7		53:登録		63:F0		73:OPT.2
+04:3#		14:R		24:J		34:_		44:8		54:HELP		64:F1	
+05:4$		15:T		25:K		35:SPACE	45:9		55:XF1		65:F2	
+06:5%		16:Y		26:L		36:HOME		46:+		56:XF2		66:F3	
+07:6&		17:U		27:;+		37:DEL		47:4		57:XF3		67:F4	
+08:7'		18:I		28::*		38:R_UP		48:5		58:XF4		68:F5	
+09:8(		19:O		29:]}		39:R_DOWN	49:6		59:XF5		69:F6	
+0a:9)		1a:P		2a:Z		3a:UNDO		4a:=		5a:かな		6a:F7	
+0b:0		1b:@`		2b:X		3b:←		4b:1		5b:ﾛ-ﾏ字		6b:F8	
+0c:-=		1c:[{		2c:C		3c:↑		4c:2		5c:ｺ-ﾄﾞ		6c:F9	
+0d:^~		1d:CR		2d:V		3d:→		4d:3		5d:CAPS		
+0e:\|		1e:A		2e:B		3e:↓		4e:ENTER	5e:INS		
+0f:BS		1f:S		2f:N		3f:CLR		4f:0		5f:ひらがな		
+
 
 ================================================= ============================
 
@@ -336,6 +341,9 @@ Return value d0.b Key pressed down state
 
 	The pressed state of the keys included in the specified key code group is displayed in bit units.
 	Examine. Indicates that the corresponding bit is 1 and the key is pressed.
+	
+
+see Key Status table.
 
 ================================================= ============================
 
@@ -346,6 +354,8 @@ Argument d1.l scan code
 		bit 6-0 scan code
 
 	Generates the input of the specified key in software.
+	
+see Scan Codes table.
 
 ================================================= ============================
 
@@ -524,16 +534,17 @@ Argument d1.w CRT mode
 			13 	〃 				〃 					〃 					〃 			15
 			14 	〃 				256 x 256 			〃 					〃 			31
 			15 	〃 				〃 					〃 					〃 			15
+			
 			16 	1024 			768 x 512 			16 					1 			31
 			17 	〃 				1024 x 424 			〃 					〃 			24
 			18 	〃 				1024 x 848 			〃 					〃 			24
-
 			19 	〃 				640 x 480 			〃 					〃 			24
 
 			20 	〃 				768 x 512 			256 				2 			31
 			21 	〃 				1024 x 848 			〃 					〃 			24
 			22 	〃 				1024 x 424 			〃 					〃 			24
 			23 	〃 				640 x 480 			〃 					〃 			24
+			
 			24 	〃 				768 x 512 			65536 				1 			31
 			25 	〃 				1024 x 848 			〃 					〃 			24
 			26 	〃				1024 x 424 			〃 					〃 			24
@@ -2967,11 +2978,13 @@ Return value d0.l = 0 Normal termination
 
 $ b3 _HOME Graphic screen display position setting
 
-Argument d1.b Page to set the display position (bits 0 to 3 correspond to pages 0 to 3, 0 is all pages)
+Argument
+	d1.b Page to set the display position (bits 0 to 3 correspond to pages 0 to 3, 0 is all pages)
 	d2.w X coordinates
 	d3.w Y 〃
 
-Return value d0.l = 0 Normal termination
+Return value d0.l = 
+		 0 Normal termination
 		-1 Graphics not available
 		-2 pages or coordinates are not specified
 		-3 Specified page or coordinates cannot be used in current mode
@@ -3184,21 +3197,21 @@ $ bf _PUTGRM Graphic screen dot-by-dot writing
 
 Argument a1.l Address of the parameter buffer
 
-Return value d0.l = 0 Normal termination
-		-1 Graphics not available
-		-2 Coordinate specification is abnormal
-		-3 Buffer capacity is too small
+Return value d0.l =  0 Normal termination
+					-1 Graphics not available
+					-2 Coordinate specification is abnormal
+					-3 Buffer capacity is too small
 
 	Write dot-by-dot from the buffer to the graphic screen.
 	The contents of the parameter buffer are as follows.
 
 offset size
- 0 1.w Start point X coordinate
- 2 1.w 〃 Y 〃
- 4 1.w End point X 〃
- 6 1.w 〃 Y 〃
+ 0 1.w Start point  X coordinate
+ 2 1.w 〃 			Y 〃
+ 4 1.w End point 	X 〃
+ 6 1.w 〃 			Y 〃
  8 1.l Buffer start address
-12 1.l 〃 Finish 〃
+12 1.l 〃 	Finish 	〃
 
 ================================================= ============================
 
@@ -3300,8 +3313,9 @@ $ c7 _SP_REGGT Read sprite register
 
 Argument d1.l Sprite number (0 to 127)
 
-Return value d0.l = 0 Normal termination
-		-1 Illegal screen mode
+Return value 
+	d0.l =   0 Normal termination
+			-1 Illegal screen mode
 	d2.l X coordinates
 	d3.l Y 〃
 	d4.l pattern code
@@ -3313,7 +3327,8 @@ Return value d0.l = 0 Normal termination
 
 $ c8 _BGSCRLST Background scroll register setting
 
-Argument d1.l Vertical blanking interval detection / background specification
+Argument
+	d1.l Vertical blanking interval detection / background specification
 		bit 31 0: Vertical blanking interval detection post-setting 1: Not detected
 		bit 0 BG number (0/1)
 	d2.l X coordinates (0-1023)
@@ -3331,8 +3346,9 @@ $ c9 _BGSCRLGT Reading background scroll register
 
 Argument d1.l Background specification (0/1)
 
-Return value d0.l = 0 Normal termination
-		-1 Illegal screen mode
+Return value 
+	d0.l =   0 Normal termination
+			-1 Illegal screen mode
 	d2.l X coordinates
 	d3.l Y 〃
 
@@ -3342,12 +3358,14 @@ Return value d0.l = 0 Normal termination
 
 $ ca _BGCTRLST Background control register settings
 
-Argument d1.l Background specification (0/1)
+Argument 
+	d1.l Background specification (0/1)
 	d2.l Specifying a text page (0/1)
 	d3.l Show / Hide specification (0: Hide 1: Show)
 
-Return value d0.l = 0 Normal termination
-		-1 Illegal screen mode
+Return value 
+		d0.l =   0 Normal termination
+				-1 Illegal screen mode
 
 	Set the background control register. Set d2.l / d3.l to -1.
 	Do not change the setting, but do not specify -1 when setting for the first time.
@@ -3370,7 +3388,8 @@ Return value d0.l = 0 Text page 0, hidden
 
 $ cc _BGTEXTCL Clear background text
 
-Argument d1.l Specify text page (0/1)
+Argument 
+	d1.l Specify text page (0/1)
 	d2.l pattern code
 
 Return value d0.l = 0 Normal termination
@@ -3382,13 +3401,15 @@ Return value d0.l = 0 Normal termination
 
 $ cd _BGTEXTST Background text setting
 
-Argument d1.l Specify text page (0/1)
+Argument
+	d1.l Specify text page (0/1)
 	d2.l X coordinates (0-63)
 	d3.l Y 〃 (〃)
 	d4.l pattern code
 
-Return value d0.l = 0 Normal termination
-		-1 Illegal screen mode
+Return value 
+	d0.l = 0 Normal termination
+		  -1 Illegal screen mode
 
 	Set a pattern code on the text page of the background screen.
 
