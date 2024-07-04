@@ -29,9 +29,6 @@ def extract_palete(tiles, output_directory, filename):
         new_palette.add(0)  # we add the black colour
         new_palette = set(sorted(list(new_palette)))
 
-        if tile_index == 6 or tile_index == 7:
-            print(f"tile: {tile_index} {new_palette}")
-
         # of groups is empty
         if len(palettes) == 0:
             # we just insert the matrix
@@ -68,10 +65,7 @@ def extract_palete(tiles, output_directory, filename):
     # Split the filename into base and extension
     base, ext = os.path.splitext(filename)
 
-    # for color in groups:
-    #    print(color)
-
-    with open(output_directory + base + ".pic", 'wb') as palette_out:
+    with open(f"{output_directory}/{base}.pal", 'wb') as palette_out:
         # Write the encoded palette to the palette file
         for palette in palettes:
             palette = sorted(palette)
@@ -88,7 +82,7 @@ def save_tiles(tiles, palettes, output_directory, filename):
     # Split the filename into base and extension
     base, ext = os.path.splitext(filename)
 
-    with open(output_directory + base + ".ts", 'wb') as binary_file:
+    with open(f"{output_directory}/{base}.ts", 'wb') as binary_file:
         # Write the encoded palette to the palette file
 
         for index, tile in enumerate(tiles):
@@ -141,6 +135,10 @@ def parse_tmx(file_path, output_directory):
     # Define the namespace URI
     namespace = {'xhtml': 'http://www.w3.org/1999/xhtml'}
 
+    FLIP_HORIZONTAL_FLAG = 0x80000000
+    FLIP_VERTICAL_FLAG = 0x40000000
+    # FLIP_DIAGONAL_FLAG = 0x20000000
+
     # Parse the XML file
     tree = ET.parse(file_path)
 
@@ -148,25 +146,35 @@ def parse_tmx(file_path, output_directory):
     root = tree.getroot()
 
     # we get the tileset filename
-    tileset_element = root.find('xhtml:tileset', namespace)
+    tileset_element = root.find('tileset')
     tilewidth = int(tileset_element.get('tilewidth'))
     tileheight = int(tileset_element.get('tileheight'))
 
-    image_element = tileset_element.find('xhtml:image', namespace)
+    image_element = tileset_element.find('image')
     filename = image_element.get('source')
 
     palette_indices = process_image(filename, tilewidth, tileheight, output_directory)
 
     # Use namespace prefix in findall and find methods
-    for layer in root.findall('xhtml:layer', namespace):
+    for layer in root.findall('layer'):
         layer_data = []
         base, ext = os.path.splitext(filename)
 
-        with open(output_directory + base + ".tm", 'wb') as binary_file:
+        with open(f"{output_directory}/{base}.tm", 'wb') as binary_file:
             # we traverse the
-            for tile in layer.find('xhtml:data', namespace).findall('xhtml:tile', namespace):
-                gid = (int(tile.get('gid')) - 1) | (palette_indices.indices[int(tile.get('gid')) - 1] + 1) << 8
-                # print(f"{gid:04x}")
+            for tile in layer.find('data').findall('tile'):
+
+                gid = int(tile.get('gid'));
+
+                tile_id = 0xFF & int(gid) - 1
+
+                palette_id = palette_indices.indices[tile_id] + 1  #avoid text palette
+
+                vertical_flip = (gid & FLIP_VERTICAL_FLAG) != 0
+                horizontal_flip = (gid & FLIP_HORIZONTAL_FLAG) != 0
+
+                gid = (vertical_flip << 15) | (horizontal_flip << 14) | (palette_id << 8) | tile_id
+
                 binary_file.write(struct.pack('>H', gid))
 
 
@@ -190,6 +198,9 @@ def convImage(filename, output, depth):
             if image.mode != 'P':
                 # we turn the image into 8 bits
                 image = image.convert('P', palette=Image.ADAPTIVE, colors=256)
+            else:
+                if len(image.getpalette()) // 3 <= 16:
+                    image = image.convert('RGB').convert('P', palette=Image.ADAPTIVE, colors=256)
 
             # we capture the palette
             palette = image.getpalette()
@@ -218,16 +229,13 @@ def convImage(filename, output, depth):
             if image.mode != 'P':
                 # we turn the image into 4 bits
                 image = image.convert('P', palette=Image.ADAPTIVE, colors=16)
+            else:
+                if len(image.getpalette()) // 3 > 16:
+                    # we reprocess the image to make it have 16 colours
+                    image = image.convert('RGB').convert('P', palette=Image.ADAPTIVE, colors=16)
 
             # we capture the palette
             palette = image.getpalette()
-
-            # if the palette has more than 16 colours...
-            if len(palette) // 3 > 16:
-                # we reprocess the image to make it have 16 colours
-                image = image.convert('RGB').convert('P', palette=Image.ADAPTIVE, colors=16)
-                # and capture the palette
-                palette = image.getpalette()
 
             # we traverse the palette
             for i in range(0, len(palette), 3):
@@ -244,7 +252,7 @@ def convImage(filename, output, depth):
             aux = list(image.getdata())
 
             # we traverse the data
-            for i in range(0, len(aux)-1, 4):
+            for i in range(0, len(aux) - 1, 4):
                 # we pack four 4bit indices (pixels) in one 16bit word
                 encoded_color.append((aux[i] << 12) | (aux[i + 1] << 8) | (aux[i + 2] << 4) | aux[i + 3])
 
@@ -252,6 +260,7 @@ def convImage(filename, output, depth):
     with open(base + ".pic", 'wb') as binary_file:
         for word in encoded_color:
             binary_file.write(struct.pack('>H', word))
+
 
 def main():
     parser = argparse.ArgumentParser(description="A simple CLI")
