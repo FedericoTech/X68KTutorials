@@ -1,0 +1,1 @@
+![Alt text](../assets/captures/fpcube.png)
