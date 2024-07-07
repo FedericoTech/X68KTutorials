@@ -149,6 +149,8 @@ class Bmp {
 
         int saveDump(const char *fileDest);
 
+        int saveMultiPlanes(const char *fileDest);
+
         int savePalette(const char *fileDest);
 
         int saveTiles(const char *fileDest);

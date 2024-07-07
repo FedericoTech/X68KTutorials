@@ -3217,8 +3217,8 @@ offset size
 
 $ c0 _SP_INIT Sprite initialization
 
-Return value d0.l = 0 Normal termination
-		-1 Illegal screen mode
+Return value d0.l =  0 Normal termination
+					-1 Illegal screen mode
 
 	Initialize the sprite screen.
 
@@ -3226,8 +3226,8 @@ Return value d0.l = 0 Normal termination
 
 $ c1 _SP_ON Sprite display
 
-Return value d0.l = 0 Normal termination
-		-1 Illegal screen mode
+Return value d0.l =  0 Normal termination
+					-1 Illegal screen mode
 
 	Display the sprite screen.
 
@@ -3235,8 +3235,8 @@ Return value d0.l = 0 Normal termination
 
 $ c2 _SP_OFF ​​Sprite Erase
 
-Return value d0.l = 0 Normal termination
-		-1 Illegal screen mode
+Return value d0.l =  0 Normal termination
+					-1 Illegal screen mode
 
 	Do not show sprite screen.
 
@@ -3246,8 +3246,8 @@ $ c3 _SP_CGCLR Clear sprite pattern
 
 Argument d1.l Pattern code (0 to 255)
 
-Return value d0.l = 0 Normal termination
-		-1 Illegal screen mode
+Return value d0.l =  0 Normal termination
+					-1 Illegal screen mode
 
 	Clears the specified PCG. The size of the pattern to clear is 128 bytes.
 
@@ -3255,12 +3255,12 @@ Return value d0.l = 0 Normal termination
 
 $ c4 _SP_DEFCG Sprite pattern definition
 
-Argument d1.l Pattern code (0 to 255)
-	d2.l Pattern size (0: 8x8 1: 16x16)
-	a1.l Pattern data address
+Argument 	d1.l Pattern code (0 to 255)
+			d2.l Pattern size (0: 8x8 1: 16x16)
+			a1.l Pattern data address
 
-Return value d0.l = 0 Normal termination
-		-1 Illegal screen mode
+Return value d0.l =  0 Normal termination
+					-1 Illegal screen mode
 
 	Define the pattern for the specified PCG.
 	The size of the pattern is 32 bytes when d2.l = 0 and 128 bytes when d2.l = 1.
@@ -3269,12 +3269,13 @@ Return value d0.l = 0 Normal termination
 
 $ c5 _SP_GTPCG Sprite pattern loading
 
-Argument d1.l Pattern code (0 to 255)
+Argument 
+	d1.l Pattern code (0 to 255)
 	d2.l Pattern size (0: 8x8 1: 16x16)
 	a1.l Buffer address
 
-Return value d0.l = 0 Normal termination
-		-1 Illegal screen mode
+Return value d0.l =  0 Normal termination
+					-1 Illegal screen mode
 
 	Load the specified PCG pattern.
 	The buffer requires 32 bytes when d2.l = 0 and 128 bytes when d2.l = 1.
@@ -3287,20 +3288,20 @@ Argument
 	d1.l Vertical blanking interval detection / sprite number
 		bit 31 0: Vertical blanking interval detection post-setting 1: Not detected
 		bit 6-0 sprite number (0-127)
-	d2.l X coordinates (0-1023 16 displayed on the far left)
-	d3.l Y 〃 (〃 〃 Top 〃)
+	d2.l X coordinates	(0-1023 16 displayed on the far left)
+	d3.l Y 		〃 		(	〃 	〃 		〃				 Top)
 	d4.l pattern code
-		bit 15 Vertical inversion specification (0: Do not invert 1: Do)
-		bit 14 horizontal 〃 (〃)
+		bit 15 Vertical 	inversion specification (0: Do not invert 1: Do)
+		bit 14 horizontal 				〃 			(〃)
 		bit 11-8 Palette block specification (0-15)
 		bit 7 ~ 0 Pattern code (0 ~ 255)
 	d5.l priority
-		d5.l = 0 Don't show sprites
-			1 BG0 <BG1 <SP
-			2 BG0 <SP <BG1
-			3 SP <BG0 <BG1
+		d5.l = 	0 Don't show sprites
+				1 BG0 	<	BG1 <	SP
+				2 BG0 	<	SP 	<	BG1
+				3 SP	<	BG0 <	BG1
 
-Return value d0.l = 0 Normal termination
+Return value d0.l =  0 Normal termination
 					-1 Illegal screen mode
 
 	Set the sprite register.
@@ -3334,8 +3335,8 @@ Argument
 	d2.l X coordinates (0-1023)
 	d3.l Y 〃 (〃)
 
-Return value d0.l = 0 Normal termination
-		-1 Illegal screen mode
+Return value d0.l =  0 Normal termination
+					-1 Illegal screen mode
 
 	Set the background scroll register. Setting d2.l / d3.l to -1
 	Do not change the setting, but do not specify -1 when setting for the first time.
@@ -3349,8 +3350,8 @@ Argument d1.l Background specification (0/1)
 Return value 
 	d0.l =   0 Normal termination
 			-1 Illegal screen mode
-	d2.l X coordinates
-	d3.l Y 〃
+	d2.l 	 X coordinates
+	d3.l 	 Y 		〃
 
 	Read the background scroll register.
 
@@ -3376,11 +3377,11 @@ $ cb _BGCTRLGT Read background control register
 
 Argument d1.l Background specification (0/1)
 
-Return value d0.l = 0 Text page 0, hidden
-		1 〃 0, display
-		2 〃 1, hidden
-		3 〃 1, display
-		-1 Illegal screen mode
+Return value d0.l =  0 Text page 0, 	hidden
+					 1 		〃 	 0, 	display
+					 2 		〃 	 1, 	hidden
+					 3 		〃 	 1, 	display
+					-1 Illegal screen mode
 
 	Read the background control register.
 
@@ -3392,8 +3393,8 @@ Argument
 	d1.l Specify text page (0/1)
 	d2.l pattern code
 
-Return value d0.l = 0 Normal termination
-		-1 Illegal screen mode
+Return value d0.l =  0 Normal termination
+					-1 Illegal screen mode
 
 	Fill the specified text page on the background screen with a pattern code.
 
@@ -3417,12 +3418,12 @@ Return value
 
 $ ce _BGTEXTGT Reading background text
 
-Argument d1.l Specify text page (0/1)
-	d2.l X coordinates (0-63)
-	d3.l Y 〃 (〃)
+Arguments	d1.l Specify text page (0/1)
+			d2.l X coordinates (0-63)
+			d3.l Y 		〃 		(〃)
 
 Return value d0.l = -1 Incorrect screen mode
-		Other pattern codes
+					Other pattern codes
 
 	Read the pattern code from the text page of the background screen.
 

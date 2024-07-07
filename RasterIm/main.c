@@ -46,6 +46,8 @@
 #define Y_SCROLL_PAGE_C 0xe80022
 #define Y_SCROLL_PAGE_D 0xe80026
 
+#define PAGE_MASK 0xe82600
+
 
 #define GVRAM_PAGE_0	0xC00000	// Start of graphics vram
 #define GVRAM_PAGE_1    0xc80000    // Start of page 1 in 16 and 256 colours
@@ -61,8 +63,8 @@ volatile char last_mode;
 
 volatile int y = -1;
 
-short *scroll_a;
-short *scroll_b;
+volatile short *scroll_a = (short *) Y_SCROLL_PAGE_A;
+volatile short *scroll_b = (short *) Y_SCROLL_PAGE_B;
 
 void init();
 
@@ -76,7 +78,7 @@ void interrupt hsyncst15();
 
 void interrupt hsyncst31();
 
-volatile int page_num;
+volatile int page_num = 0;
 
 int main(void)
 {
@@ -98,6 +100,36 @@ int main(void)
     init();
 
     fconf.config = 0;
+
+    //we open the palette file
+    file_handler = _dos_open(
+        "8BLndScpCols.pla",
+        fconf.config
+    );
+
+    //if any error...
+    if(file_handler < 0){
+        _dos_c_print("Can't open the file 8BLndScpCols.pla\r\n");
+        _dos_getchar();
+        termin();
+    }
+
+    _dos_read(file_handler, (char*)GVRAM_PAGE_0, sizeof (short) * (512 * 512));
+
+    status = _dos_close(file_handler);
+
+    //if any error...
+    if(status < 0){
+        _dos_c_print("Can't close the file 8BLndScpCols.pla\r\n");
+        _dos_getchar();
+        termin();
+    }
+
+    status = _iocs_crtmod(9 + 0x100); //this mode is 512 x 512 256 colours 15 KHz
+
+    //status = _iocs_crtmod(8 + 0x100); //this mode is 512 x 512 256 colours 31 KHz
+
+    _iocs_vpage(1);
 
     //we open the palette file
     file_handler = _dos_open(
@@ -129,31 +161,6 @@ int main(void)
     //if any error...
     if(status < 0){
         _dos_c_print("Can't close the file landscap.pal\r\n");
-        _dos_getchar();
-        termin();
-    }
-
-
-    //we open the palette file
-    file_handler = _dos_open(
-        "landscap.dmp",
-        fconf.config
-    );
-
-    //if any error...
-    if(file_handler < 0){
-        _dos_c_print("Can't open the file landscap.dmp\r\n");
-        _dos_getchar();
-        termin();
-    }
-
-    _dos_read(file_handler, (char*)GVRAM_PAGE_0, sizeof (short) * (512 * 512));
-
-    status = _dos_close(file_handler);
-
-    //if any error...
-    if(status < 0){
-        _dos_c_print("Can't close the file landscap.dmp\r\n");
         _dos_getchar();
         termin();
     }
@@ -193,32 +200,9 @@ int main(void)
         termin();
     }
 
-    //we open the palette file
-    file_handler = _dos_open(
-        "colours.dmp",
-        fconf.config
-    );
-
-    //if any error...
-    if(file_handler < 0){
-        _dos_c_print("Can't open the file colours.dmp\r\n");
-        _dos_getchar();
-        termin();
-    }
-
-    _dos_read(file_handler, (char*)GVRAM_PAGE_1, sizeof (short) * (512 * 512));
-
-    status = _dos_close(file_handler);
-
-    //if any error...
-    if(status < 0){
-        _dos_c_print("Can't close the file colours.dmp\r\n");
-        _dos_getchar();
-        termin();
-    }
 
     _iocs_vdispst(
-        &vsync_disp,
+        vsync_disp,
         0,  //0: vertical blanking interval 1: vertical display period
         1   //Counter (when 0, treat as 256)
     );
@@ -226,18 +210,18 @@ int main(void)
     //if 15 kHz
     if(_iocs_crtmod(-1) % 2){
         _iocs_crtcras(
-            &crtcras,
+            crtcras,
             128 // line
         );
 
-        _iocs_hsyncst(&hsyncst15);
+        _iocs_hsyncst(hsyncst15);
     //if 31 kHz
     } else {
         _iocs_crtcras(
-            &crtcras,
+            crtcras,
             270 // line
         );
-        _iocs_hsyncst(&hsyncst31);
+        _iocs_hsyncst(hsyncst31);
     }
 
     _dos_c_print("Press a key.\r\n");
@@ -255,14 +239,11 @@ void init()
     //we capture the current video mode
     last_mode = _iocs_crtmod(-1);
 
-    //status = _iocs_crtmod(8); //this mode is 512 x 512 256 colours 31 KHz
-    status = _iocs_crtmod(9); //this mode is 512 x 512 256 colours 15 KHz
+    status = _iocs_crtmod(12);  //this mode is 512 x 512 65536 colours
 
     _iocs_b_curoff(); //disable the cursor
 
     _iocs_g_clr_on();
-
-     _iocs_vpage(1);
 
     //if any error...
     if(status < 0){
@@ -298,79 +279,52 @@ void termin()
 
 void interrupt vsync_disp()
 {
-    scroll_a = (short *) Y_SCROLL_PAGE_A;
-    scroll_b = (short *) Y_SCROLL_PAGE_B;
-
     //copy palette 0
     memcpy((short *)G_PALETTE_START, (short *) palette0, 512);
     //_iocs_b_memset((void *)G_PALETTE_START, (void *) palette0, 512);
 
+    y = 0;
 
 
     _iocs_vpage(1);
-/*
-    _iocs_dmamove(
-        &palette0,                   //buffer A, the source
-        (short*)G_PALETTE_START,    //buffer B, the destination
-        DMA_MODE(
-             DMA_DIR_A_TO_B,        //from A to B
-             DMA_PLUS_PLUS,       //move the pointer forward as it reads
-             DMA_PLUS_PLUS        //move the pointer forward as it writes
-        ),
-        512             //size of the memory block we are moving
-    );
-*/
-
-
-    //put back the scroll
-
+    //*(short *) PAGE_MASK = 1;
 }
 
 
 void interrupt crtcras()
 {
-    scroll_a = (short *) Y_SCROLL_PAGE_C;
-    scroll_b = (short *) Y_SCROLL_PAGE_D;
-
     //copy palette 1
     memcpy((short *)G_PALETTE_START, (short *) palette1, 512);
     //_iocs_b_memset((short *)G_PALETTE_START, (short *) palette1, 512);
 
-
-    /*
-    _iocs_dmamove(
-        &palette1,                   //buffer A, the source
-        (short*)G_PALETTE_START,    //buffer B, the destination
-        DMA_MODE(
-             DMA_DIR_A_TO_B,        //from A to B
-             DMA_PLUS_PLUS,       //move the pointer forward as it reads
-             DMA_PLUS_PLUS        //move the pointer forward as it writes
-        ),
-        512             //size of the memory block we are moving
-    );
-    */
-
-    _iocs_vpage(2);
-    page_num = 2;
     y = 256;
+    _iocs_vpage(2);
+    //*(short *) PAGE_MASK = 4;
 }
 
 void interrupt hsyncst31()
 {
-    *scroll_a = ++y;
-    *scroll_b = y;
+    //the addition can't be done straight on the pointer but through a var
+    y++;
+
+    *(short *) Y_SCROLL_PAGE_A = y;
+    *(short *) Y_SCROLL_PAGE_B = y;
+    *(short *) Y_SCROLL_PAGE_C = y;
+    *(short *) Y_SCROLL_PAGE_D = y;
 }
 
 
 void interrupt hsyncst15()
 {
-    /*
+    //the addition can't be done straight on the pointer but through a var
     y += 2;
 
-    *scroll_a = y;
-    *scroll_b = y;
+    *(short *) Y_SCROLL_PAGE_A = y;
+    *(short *) Y_SCROLL_PAGE_B = y;
+    *(short *) Y_SCROLL_PAGE_C = y;
+    *(short *) Y_SCROLL_PAGE_D = y;
 
-    */
-    scroll_a += 2;
-    *scroll_b += 2;
+    //_iocs_b_locate(0, 1);
+    //printf("%d, %d, %d\n", *(short *) 0xe8001c, *(short *) 0xe8001e, y);
+
 }

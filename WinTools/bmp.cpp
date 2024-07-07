@@ -6,21 +6,21 @@ std::ostream &operator<<  (std::ostream &o, const BmpHeader &header)
     char sys[3] = {0};
     std::memcpy(&sys, header.sys, 2);
 
-	o <<                "header.sys "                   << sys
-        << std::endl << "header.file_siz "               << header.file_size
-        << std::endl << "header.reserved1 "              << header.reserved1
-        << std::endl << "header.reserved2 "              << header.reserved2
-        << std::endl << "header.starting "               << header.starting
-        << std::endl << "header.header_size "            << header.header_size
-        << std::endl << "header.witdth "                 << header.witdth
-        << std::endl << "header.height "                 << header.height
-        << std::endl << "header.color_planes "           << header.color_planes
-        << std::endl << "header.bits_per_pixel "         << header.bits_per_pixel
-        << std::endl << "header.compression_method "     << header.compression_method
-        << std::endl << "header.image_raw_size "         << header.image_raw_size
-        << std::endl << "header.horizontal_resolution "  << header.horizontal_resolution
-        << std::endl << "header.colours_per_pallete "    << header.colours_per_pallete
-        << std::endl << "header.num_important_colours "  << header.num_important_colours
+	o   <<              "header.sys "                   << sys
+        << std::endl << "header.file_siz "              << header.file_size
+        << std::endl << "header.reserved1 "             << header.reserved1
+        << std::endl << "header.reserved2 "             << header.reserved2
+        << std::endl << "header.starting "              << header.starting
+        << std::endl << "header.header_size "           << header.header_size
+        << std::endl << "header.witdth "                << header.witdth
+        << std::endl << "header.height "                << header.height
+        << std::endl << "header.color_planes "          << header.color_planes
+        << std::endl << "header.bits_per_pixel "        << header.bits_per_pixel
+        << std::endl << "header.compression_method "    << header.compression_method
+        << std::endl << "header.image_raw_size "        << header.image_raw_size
+        << std::endl << "header.horizontal_resolution " << header.horizontal_resolution
+        << std::endl << "header.colours_per_pallete "   << header.colours_per_pallete
+        << std::endl << "header.num_important_colours " << header.num_important_colours
         << std::endl;
 
 	return o;
@@ -70,12 +70,16 @@ Bmp Bmp::fromBmpFile(const char *fileName) {
         std::cout << "num of colours " << num_of_colours << std::endl;
 
         //we initialize the array
+        //std::fill_n(bmp.palette, num_of_colours, RGBQUAD{{0, 0, 0}, 0});
+
+
         for(int cont = 0; cont < num_of_colours; cont++){
             bmp.palette[cont].rgbBlue = 0;
             bmp.palette[cont].rgbGreen = 0;
             bmp.palette[cont].rgbRed = 0;
             bmp.palette[cont].rgbReserved = 0;
         }
+
 
         std::puts("before initializing the palette\n");
 
@@ -708,8 +712,123 @@ int Bmp::saveDump(const char *fileDest)
     fImage.close();
 
     return 0;
-}
+} //saveDump
 
+int Bmp::saveMultiPlanes(const char *fileDest)
+{
+    std::puts(__FUNCTION__);
+
+    std::ofstream fImage(fileDest, std::ofstream::binary);
+
+    int32_t num_of_pixels = getNumPixels();
+
+    switch(bits_per_pixel)
+    {
+        case CM_16BIT:
+            {
+                std::puts("dumping in 16 bit\n");
+                //we take the image as 16bit per pixel
+                uint16_t * img = reinterpret_cast<uint16_t *>(image);
+
+                //uint16_t * buffer = (uint16_t *) malloc(sizeof(uint16_t) * num_of_pixels);
+
+                uint16_t * buffer = nullptr;
+
+                try{
+                    buffer = new uint16_t[num_of_pixels];
+                } catch(const std::bad_alloc& e){
+                    std::cout << e.what() << std::endl;
+                    exit(1);
+                }
+
+                //reverse the bytes for the bigendien
+                for(int cont = 0; cont < num_of_pixels; cont++){
+                    buffer[cont] = REVERSE_BYTES_16(img[cont]);
+                }
+
+                fImage.write(reinterpret_cast<char*>(buffer), sizeof(uint16_t) *  num_of_pixels);
+
+                delete[] buffer;
+                buffer = nullptr;
+                break;
+            }
+        case CM_8BIT:
+            {
+                std::puts("dumping in 8 bit\n");
+                //uint16_t * buffer = (uint16_t *) malloc(sizeof(uint16_t) * num_of_pixels);
+                uint16_t * buffer = new (std::nothrow)uint16_t[num_of_pixels / 2];
+
+                if(buffer == nullptr){
+                    std::puts("cannot allocate\n");
+                    exit(1);
+                }
+
+                //reverse the bytes for the bigendien
+                /*
+                for(int cont = 0; cont < num_of_pixels; cont++){
+                    buffer[cont] = REVERSE_BYTES_16(image[cont]);
+                }*/
+
+                for(uint32_t y = 0, k = 0; y < 512; y++){ //height
+                    for(uint32_t x = 0; x < 512; x++){ //width
+                        buffer[k++] =  ((uint16_t) image[y * 1024 + x]) << 8                     //a quadrant
+                                       | ((uint16_t) image[y * 1024 + x + 512]) << 0;              //b quadrant
+
+                    }
+                }
+
+
+                fImage.write(reinterpret_cast<char*>(buffer), sizeof(uint16_t) *  num_of_pixels / 2);
+
+                delete[] buffer;
+                buffer = nullptr;
+                break;
+            }
+        case CM_4BIT:
+            {
+                std::puts("dumping in 4 bit\n");
+                //we take the image as 4bits per pixel
+                RGB4 * img = reinterpret_cast<RGB4 *>(image);
+
+                //uint16_t * buffer = (uint16_t *) malloc(sizeof(uint16_t) * num_of_pixels);
+
+                uint16_t * buffer = nullptr;
+
+                try {
+                    buffer = new uint16_t[num_of_pixels / 4];
+                } catch(const std::bad_alloc& e){
+                    std::cout << e.what() << std::endl;
+                    exit(1);
+                }
+
+                for(uint32_t y = 0, k = 0; y < 512; y++){ //height
+                    for(uint32_t x = 0; x < 256; x++){ //width
+                        buffer[k++] =     ((uint16_t) img[y * 512 + x].pixel1) << 8                     //a quadrant
+                                        | ((uint16_t) img[y * 512 + x + 256].pixel1) << 12              //b quadrant
+                                        | ((uint16_t) img[y * 512 + x + 512 * 512].pixel1)  << 0        //c quadrant
+                                        | ((uint16_t) img[y * 512 + x + 512 * 512 + 256].pixel1) << 4;  //d quadrant
+
+                        buffer[k++] =     ((uint16_t) img[y * 512 + x].pixel0) << 8                     //a quadrant
+                                        | ((uint16_t) img[y * 512 + x + 256].pixel0) << 12              //b quadrant
+                                        | ((uint16_t) img[y * 512 + x + 512 * 512].pixel0)  << 0        //c quadrant
+                                        | ((uint16_t) img[y * 512 + x + 512 * 512 + 256].pixel0) << 4;  //d quadrant
+
+                    }
+                }
+
+                fImage.write(reinterpret_cast<char*>(buffer), sizeof(uint16_t) *  (num_of_pixels / 4));
+
+                delete[] buffer;
+                buffer = nullptr;
+                break;
+            }
+            break;
+    }
+
+    fImage.close();
+
+    return 0;
+} //saveMultiPlanes
 
 int Bmp::savePalette(const char *fileDest)
 {

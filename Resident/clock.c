@@ -60,7 +60,7 @@ void interrupt process_start() //it has to be an interrupt
     //we check whether the interrupt is still being processed
     if(mutex){
         mutex = 0; //we hold the mutex
-        //only do things every 200 cycles
+        //only do things every 100 cycles
         if(++counter % 100 == 0){
 
             int auxtime = _dos_gettim2();

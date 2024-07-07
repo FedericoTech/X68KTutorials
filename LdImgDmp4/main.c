@@ -34,10 +34,12 @@
 #define DMA_STATUS_IN_DMAMOV_A_OP 0x8B
 #define DMA_STATUS_IN_DMAMOV_L_OP 0x8C
 
+
+
+
+
 volatile uint16_t x = 0;
 volatile uint16_t y = 0;
-
-volatile int8_t last_mode;
 
 void interrupt vsync_disp()
 {
@@ -59,6 +61,12 @@ void interrupt vsync_disp()
         y
     );
 }
+
+volatile int8_t last_mode;
+
+volatile uint32_t _t = 0;
+
+
 
 /* Processing routine when pressed CTRL-C */
 void terminate()
@@ -82,6 +90,12 @@ void terminate()
     _iocs_crtmod(last_mode);
     _dos_exit();
 }
+
+/**
+ * This program is meant to be run with the XM6 Pro-68k emulator which has development tools.
+ * You need to look at option: "View / Video / Graphic 16-Color 1024x1024" panel to see how the
+ * video memory is drown upon.
+ */
 
 int main(void)
 {
@@ -122,15 +136,23 @@ int main(void)
     }
 
 
-    fconf.config = 0;
+    fconf.config = 0; //reset the whole union
     fconf.flags.access_dictionary = ACCESS_NORMAL;
     fconf.flags.sharing = SHARING_COMPATIBILITY_MODE;
     fconf.flags.mode = MODE_R;
 
     status = start_timer();
+/*
 
-    printf("if not zero, the timer din't start: %d\n", status);
 
+    if(status){
+        printf("Status is %d which it's different from 0\n", status);
+        _dos_c_print(
+             "Probably there is a PROCESS in the CONFIG.SYS for\r\n"
+             "multiprocessing that disables _iocs_vdispst().\r\n"
+         );
+    }
+*/
 
     //we open the palette file
     file_handler = _dos_open(
@@ -147,71 +169,72 @@ int main(void)
     }
 
     t = millisecond();
+    printf("timerset %d\n", t);
 
     //we are loading the file straight away into the first page.
     status = _dos_read(file_handler, (void *) GVRAM_START, (512 * 512 * 2));
 
     printf(
-       "read %d bytes from file in %d milliseconds.\n\n",
+       "read %d bytes from file in \x81\x60%d milliseconds.\n\n",
        status,
-       millisecond() - t
+       (millisecond() - t) * 10
     );
 
     t = millisecond();
 
-        //these two instructions much faster than looping but slower than DMA
-        _iocs_b_memstr((void *) GVRAM_START, (void *) GVRAM_PAGE_1, 512 * 512 * 2);
-        //_iocs_b_memset((void *) GVRAM_PAGE_1, (void *) GVRAM_START, 512 * 512 * 2);
+    //these two instructions much faster than looping but slower than DMA
+    _iocs_b_memstr((void *) GVRAM_START, (void *) GVRAM_PAGE_1, 512 * 512 * 2);
+    //_iocs_b_memset((void *) GVRAM_PAGE_1, (void *) GVRAM_START, 512 * 512 * 2);
 
-        //Painted with _dmamove START
-        {
-            int cont;
-            int iterations = (512 * 512 * sizeof(uint16_t)) / DMA_MAX_BLAST;
+    //Painted with _dmamove START
+    {
+        int cont;
+        int iterations = (512 * 512 * sizeof(uint16_t)) / DMA_MAX_BLAST;
 
-            for(cont = 0; cont < iterations; cont ++){
-                //we check that the dma has finished
-                while(_iocs_dmamode() != DMA_STATUS_IDLE){
-                    printf("wait for dma\n");
-                }
+        for(cont = 0; cont < iterations; cont ++){
+            //we check that the dma has finished
+            while(_iocs_dmamode() != DMA_STATUS_IDLE){
+                printf("wait for dma\n");
+            }
 
-                _iocs_dmamove(
-                    (void *) GVRAM_START + cont * DMA_MAX_BLAST,            //buffer A, the source
-                    (void *) GVRAM_PAGE_2 + cont * DMA_MAX_BLAST,    //buffer B, the destination
-                    DMA_MODE(
-                         DMA_DIR_A_TO_B,    //from A to B
-                         DMA_A_PLUS_PLUS,       //keep reading from colour
-                         DMA_B_PLUS_PLUS    //move the pointer forward as it writes
-                    ),
-                    DMA_MAX_BLAST              //size of the memory block we are moving
-                );
+            _iocs_dmamove(
+                (void *) GVRAM_START + cont * DMA_MAX_BLAST,            //buffer A, the source
+                (void *) GVRAM_PAGE_2 + cont * DMA_MAX_BLAST,    //buffer B, the destination
+                DMA_MODE(
+                     DMA_DIR_A_TO_B,    //from A to B
+                     DMA_A_PLUS_PLUS,       //keep reading from colour
+                     DMA_B_PLUS_PLUS    //move the pointer forward as it writes
+                ),
+                DMA_MAX_BLAST              //size of the memory block we are moving
+            );
+        }
+    }
+    //Painted with _dmamove END
+
+    {
+        uint16_t *vram_addr = (uint16_t *)GVRAM_PAGE_3;
+        uint16_t *buffer = (uint16_t *)GVRAM_START;
+
+        int cont, cont2, k;
+
+        //we set the super user mode to gain access to reserved areas of memory
+        status = _dos_super(0);
+        //each row
+        for(cont = 0, k = 0; cont < 512; cont++){
+            //each column
+            for(cont2 = 0; cont2 < 512; cont2++){
+                //we copy 2 bytes at the time
+                *vram_addr++ = buffer[k++];
             }
         }
-        //Painted with _dmamove END
-
-        {
-            uint16_t *vram_addr = (uint16_t *)GVRAM_PAGE_3;
-            uint16_t *buffer = (uint16_t *)GVRAM_START;
-
-            int cont, cont2, k;
-
-            //we set the super user mode to gain access to reserved areas of memory
-            status = _dos_super(0);
-            //each row
-            for(cont = 0, k = 0; cont < 512; cont++){
-                //each column
-                for(cont2 = 0; cont2 < 512; cont2++){
-                    //we copy 2 bytes at the time
-                    *vram_addr++ = buffer[k++];
-                }
-            }
-            _dos_super(status);
-        }
+        _dos_super(status);
+    }
 
 
 
     printf(
-       "painted in %d milliseconds\n\n",
-       millisecond() - t
+       "painted in \x81\x60%d milliseconds\n\n",
+       (millisecond() - t) * 10
     );
 
     //now we close the file

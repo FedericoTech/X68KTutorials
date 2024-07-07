@@ -27,6 +27,11 @@
 					<Add option="-s" />
 				</Linker>
 			</Target>
+			<Target title="test">
+				<Option output="WinTools" prefix_auto="1" extension_auto="1" />
+				<Option type="0" />
+				<Option compiler="gcc" />
+			</Target>
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
@@ -36,8 +41,14 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="bmp.h" />
-		<Unit filename="main.cpp" />
-		<Unit filename="stdafx.h" />
+		<Unit filename="main.cpp">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="stdafx.h">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
 		<Extensions />
 	</Project>
 </CodeBlocks_project_file>

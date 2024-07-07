@@ -28,11 +28,14 @@
 #define BG_A 0
 #define BG_B 1
 
+#define BG_TM_A 0
+#define BG_TM_B 1
+
 volatile uint16_t x0 = 0;
 volatile uint16_t y0 = 0;
 
 volatile uint16_t x1 = 0;
-volatile uint16_t y1 = 392;
+volatile uint16_t y1 = 392; // h: 256 + 1/2 h: 128 + tile row: 8 = 392
 
 void interrupt vsync_disp()
 {
@@ -71,11 +74,20 @@ void interrupt vsync_disp()
         y0++;
     }
 
+    //we move player 1's scroll
     _iocs_bgscrlst(
         VERTICAL_BLANKING_DETECTION | BG_A, //(1 << 31) | 0, // and Background specification (0/1)
         x0, //x
         y0  //y
     );
+
+    //we show player 1's scroll
+    _iocs_bgctrlst (
+        BG_A,  //Background specification (0/1)
+        BG_TM_A,  //Specifying a text page (0/1)
+        1   //Show / Hide specification (0: Hide 1: Show)
+    );
+
 
     //player 2
 
@@ -114,30 +126,44 @@ void interrupt vsync_disp()
     ){
         x1++;
     }
+
+    //we hide player 2's scroll
+    _iocs_bgctrlst (
+        BG_B,  //Background specification (0/1)
+        BG_TM_B,  //Specifying a text page (0/1)
+        0   //Show / Hide specification (0: Hide 1: Show)
+    );
+
+    //we update player 2's scroll
+    _iocs_bgscrlst(
+        VERTICAL_BLANKING_DETECTION | BG_B, //(1 << 31) | 0, // and Background specification (0/1)
+        x1, //x
+        y1  //y
+    );
 }
 
 void interrupt crtcras()
 {
-    /*
-    _iocs_home(
-        0,  //at 1024, the whole single page
-        x1,
-        y1
-    );
-    */
-
-    _iocs_bgscrlst(
-        VERTICAL_BLANKING_DETECTION | BG_A, //(1 << 31) | 0, // and Background specification (0/1)
-        x1, //x
-        y1  //y
+    // we hide player 1's scroll
+    _iocs_bgctrlst (
+        BG_A,  //Background specification (0/1)
+        BG_TM_A,  //Specifying a text page (0/1)
+        0   //Show / Hide specification (0: Hide 1: Show)
     );
 
+    // we show player 2's scroll
+    _iocs_bgctrlst (
+        BG_B,  //Background specification (0/1)
+        BG_TM_B,  //Specifying a text page (0/1)
+        1   //Show / Hide specification (0: Hide 1: Show)
+    );
 }
 
 int main(void)
 {
     int32_t status;
     int8_t last_mode;
+    uint16_t* tilemap;
 
     //retrieve current mode
     last_mode = _iocs_crtmod(-1);
@@ -174,11 +200,12 @@ int main(void)
 
 
         {
+            // buffer for 3 palettes
             uint16_t s_colours[3][16] = {0};
 
             //we open the palette file
             file_handler = _dos_open(
-                "tiles.pal",
+                "tiled.pal",
                 fconf.config
             );
 
@@ -233,7 +260,7 @@ int main(void)
 
             //we open the palette file
             file_handler = _dos_open(
-                "tiles.ts",
+                "tiled.ts",
                 fconf.config
             );
 
@@ -245,14 +272,14 @@ int main(void)
                 _dos_exit2(file_handler);
             }
 
-
-            for(cont = 0; cont < 99; cont++){
-                //we read the whole palette file
+            //we go through the 84 tiles of the tileset
+            for(cont = 0; cont < 84; cont++){
+                //we read current tile
                 status = _dos_read(file_handler, (char*) tile, sizeof tile);
 
-                //we load the ship as a 16 x 16 tile in the position 0
+                //we load the tile as an 8 x 8 tile in "cont" position
                 status = _iocs_sp_defcg(
-                    cont,               // position in 16 x 16 tiles
+                    cont,               // position in 8 x 8 tiles
                     SP_DEFCG_8X8_TILE,  // 8 x 8 tile = 1
                     tile                // pointer to the data
                 );
@@ -273,102 +300,116 @@ int main(void)
         //we activate the sprites
         _iocs_sp_on();
 
-        /*
-         * here I'm setting the scroll 1 to work with the tilemap 0 and to
-         * make it shown.
-         * In this example I demonstrate that the tilemap can be either
+        /**
+         * setting scroll 0 with tilemap 0 for player 1
          */
         status = _iocs_bgctrlst (
-            0,  //Background specification (0/1)
-            0,  //Specifying a text page (0/1)
+            BG_A,  //Background specification (0/1)
+            BG_TM_A,  //Specifying a text page (0/1)
+            1   //Show / Hide specification (0: Hide 1: Show)
+        );
+
+        /**
+         * setting scroll 1 with tilemap 1 for player 2
+         */
+        status = _iocs_bgctrlst (
+            BG_B,  //Background specification (0/1)
+            BG_TM_B,  //Specifying a text page (0/1)
             1   //Show / Hide specification (0: Hide 1: Show)
         );
 
         {
             uint16_t i, j;
             uint16_t cont;
+            {
+                //we make room for a 128x128-tile tilemap
+                tilemap = (uint16_t *) _dos_malloc(128 * 128 * sizeof(uint16_t));
 
-            //this is to illustrate the format in which each cell of the tilemap is expressed
-            union {
-                struct {
-                    int8_t vf:1;
-                    int8_t hf:1;
-                    int8_t :2;           //padding
-                    int8_t palette:4;
-                    int8_t pcg;
-                } flags;
-                uint16_t code;
-            } tr;
-
-            //this is to illustrate how the union works
-            tr.flags.vf = 0;         // VF ON
-            tr.flags.hf = 0;         // HF OFF
-            tr.flags.palette = 1;    // palette number
-            tr.flags.pcg = 0;        // pcg number
-
-            //we open the palette file
-            file_handler = _dos_open(
-                "tiles.tm",
-                fconf.config
-            );
-
-            //if any error...
-            if(file_handler < 0){
-                _dos_c_print("Can't open the file\r\n");
-                _dos_c_print(getErrorMessage(file_handler));
-                _iocs_crtmod(last_mode);
-                _dos_exit2(file_handler);
-            }
-
-            //we traverse the height
-            for(j = 0, cont = 0; j < 64; j++){
-                //we traverse the width
-                for(i = 0; i < 64; i++){
-                    uint16_t code;
-                    status = _dos_read(file_handler, (char*) &code, sizeof(uint16_t));
-
-                    tr.code = code;
-
-                    _iocs_bgtextst(
-                        BG_A,
-                        i,
-                        j,
-                        tr.code
-                    );
-                }
-                //back to the row
-
-                //we skip the next 64 columns as the tilemap is only 64x64
-                status = _dos_seek(
-                    file_handler,
-                    64 * sizeof(uint16_t),
-                    SEEK_MODE_CURRENT
+                //we open the palette file
+                file_handler = _dos_open(
+                    "tiled.tm",
+                    fconf.config
                 );
 
                 //if any error...
-                if(status < 0){
+                if(file_handler < 0){
                     _dos_c_print("Can't open the file\r\n");
-                    _dos_c_print(getErrorMessage(status));
+                    _dos_c_print(getErrorMessage(file_handler));
                     _iocs_crtmod(last_mode);
                     _dos_exit2(file_handler);
                 }
+
+                status = _dos_read(file_handler, (char*) tilemap, 128 * 128 * sizeof(uint16_t));
+
+                //now we close the file
+                status = _dos_close(file_handler);
+
+                //if any error...
+                if(status < 0){
+                    _dos_c_print("Can't close the file\r\n");
+                    _dos_c_print(getErrorMessage(status));
+                    _iocs_crtmod(last_mode);
+                    _dos_exit2(status);
+                }
             }
 
+            {
+            //this is to illustrate the format in which each cell of the tilemap is expressed
+                union {
+                    struct {
+                        int8_t vf:1;
+                        int8_t hf:1;
+                        int8_t :2;           //padding
+                        int8_t palette:4;
+                        int8_t pcg;
+                    } flags;
+                    uint16_t code;
+                } tr;
 
-            //now we close the file
-            status = _dos_close(file_handler);
+                //this is to illustrate how the union works
+                tr.flags.vf = 0;         // VF ON
+                tr.flags.hf = 0;         // HF OFF
+                tr.flags.palette = 1;    // palette number
+                tr.flags.pcg = 0;        // pcg number
 
-            //if any error...
-            if(status < 0){
-                _dos_c_print("Can't close the file\r\n");
-                _dos_c_print(getErrorMessage(status));
-                _iocs_crtmod(last_mode);
-                _dos_exit2(status);
+                //we traverse the height
+                for(j = 0, cont = 0; j < 64; j++){
+                    //we traverse the width
+                    for(i = 0; i < 64; i++, cont++){
+
+                        tr.code = tilemap[cont];
+
+                        //we store the same data en both tilemaps
+                        _iocs_bgtextst(
+                            BG_TM_A,
+                            i,
+                            j,
+                            tr.code
+                        );
+
+                        _iocs_bgtextst(
+                            BG_TM_B,
+                            i,
+                            j,
+                            tr.code
+                        );
+                    }
+                    //back to the row
+
+                    //we skip the next 64 columns as the tilemap is only 64 x 64
+                    cont += 64;
+
+                    //if any error...
+                    if(status < 0){
+                        _dos_c_print("Can't open the file\r\n");
+                        _dos_c_print(getErrorMessage(status));
+                        _iocs_crtmod(last_mode);
+                        _dos_exit2(file_handler);
+                    }
+                }
             }
         }
     }
-
-
 
     {
 
@@ -386,6 +427,7 @@ int main(void)
         );
 
 
+        //as long a we don't press ESCAPE
         while(_dos_inkey() != 27){
             ;
         }
@@ -401,6 +443,8 @@ int main(void)
             0
         );
     }
+
+    _dos_mfree(tilemap);
 
     //we activate the console cursor
     _iocs_b_curon();
