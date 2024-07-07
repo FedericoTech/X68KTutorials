@@ -8,7 +8,7 @@ import xml.etree.ElementTree as ET
 Palettes = namedtuple('Palettes', ['palettes', 'indices'])
 
 
-def extract_palete(tiles, output_directory, filename):
+def extract_palete(tiles, output_dir, output_name):
     max = 15
 
     palettes = []
@@ -55,11 +55,7 @@ def extract_palete(tiles, output_directory, filename):
                 # we move to the next group
                 continue
 
-    # Split the filename into base and extension
-    base, ext = os.path.splitext(os.path.basename(filename))
-
-    lolo = os.path.join(output_directory, f"{base}.pal")
-
+    lolo = os.path.join(output_dir, f"{output_name}.pal")
 
     with open(lolo, 'wb') as palette_out:
         # Write the encoded palette to the palette file
@@ -74,11 +70,10 @@ def extract_palete(tiles, output_directory, filename):
     return Palettes(palettes, indices)
 
 
-def save_tiles(tiles, palettes, output_directory, filename):
+def save_tiles(tiles, palettes, output_dir, output_name):
     # Split the filename into base and extension
 
-    base, ext = os.path.splitext(os.path.basename(filename))
-    lolo = os.path.join(output_directory, f"{base}.ts")
+    lolo = os.path.join(output_dir, f"{output_name}.ts")
 
     with open(lolo, 'wb') as binary_file:
         # Write the encoded palette to the palette file
@@ -94,25 +89,23 @@ def save_tiles(tiles, palettes, output_directory, filename):
                 binary_file.write(struct.pack('B', byte))
 
 
-def process_image(filename, tilewidth, tileheight, output_directory):
+def process_image(filename, tile_width, tile_height, output_dir, output_name):
     image = Image.open(filename).convert('RGB')
 
     width, height = image.size
 
     # Ensure the image dimensions are a multiple of the tile size
-    assert width % tilewidth == 0, "Image width is not a multiple of tile size"
-    assert height % tileheight == 0, "Image height is not a multiple of tile size"
+    assert width % tile_width == 0, "Image width is not a multiple of tile size"
+    assert height % tile_height == 0, "Image height is not a multiple of tile size"
 
     tile_post = []
     # Loop through the image and extract 8x8 tiles
-    for y in range(0, height, tileheight):
-        for x in range(0, width, tilewidth):
+    for y in range(0, height, tile_height):
+        for x in range(0, width, tile_width):
             # Extract the tile
-            tile = image.crop((x, y, x + tilewidth, y + tileheight))
+            tile = image.crop((x, y, x + tile_width, y + tile_height))
             # Get the tile data as a list of indices
             tile_data = list(tile.getdata())
-
-            # print(tile_data)
 
             encoded_color = []
             # we traverse the tile data
@@ -121,15 +114,15 @@ def process_image(filename, tilewidth, tileheight, output_directory):
 
             tile_post.append(encoded_color)
 
-    palettes = extract_palete(tile_post, output_directory, filename)
+    palettes = extract_palete(tile_post, output_dir, output_name)
 
-    save_tiles(tile_post, palettes, output_directory, filename)
+    save_tiles(tile_post, palettes, output_dir, output_name)
 
     return palettes
 
 
 # tiled functions
-def convert_tmx(file_path, output_directory):
+def convert_tmx(file_path, output_directory, output_name):
     # Define the namespace URI
     namespace = {'xhtml': 'http://www.w3.org/1999/xhtml'}
 
@@ -145,24 +138,29 @@ def convert_tmx(file_path, output_directory):
 
     # we get the tileset filename
     tileset_element = root.find('tileset')
-    tilewidth = int(tileset_element.get('tilewidth'))
-    tileheight = int(tileset_element.get('tileheight'))
+    tile_width = int(tileset_element.get('tilewidth'))
+    tile_height = int(tileset_element.get('tileheight'))
 
     image_element = tileset_element.find('image')
-    filename = image_element.get('source')
+    source_filename = image_element.get('source')
 
-    print(os.path.join(os.path.dirname(file_path), filename))
+    tileset_file = os.path.join(os.path.dirname(file_path), source_filename)
 
-    palette_indices = process_image(os.path.join(os.path.dirname(file_path), filename), tilewidth, tileheight, output_directory)
+    palette_indices = process_image(
+        tileset_file,
+        tile_width,
+        tile_height,
+        output_directory,
+        output_name
+    )
 
     # Use namespace prefix in findall and find methods
     for layer in root.findall('layer'):
         layer_data = []
 
-        base, ext = os.path.splitext(os.path.basename(filename))
-        lolo = os.path.join(output_directory, f"{base}.tm")
+        tilemap_file = os.path.join(output_directory, f"{output_name}.tm")
 
-        with open(lolo, 'wb') as binary_file:
+        with open(tilemap_file, 'wb') as binary_file:
             # we traverse the
             for tile in layer.find('data').findall('tile'):
                 gid = int(tile.get('gid'))

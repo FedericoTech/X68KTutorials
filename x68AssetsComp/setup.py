@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='x68assetscomp',
+    name='x68AssetsComp',
     version='0.1.0',
     packages=find_packages(),
     install_requires=[
@@ -10,7 +10,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'x68assetscomp=main:main',
+            'x68AssetsComp=main:main',
         ],
     },
     classifiers=[
