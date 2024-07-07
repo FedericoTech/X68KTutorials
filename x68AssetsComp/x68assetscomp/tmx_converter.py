@@ -57,6 +57,8 @@ def extract_palete(tiles, output_dir, output_name):
 
     lolo = os.path.join(output_dir, f"{output_name}.pal")
 
+    # print(lolo)
+
     with open(lolo, 'wb') as palette_out:
         # Write the encoded palette to the palette file
         for palette in palettes:
@@ -71,9 +73,10 @@ def extract_palete(tiles, output_dir, output_name):
 
 
 def save_tiles(tiles, palettes, output_dir, output_name):
-    # Split the filename into base and extension
 
     lolo = os.path.join(output_dir, f"{output_name}.ts")
+
+    # print(lolo)
 
     with open(lolo, 'wb') as binary_file:
         # Write the encoded palette to the palette file
@@ -89,30 +92,47 @@ def save_tiles(tiles, palettes, output_dir, output_name):
                 binary_file.write(struct.pack('B', byte))
 
 
-def process_image(filename, tile_width, tile_height, output_dir, output_name):
+def process_image(filename, tile_size, output_dir, output_name):
     image = Image.open(filename).convert('RGB')
 
     width, height = image.size
 
     # Ensure the image dimensions are a multiple of the tile size
-    assert width % tile_width == 0, "Image width is not a multiple of tile size"
-    assert height % tile_height == 0, "Image height is not a multiple of tile size"
+    assert width % tile_size == 0, "Image width is not a multiple of tile size"
+    assert height % tile_size == 0, "Image height is not a multiple of tile size"
 
     tile_post = []
     # Loop through the image and extract 8x8 tiles
-    for y in range(0, height, tile_height):
-        for x in range(0, width, tile_width):
-            # Extract the tile
-            tile = image.crop((x, y, x + tile_width, y + tile_height))
-            # Get the tile data as a list of indices
-            tile_data = list(tile.getdata())
+    for y in range(0, height, tile_size):
+        for x in range(0, width, tile_size):
 
-            encoded_color = []
-            # we traverse the tile data
-            for (red, green, blue) in tile_data:
-                encoded_color.append(rgb_to_grb(red, green, blue))
+            if tile_size == 8:
+                # Extract the tile
+                tile = image.crop((x, y, x + tile_size, y + tile_size))
+                # Get the tile data as a list of indices
+                tile_data = list(tile.getdata())
 
-            tile_post.append(encoded_color)
+                encoded_color = []
+                # we traverse the tile data
+                for (red, green, blue) in tile_data:
+                    encoded_color.append(rgb_to_grb(red, green, blue))
+
+                tile_post.append(encoded_color)
+            else:
+                tile16x16 = image.crop((x, y, x + tile_size, y + tile_size))
+
+                encoded_color = []
+
+                for j in range(0, 16, 8):
+                    tile = tile16x16.crop((j, 0, j + 8, 16))
+                    # Get the tile data as a list of indices
+                    tile_data = list(tile.getdata())
+
+                    # we traverse the tile data
+                    for (red, green, blue) in tile_data:
+                        encoded_color.append(rgb_to_grb(red, green, blue))
+
+                tile_post.append(encoded_color)
 
     palettes = extract_palete(tile_post, output_dir, output_name)
 
@@ -137,11 +157,15 @@ def convert_tmx(file_path, output_directory, output_name):
     root = tree.getroot()
 
     # we get the tileset filename
-    tileset_element = root.find('tileset')
+    tileset_element = root.find('xhtml:tileset', namespace)
+
     tile_width = int(tileset_element.get('tilewidth'))
     tile_height = int(tileset_element.get('tileheight'))
 
-    image_element = tileset_element.find('image')
+    assert tile_width == tile_height, "Tiles are to be square"
+    assert tile_width % 8 == 0 or tile_width % 16 == 0, "Tiles are to be either 8x8 or 16x16 pixels"
+
+    image_element = tileset_element.find('xhtml:image', namespace)
     source_filename = image_element.get('source')
 
     tileset_file = os.path.join(os.path.dirname(file_path), source_filename)
@@ -149,20 +173,19 @@ def convert_tmx(file_path, output_directory, output_name):
     palette_indices = process_image(
         tileset_file,
         tile_width,
-        tile_height,
         output_directory,
         output_name
     )
 
     # Use namespace prefix in findall and find methods
-    for layer in root.findall('layer'):
+    for layer in root.findall('xhtml:layer', namespace):
         layer_data = []
 
         tilemap_file = os.path.join(output_directory, f"{output_name}.tm")
 
         with open(tilemap_file, 'wb') as binary_file:
             # we traverse the
-            for tile in layer.find('data').findall('tile'):
+            for tile in layer.find('xhtml:data', namespace).findall('xhtml:tile', namespace):
                 gid = int(tile.get('gid'))
 
                 tile_id = 0xFF & int(gid) - 1
