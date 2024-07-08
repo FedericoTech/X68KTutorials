@@ -44,31 +44,31 @@ void interrupt vsync_disp()
      * We capture the flags of the group of keys the cursor keys belong to.
      * for groups: https://gamesx.com/wiki/doku.php?id=x68000:keycodes
      */
-    uint8_t keys = _iocs_bitsns(0x7); //retrieving the state of the keys: CLR	↓	→	↑	←	UNDO	R_DOWN	R_UP
+    uint8_t keys = _iocs_bitsns(0x7); //retrieving the state of the keys: CLR	?	?	?	?	UNDO	R_DOWN	R_UP
 
     if(
-       keys & 0x08  //if left (←) key pressed
+       keys & 0x08  //if left (?) key pressed
        //&& x0 - 1 >= 0
     ){
         x0--;
     }
 
     if(
-        keys & 0x20 //if right (→) key pressed
+        keys & 0x20 //if right (?) key pressed
         //&& x0 + 1 <= 512
     ){
         x0++;
     }
 
     if(
-        keys & 0x10 //if up (↑) key pressed
+        keys & 0x10 //if up (?) key pressed
         //&& y0 - 1 >= 0
     ){
         y0--;
     }
 
     if(
-        keys & 0x40 //if down (↓) key pressed
+        keys & 0x40 //if down (?) key pressed
         //&& y0 + 1 <= 512
     ){
         y0++;
@@ -171,7 +171,7 @@ int main(void)
 
         {
             //buffer for 6 palettes
-            uint16_t s_colours[6][16] = {0};
+            uint16_t s_colours[1][16] = {0};
 
             //we open the palette file
             file_handler = _dos_open(
@@ -193,7 +193,7 @@ int main(void)
             if(status > 0){
 
                 uint8_t colour_in_palette, palette_index;
-                for(palette_index = 0; palette_index < 6; palette_index++){
+                for(palette_index = 0; palette_index < 1; palette_index++){
                     for(colour_in_palette = 0; colour_in_palette < 16; colour_in_palette++){
                          status = _iocs_spalet( //returns 32 bit integer
                             SET_VBD_V(
@@ -225,8 +225,10 @@ int main(void)
         }
 
         {
-            uint8_t tile[128];  // 16 x 16 pixels / 2 pixels per byte
+            // 16 x 16 pixels / 2 pixels per byte
             uint8_t cont;
+            int32_t size;
+            char *buffer;
 
             //we open the palette file
             file_handler = _dos_open(
@@ -242,17 +244,32 @@ int main(void)
                 _dos_exit2(file_handler);
             }
 
-            //max 196 tiles
-            for(cont = 0; cont < 62; cont++){
-                //we read the whole palette file
-                status = _dos_read(file_handler, (char*) tile, sizeof tile);
+            //we move the header to the end to get the file size.
+            size = _dos_seek(
+               file_handler,
+               0, //offset
+               SEEK_MODE_END  //0 = beginning, 1 = on the spot, 2 = end
+            );
 
-                //we load the ship as a 16 x 16 tile in the position "cont"
-                status = _iocs_sp_defcg(
-                    cont,                   // position in 16 x 16 tiles
-                    SP_DEFCG_16X16_TILE,    // 16 x 16 tile = 1
-                    tile                    // pointer to the data
-                );
+            //we put the header back to the beginning
+            _dos_seek(
+               file_handler,
+               0, //offset
+               SEEK_MODE_BEGINNING  //0 = beginning, 1 = on the spot, 2 = end
+            );
+
+            // we allocate memory
+            buffer = _dos_malloc(size);
+
+            //we read the file
+            status = _dos_read(file_handler, (char*) buffer, size);
+
+            //if any error...
+            if(status < 0){
+                _dos_c_print("Can't close the file\r\n");
+                _dos_c_print(getErrorMessage(status));
+                _iocs_crtmod(last_mode);
+                _dos_exit2(status);
             }
 
             //now we close the file
@@ -265,6 +282,21 @@ int main(void)
                 _iocs_crtmod(last_mode);
                 _dos_exit2(status);
             }
+
+
+            //max 196 tiles
+            for(cont = 0; cont < size / 128; cont++){
+
+                //we load the ship as a 16 x 16 tile in the position "cont"
+                status = _iocs_sp_defcg(
+                    cont,                       // position in 16 x 16 tiles
+                    SP_DEFCG_16X16_TILE,        // 16 x 16 tile = 1
+                    (void *) buffer + (cont * 128) // pointer to the data
+                );
+            }
+
+            _dos_mfree(buffer);
+
         }
 
         //we activate the sprites
@@ -285,6 +317,8 @@ int main(void)
         {
             uint16_t i, j;
             uint16_t cont;
+            int32_t size;
+            char *buffer;
 
             //this is to illustrate the format in which each cell of the tilemap is expressed
             union {
@@ -318,25 +352,33 @@ int main(void)
                 _dos_exit2(file_handler);
             }
 
-            //we traverse the height
-            for(j = 0, cont = 0; j < 64; j++){
-                //we traverse the width
-                for(i = 0; i < 64; i++){
-                    uint16_t code;
-                    status = _dos_read(file_handler, (char*) &code, sizeof(uint16_t));
+            //we move the header to the end to get the file size.
+            size = _dos_seek(
+               file_handler,
+               0, //offset
+               SEEK_MODE_END  //0 = beginning, 1 = on the spot, 2 = end
+            );
 
-                    tr.code = code;
+            //we put the header back to the beginning
+            _dos_seek(
+               file_handler,
+               0, //offset
+               SEEK_MODE_BEGINNING  //0 = beginning, 1 = on the spot, 2 = end
+            );
 
-                    _iocs_bgtextst(
-                        BG_TM_B,    //in tilemap B
-                        i,
-                        j,
-                        tr.code
-                    );
-                }
-                //back to the row
+            // we allocate memory
+            buffer = _dos_malloc(size);
+
+            //we read the file
+            status = _dos_read(file_handler, buffer, size);
+
+            //if any error...
+            if(status < 0){
+                _dos_c_print("Can't close the file\r\n");
+                _dos_c_print(getErrorMessage(status));
+                _iocs_crtmod(last_mode);
+                _dos_exit2(status);
             }
-
 
             //now we close the file
             status = _dos_close(file_handler);
@@ -348,6 +390,26 @@ int main(void)
                 _iocs_crtmod(last_mode);
                 _dos_exit2(status);
             }
+
+
+            //we traverse the height
+            for(j = 0, cont = 0; j < 64; j++){
+                //we traverse the width
+                for(i = 0; i < 64; i++, cont++){
+
+                    tr.code = *(((uint16_t *)buffer) + cont);
+
+                    _iocs_bgtextst(
+                        BG_TM_B,    //in tilemap B
+                        i,
+                        j,
+                        tr.code
+                    );
+                }
+                //back to the row
+            }
+
+            _dos_mfree(buffer);
         }
     }
 

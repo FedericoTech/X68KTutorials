@@ -242,6 +242,7 @@ int main(void)
                 _dos_exit2(file_handler);
             }
 
+            //max 196
             // tileset = 16 * 14 + 4 tiles = 228 tiles
             for(cont = 0; cont < 228; cont++){
                 //we read the whole palette file

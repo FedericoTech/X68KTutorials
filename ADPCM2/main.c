@@ -102,14 +102,14 @@ int main(int argc, char *argv[])
     size = _dos_seek(
        file_handler,
        0, //offset
-       2  //0 = beginning, 1 = on the spot, 2 = end
+       SEEK_MODE_END  //0 = beginning, 1 = on the spot, 2 = end
     );
 
     //we put the header back to the beginning
     _dos_seek(
        file_handler,
        0, //offset
-       0  //0 = beginning, 1 = on the spot, 2 = end
+       SEEK_MODE_BEGINNING  //0 = beginning, 1 = on the spot, 2 = end
     );
 
     buffer = (char *) _dos_malloc(size);
