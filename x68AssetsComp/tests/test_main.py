@@ -67,7 +67,8 @@ class TestTiletoolCLI(unittest.TestCase):
         expected_pic = os.path.join(self.samples_dir, 'formula4b.pic')
         expected_pal = os.path.join(self.samples_dir, 'formula4b.pal')
 
-        test_args = ['convert-image', '--input', input_file, '--output_dir', output_dir, '--format', '4bits', '--no-warn']
+        test_args = ['convert-image', '--input', input_file, '--output_dir', output_dir, '--format', '4bits',
+                     '--no-warn']
         with patch('sys.argv', ['main.py'] + test_args):
             main.main()
 
@@ -124,7 +125,8 @@ class TestTiletoolCLI(unittest.TestCase):
         #output_file = os.path.join(os.path.dirname(__file__), 'ello')
         expected_pic = os.path.join(self.samples_dir, '16BitLandSc.pic')
 
-        test_args = ['convert-image', '--input', input_file, '--output_dir', output_dir, '--format', '16bits', '--output_name', '16BitLandSc']
+        test_args = ['convert-image', '--input', input_file, '--output_dir', output_dir, '--format', '16bits',
+                     '--output_name', '16BitLandSc']
         with patch('sys.argv', ['main.py'] + test_args):
             main.main()
 
@@ -140,18 +142,17 @@ class TestTiletoolCLI(unittest.TestCase):
         # Assert that the warning message is in the printed output
         self.assertIn("\033[93mWarning: \033[0mThe output name is more than 8 characters long.", printed_output)
 
-    '''
     def test_convert_audio(self):
-        output_dir = os.path.join(self.test_dir.name, 'output.pcm')
-        expected_file = os.path.join(self.samples_dir, 'expected_audio_pcm16.pcm')
-        input_file = os.path.join(self.samples_dir, 'music.mp3')
+        input_file = os.path.join(self.samples_dir, 'LWT1.mp3')
+        output_dir = self.test_dir.name
+        expected_file = os.path.join(self.samples_dir, 'result1.raw')
 
-        test_args = ['convert-audio', '--input', input_file, '--output', output_dir, '--format', 'pcm16']
+        test_args = ['convert-audio', '--input', input_file, '--output_dir', output_dir, '--output_name', 'result1']
         with patch('sys.argv', ['main.py'] + test_args):
             main.main()
 
         self.assertTrue(filecmp.cmp(output_dir, expected_file), "Generated file does not match the expected file")
-    '''
+
 
 if __name__ == '__main__':
     unittest.main()

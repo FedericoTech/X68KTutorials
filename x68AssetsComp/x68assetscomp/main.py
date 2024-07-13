@@ -10,28 +10,29 @@ def main():
     subparsers = parser.add_subparsers(dest='command')
 
     # TMX conversion
-    tmx_parser = subparsers.add_parser('convert-tmx', help='Convert TMX to tilemap, tileset, and palette')
-    tmx_parser.add_argument('--input', '-i', required=True, help='Path to the TMX file')
-    tmx_parser.add_argument('--output_dir', '-o', required=True, help='Path to the output directory')
-    tmx_parser.add_argument('--output_name', '-n', help='Custom name for the output file')
-    tmx_parser.add_argument('--no-warn', '-w', action='store_true', help='Disable warnings')
+    tmx_parser = subparsers.add_parser('convert-tmx',   help='Convert TMX to tilemap, tileset, and palette')
+    tmx_parser.add_argument('--input', '-i',        required=True, help='Path to the TMX file')
+    tmx_parser.add_argument('--output_dir', '-o',   required=True, help='Path to the output directory')
+    tmx_parser.add_argument('--output_name', '-n',  help='Custom name for the output file')
+    tmx_parser.add_argument('--no-warn', '-w',      action='store_true', help='Disable warnings')
 
     # Image conversion
     img_parser = subparsers.add_parser('convert-image', help='Convert image to custom color format')
-    img_parser.add_argument('--input', '-i', required=True, help='Path to the image file')
-    img_parser.add_argument('--output_dir', '-o', required=True, help='Path to the output file')
-    img_parser.add_argument('--format', '-f', required=True, choices=['4bits', '8bits', '16bits'],
+    img_parser.add_argument('--input', '-i',        required=True, help='Path to the image file')
+    img_parser.add_argument('--output_dir', '-o',   required=True, help='Path to the output file')
+    img_parser.add_argument('--format', '-f',       required=True, choices=['4bits', '8bits', '16bits'],
                             help='Color format to convert to')
-    img_parser.add_argument('--output_name', '-n', help='Custom name for the output file')
-    img_parser.add_argument('--no-warn', '-w', action='store_true', help='Disable warnings')
+    img_parser.add_argument('--output_name', '-n',  help='Custom name for the output file')
+    img_parser.add_argument('--no-warn', '-w',      action='store_true', help='Disable warnings')
 
     # Audio conversion
-    audio_parser = subparsers.add_parser('convert-audio', help='Convert audio to custom PCM format')
-    audio_parser.add_argument('--input', '-i', required=True, help='Path to the audio file')
-    audio_parser.add_argument('--output_dir', '-d', required=True, help='Path to the output file')
-    audio_parser.add_argument('--format', '-f', required=True, help='PCM format to convert to')
-    audio_parser.add_argument('--output_name', '-n', help='Custom name for the output file')
-    audio_parser.add_argument('--no-warn', '-w', action='store_true', help='Disable warnings')
+    audio_parser = subparsers.add_parser('convert-audio',   help='Convert audio to custom PCM format')
+    audio_parser.add_argument('--input', '-i',          required=True, help='Path to the audio file')
+    audio_parser.add_argument('--output_dir', '-d',     required=True, help='Path to the output file')
+    audio_parser.add_argument('--sample', '-s',         required=True, choices=['1', '2', '3', '4', '5'],
+                            help='1 = 3.9Khz, 2 = 5.2Khz, 3 = 7.8Khz, 4 = 10.4Khz, 5 = 15.6Khz')
+    audio_parser.add_argument('--output_name', '-n',    help='Custom name for the output file')
+    audio_parser.add_argument('--no-warn', '-w',        action='store_true', help='Disable warnings')
 
     args = parser.parse_args()
 
@@ -51,7 +52,7 @@ def main():
         case 'convert-image':
             convert_image(args.input, output_dir, output_name, args.format)
         case 'convert-audio':
-            convert_audio(args.input, output_dir, output_name)
+            convert_audio(args.input, output_dir, output_name, args.sample)
         case _:
             return "This is the default case"
 

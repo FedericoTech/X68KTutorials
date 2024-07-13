@@ -4,11 +4,11 @@ from . import struct
 from .utils import rgb_to_grb
 
 
-def convert_image(filename, output, output_name, format):
+def convert_image(file_path, output_dir, output_name, format):
 
     encoded_color = []
 
-    image = Image.open(filename)
+    image = Image.open(file_path)
 
     match format:
         case '16bits':
@@ -36,7 +36,7 @@ def convert_image(filename, output, output_name, format):
                 encoded_color.append(rgb_to_grb(palette[i], palette[i + 1], palette[i + 2]))
 
             # we save the palette
-            with open(os.path.join(output, f"{output_name}.pal"), 'wb') as binary_file:
+            with open(os.path.join(output_dir, f"{output_name}.pal"), 'wb') as binary_file:
                 for word in encoded_color:
                     binary_file.write(struct.pack('>H', word))
 
@@ -68,7 +68,7 @@ def convert_image(filename, output, output_name, format):
                 encoded_color.append(rgb_to_grb(palette[i], palette[i + 1], palette[i + 2]))
 
             # we save the palette
-            with open(os.path.join(output, f"{output_name}.pal"), 'wb') as binary_file:
+            with open(os.path.join(output_dir, f"{output_name}.pal"), 'wb') as binary_file:
                 for word in encoded_color:
                     binary_file.write(struct.pack('>H', word))
 
@@ -82,6 +82,6 @@ def convert_image(filename, output, output_name, format):
                 encoded_color.append((aux[i] << 12) | (aux[i + 1] << 8) | (aux[i + 2] << 4) | aux[i + 3])
 
     # we save the image
-    with open(os.path.join(output, f"{output_name}.pic"), 'wb') as binary_file:
+    with open(os.path.join(output_dir, f"{output_name}.pic"), 'wb') as binary_file:
         for word in encoded_color:
             binary_file.write(struct.pack('>H', word))
