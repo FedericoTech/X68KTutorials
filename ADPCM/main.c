@@ -11,6 +11,7 @@
 #include <limits.h>
 #include <math.h>
 #include <stdint.h>
+#include <signal.h>
 
 #define ACCESS_DICTIONARY           0x80    //0b10000000 //1 not for users
 #define ACCESS_NORMAL               0x00    //0b00000000 //0
@@ -67,6 +68,8 @@
 
 char *buffer_a, *buffer_b;
 
+void terminate();
+
 int main(int argc, char *argv[])
 {
     int16_t file_handler;
@@ -77,6 +80,8 @@ int main(int argc, char *argv[])
     if(argc > 1){
         filename = argv[1];
     }
+
+    signal(SIGINT, terminate); //for the Control + C
 
     _dos_c_print("loading pcm!\r\n");
 
@@ -151,8 +156,7 @@ int main(int argc, char *argv[])
                 printf("playing! %d\r\n", c);
                 //if we hit a key...
                 if(_dos_inpout(0xFF) != 0){
-                    //we stop the music
-                    _iocs_adpcmmod(ADPCM_CTRL_END);
+                    terminate();
                     //we get out the loops
                     goto end;
                 }
@@ -175,4 +179,10 @@ int main(int argc, char *argv[])
     _dos_c_print("Done\r\n");
 
     _dos_exit();
+}
+
+void terminate()
+{
+    //we stop the music
+    _iocs_adpcmmod(ADPCM_CTRL_END);
 }
