@@ -143,15 +143,20 @@ class TestTiletoolCLI(unittest.TestCase):
         self.assertIn("\033[93mWarning: \033[0mThe output name is more than 8 characters long.", printed_output)
 
     def test_convert_audio(self):
-        input_file = os.path.join(self.samples_dir, 'LWT1.mp3')
+        input_file = os.path.join(self.samples_dir, 'LWT11.wav')
         output_dir = self.test_dir.name
-        expected_file = os.path.join(self.samples_dir, 'result1.raw')
+        expected_file = os.path.join(self.samples_dir, 'LWT11_15_6khz.raw')
 
-        test_args = ['convert-audio', '--input', input_file, '--output_dir', output_dir, '--output_name', 'result1']
+        test_args = ['convert-audio', '--input', input_file, '--output_dir', output_dir, '--output_name', 'LWT11_15_6khz',
+                     '--sample', '5']
         with patch('sys.argv', ['main.py'] + test_args):
             main.main()
 
-        self.assertTrue(filecmp.cmp(output_dir, expected_file), "Generated file does not match the expected file")
+        self.assertTrue(filecmp.cmp(
+            os.path.join(output_dir, 'LWT11_15_6khz.raw'),
+            expected_file,
+            False
+        ), "Generated file does not match the expected file")
 
 
 if __name__ == '__main__':

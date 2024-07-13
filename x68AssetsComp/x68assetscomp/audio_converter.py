@@ -122,7 +122,8 @@ def oki6258_decode(buffer):
 
 def convert_audio(file_path, output_dir, output_name, sample):
     # Load the stereo audio file
-    stereo_audio = AudioSegment.from_wav(file_path)
+    with open(file_path, 'rb') as file:
+        stereo_audio = AudioSegment.from_wav(file)
 
     # Convert to mono by setting channels to 1
     mono_audio = stereo_audio.set_channels(1)
