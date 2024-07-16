@@ -28,7 +28,7 @@ class TestTiletoolCLI(unittest.TestCase):
     def test_convert_tmx(self):
         output_dir = self.test_dir.name
         input_file = os.path.join(self.samples_dir, 'tiled.tmx')
-        test_args = ['convert-tmx', '--input', input_file, '--output_dir', output_dir, '--output_name', 'mk_circuit']
+        test_args = ['convert-tmx', '--input', input_file, '--output-dir', output_dir, '--output-name', 'mk_circuit']
         with patch('sys.argv', ['main.py'] + test_args):
             main.main()
 
@@ -67,7 +67,7 @@ class TestTiletoolCLI(unittest.TestCase):
         expected_pic = os.path.join(self.samples_dir, 'formula4b.pic')
         expected_pal = os.path.join(self.samples_dir, 'formula4b.pal')
 
-        test_args = ['convert-image', '--input', input_file, '--output_dir', output_dir, '--format', '4bits',
+        test_args = ['convert-image', '--input', input_file, '--output-dir', output_dir, '--format', '4bits',
                      '--no-warn']
         with patch('sys.argv', ['main.py'] + test_args):
             main.main()
@@ -97,7 +97,7 @@ class TestTiletoolCLI(unittest.TestCase):
         expected_pic = os.path.join(self.samples_dir, '8BitsColors.pic')
         expected_pal = os.path.join(self.samples_dir, '8BitsColors.pal')
 
-        test_args = ['convert-image', '--input', input_file, '--output_dir', output_dir, '--format', '8bits']
+        test_args = ['convert-image', '--input', input_file, '--output-dir', output_dir, '--format', '8bits']
         with patch('sys.argv', ['main.py'] + test_args):
             main.main()
 
@@ -125,8 +125,8 @@ class TestTiletoolCLI(unittest.TestCase):
         #output_file = os.path.join(os.path.dirname(__file__), 'ello')
         expected_pic = os.path.join(self.samples_dir, '16BitLandSc.pic')
 
-        test_args = ['convert-image', '--input', input_file, '--output_dir', output_dir, '--format', '16bits',
-                     '--output_name', '16BitLandSc']
+        test_args = ['convert-image', '--input', input_file, '--output-dir', output_dir, '--format', '16bits',
+                     '--output-name', '16BitLandSc']
         with patch('sys.argv', ['main.py'] + test_args):
             main.main()
 
@@ -147,7 +147,7 @@ class TestTiletoolCLI(unittest.TestCase):
         output_dir = self.test_dir.name
         expected_file = os.path.join(self.samples_dir, 'LWT11_15_6khz.raw')
 
-        test_args = ['convert-audio', '--input', input_file, '--output_dir', output_dir, '--output_name', 'LWT11_15_6khz',
+        test_args = ['convert-audio', '--input', input_file, '--output-dir', output_dir, '--output-name', 'LWT11_15_6khz',
                      '--sample', '5']
         with patch('sys.argv', ['main.py'] + test_args):
             main.main()

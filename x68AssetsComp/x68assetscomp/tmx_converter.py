@@ -8,7 +8,7 @@ import xml.etree.ElementTree as ET
 Palettes = namedtuple('Palettes', ['palettes', 'indices'])
 
 
-def extract_palete(tiles, output_dir, output_name):
+def extract_palete(tiles, output_dir, output_name, transparency_color=rgb_to_grb(255, 0, 255)):
     max = 15
 
     palettes = []
@@ -19,7 +19,7 @@ def extract_palete(tiles, output_dir, output_name):
 
         # we capture the current matrix
         new_palette = set(tile)
-        new_palette.add(0)  # we add the black colour
+        # new_palette.add(0)  # we add the transparent colour
         new_palette = set(sorted(list(new_palette)))
 
         # of groups is empty
@@ -63,6 +63,17 @@ def extract_palete(tiles, output_dir, output_name):
         # Write the encoded palette to the palette file
         for palette in palettes:
             palette = sorted(palette)
+
+            # Check if the transparency color is in the palette
+            if transparency_color in palette:
+                # Remove the transparency color from its original position
+                palette.remove(transparency_color)
+                # Insert the transparency color at the beginning of the list
+
+            palette.insert(0, transparency_color)
+
+            print(palette)
+
             while len(palette) < max + 1:
                 palette.append(0)
 
@@ -72,8 +83,7 @@ def extract_palete(tiles, output_dir, output_name):
     return Palettes(palettes, indices)
 
 
-def save_tiles(tiles, palettes, output_dir, output_name):
-
+def save_tiles(tiles, palettes, output_dir, output_name, transparency_color=rgb_to_grb(255, 0, 255)):
     lolo = os.path.join(output_dir, f"{output_name}.ts")
 
     # print(lolo)
@@ -83,6 +93,15 @@ def save_tiles(tiles, palettes, output_dir, output_name):
 
         for index, tile in enumerate(tiles):
             palette = sorted(palettes.palettes[palettes.indices[index]])
+
+            # Check if the transparency color is in the palette
+            if transparency_color in palette:
+                # Remove the transparency color from its original position
+                palette.remove(transparency_color)
+                # Insert the transparency color at the beginning of the list
+
+            palette.insert(0, transparency_color)
+
             # print(palette)
             for i in range(0, len(tile), 2):
                 positions = {palette: ind for ind, palette in enumerate(palette)}
@@ -92,7 +111,7 @@ def save_tiles(tiles, palettes, output_dir, output_name):
                 binary_file.write(struct.pack('B', byte))
 
 
-def process_image(filename, tile_size, output_dir, output_name):
+def process_image(filename, tile_size, output_dir, output_name, magic_pink):
     image = Image.open(filename).convert('RGB')
 
     width, height = image.size
@@ -134,15 +153,17 @@ def process_image(filename, tile_size, output_dir, output_name):
 
                 tile_post.append(encoded_color)
 
-    palettes = extract_palete(tile_post, output_dir, output_name)
+    grb_magic_pink = rgb_to_grb(magic_pink[0], magic_pink[1], magic_pink[2])
 
-    save_tiles(tile_post, palettes, output_dir, output_name)
+    palettes = extract_palete(tile_post, output_dir, output_name, grb_magic_pink)
+
+    save_tiles(tile_post, palettes, output_dir, output_name, grb_magic_pink)
 
     return palettes
 
 
 # tiled functions
-def convert_tmx(file_path, output_directory, output_name):
+def convert_tmx(file_path, output_directory, output_name, magic_pink):
     # Define the namespace URI
     namespace = {'xhtml': 'http://www.w3.org/1999/xhtml'}
 
@@ -174,7 +195,8 @@ def convert_tmx(file_path, output_directory, output_name):
         tileset_file,
         tile_width,
         output_directory,
-        output_name
+        output_name,
+        magic_pink
     )
 
     # Use namespace prefix in findall and find methods
