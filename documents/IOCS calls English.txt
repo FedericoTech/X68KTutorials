@@ -191,7 +191,7 @@ $ c0 _SP_INIT Sprite initialization
 $ c1 _SP_ON Sprite display
 $ c2 _SP_OFF ​​Sprite Erase
 $ c3 _SP_CGCLR Clear sprite pattern
-$ c4 _SP_DEFCG Sprite pattern definition
+$ c4 _SP_DEFCG Sprite pattern definition									int _iocs_sp_defcg (int code, int size, const void *addr)
 $ c5 _SP_GTPCG Sprite pattern loading
 $ c6 _SP_REGST Sprite register settings										int _iocs_sp_regst (int spno, int x, int y, int code, int prw)
 $ c7 _SP_REGGT Read sprite register											int _iocs_sp_reggt (int spno, int *x, int *y, int *code, int *prw)
