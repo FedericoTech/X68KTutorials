@@ -15,7 +15,7 @@ def main():
     tmx_parser.add_argument('--output-dir', '-o',   required=True, help='Path to the output directory')
     tmx_parser.add_argument('--output-name', '-n',  help='Custom name for the output file')
     tmx_parser.add_argument('--no-warn', '-w',      action='store_true', help='Disable warnings')
-    tmx_parser.add_argument('--magic-pink', type=str, default='255,0,255',
+    tmx_parser.add_argument('--magic-pink', type=str, default=False,
                             help='Magic pink color in R,G,B format (default is 255,0,255).')
 
     # Image conversion
@@ -50,16 +50,7 @@ def main():
 
     match args.command:
         case 'convert-tmx':
-
-            transparency_color = tuple(map(int, args.magic_pink.split(',')))
-            '''
-            transparency_int = (
-                (transparency_color[0] << 16)
-                + (transparency_color[1] << 8)
-                + transparency_color[2]
-            )
-            '''
-            convert_tmx(args.input, output_dir, output_name, transparency_color)
+            convert_tmx(args.input, output_dir, output_name, args.magic_pink)
         case 'convert-image':
             convert_image(args.input, output_dir, output_name, args.format)
         case 'convert-audio':
