@@ -2,6 +2,7 @@
 
 import argparse
 import os
+from utils import my_warning
 from x68assetscomp import convert_tmx, convert_image, convert_audio
 
 
@@ -16,7 +17,7 @@ def main():
     tmx_parser.add_argument('--output-name', '-n',  help='Custom name for the output file')
     tmx_parser.add_argument('--no-warn', '-w',      action='store_true', help='Disable warnings')
     tmx_parser.add_argument('--magic-pink', type=str, default=False,
-                            help='Magic pink color in R,G,B format (default is 255,0,255).')
+                            help='Magic pink color in R,G,B format.')
 
     # Image conversion
     img_parser = subparsers.add_parser('convert-image', help='Convert image to custom color format')
@@ -26,6 +27,8 @@ def main():
                             help='Color format to convert to')
     img_parser.add_argument('--output-name', '-n',  help='Custom name for the output file')
     img_parser.add_argument('--no-warn', '-w',      action='store_true', help='Disable warnings')
+    img_parser.add_argument('--magic-pink', type=str, default=False,
+                            help='Magic pink color in R,G,B format.')
 
     # Audio conversion
     audio_parser = subparsers.add_parser('convert-audio',   help='Convert audio to custom PCM format')
@@ -46,13 +49,13 @@ def main():
     output_dir = os.path.expandvars(args.output_dir)
 
     if len(output_name) > 8 and not args.no_warn:
-        print("\033[93mWarning: \033[0mThe output name is more than 8 characters long.")
+        my_warning("The output name is more than 8 characters long.")
 
     match args.command:
         case 'convert-tmx':
             convert_tmx(args.input, output_dir, output_name, args.magic_pink)
         case 'convert-image':
-            convert_image(args.input, output_dir, output_name, args.format)
+            convert_image(args.input, output_dir, output_name, args.format, args.magic_pink)
         case 'convert-audio':
             convert_audio(args.input, output_dir, output_name, args.sample)
         case _:
