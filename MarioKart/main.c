@@ -126,14 +126,14 @@ void interrupt vsync_disp()
     ){
         x1++;
     }
-
+/*
     //we hide player 2's scroll
     _iocs_bgctrlst (
         BG_B,  //Background specification (0/1)
         BG_TM_B,  //Specifying a text page (0/1)
         0   //Show / Hide specification (0: Hide 1: Show)
     );
-
+*/
     //we update player 2's scroll
     _iocs_bgscrlst(
         VERTICAL_BLANKING_DETECTION | BG_B, //(1 << 31) | 0, // and Background specification (0/1)
@@ -144,6 +144,7 @@ void interrupt vsync_disp()
 
 void interrupt crtcras()
 {
+
     // we hide player 1's scroll
     _iocs_bgctrlst (
         BG_A,  //Background specification (0/1)
@@ -151,12 +152,14 @@ void interrupt crtcras()
         0   //Show / Hide specification (0: Hide 1: Show)
     );
 
+/*
     // we show player 2's scroll
     _iocs_bgctrlst (
         BG_B,  //Background specification (0/1)
         BG_TM_B,  //Specifying a text page (0/1)
         1   //Show / Hide specification (0: Hide 1: Show)
     );
+    */
 }
 
 int main(void)
