@@ -181,7 +181,7 @@ $ b6 _PSET Graphic screen point set
 $ b7 _POINT Get points on the graphic screen
 $ b8 _LINE Graphic screen line												int _iocs_line(const struct _lineptr *lineptr)
 $ b9 _BOX Graphic screen box												int _iocs_box(const struct _boxptr *boxptr)
-$ ba _FILL Graphic screen box fill
+$ ba _FILL Graphic screen box fill											int _iocs_fill(const struct _fillptr *ptr)
 $ bb _CIRCLE Graphic screen circle
 $ bc _PAINT Graphic screen paint											int _iocs_paint(struct _paintptr *ptr)
 $ bd _SYMBOL Graphic screen symbol
@@ -2954,10 +2954,10 @@ Argument d1.b Write page (when 0 to 3, -1, check the current setting)
 
 Current write page when return value d1.b = -1
 	Otherwise, the status
-		d0.l = 0 Normal termination
-			-1 Graphics not available
-			-2 pages not specified (4 or more)
-			-3 The specified page cannot be used in the current mode
+		d0.l =	 0 Normal termination
+				-1 Graphics not available
+				-2 pages not specified (4 or more)
+				-3 The specified page cannot be used in the current mode
 
 	Set the writing page of the graphic screen.
 
@@ -2967,10 +2967,10 @@ $ b2 _VPAGE Graphic screen display page settings
 
 Argument d1.b Display page (bits 0 to 3 correspond to pages 0 to 3)
 
-Return value d0.l = 0 Normal termination
-		-1 Graphics not available
-		-2 page not specified
-		-3 The specified page cannot be used in the current mode
+Return value d0.l =  0 Normal termination
+					-1 Graphics not available
+					-2 page not specified
+					-3 The specified page cannot be used in the current mode
 
 	Set the display page of the graphic screen.
 
