@@ -3,6 +3,8 @@ from . import os
 from . import struct
 from . import Image
 from .utils import rgb_to_grb
+from .utils import parse_magic_pink
+
 import xml.etree.ElementTree as ET
 
 Palettes = namedtuple('Palettes', ['palettes', 'indices'])
@@ -74,8 +76,6 @@ def extract_palete(tiles, output_dir, output_name, magic_pink):
 
                 palette.insert(0, magic_pink)
 
-            print(palette)
-
             while len(palette) < max + 1 if magic_pink else 0:
                 palette.append(0)
 
@@ -91,7 +91,7 @@ def save_tiles(tiles, palettes, output_dir, output_name, magic_pink):
 
     # print(lolo)
 
-    with open(lolo, 'wb') as binary_file:
+    with (open(lolo, 'wb') as binary_file):
         # Write the encoded palette to the palette file
 
         for index, tile in enumerate(tiles):
@@ -110,8 +110,10 @@ def save_tiles(tiles, palettes, output_dir, output_name, magic_pink):
             # print(palette)
             for i in range(0, len(tile), 2):
                 positions = {palette: ind for ind, palette in enumerate(palette)}
-                byte = 0xff & ((positions.get(tile[i]) << 4)
-                               | (0xf & positions.get(tile[i + 1])))
+                byte = 0xff & (
+                    (positions.get(tile[i]) << 4)
+                    | (0xf & positions.get(tile[i + 1]))
+                )
 
                 binary_file.write(struct.pack('B', byte))
 
@@ -169,8 +171,7 @@ def process_image(filename, tile_size, output_dir, output_name, magic_pink):
 def convert_tmx(file_path, output_directory, output_name, magic_pink):
 
     if magic_pink:
-        magic_pink = tuple(map(int, magic_pink.split(',')))
-        magic_pink = rgb_to_grb(magic_pink[0], magic_pink[1], magic_pink[2])
+        magic_pink = parse_magic_pink(magic_pink)
 
     # Define the namespace URI
     namespace = {'xhtml': 'http://www.w3.org/1999/xhtml'}

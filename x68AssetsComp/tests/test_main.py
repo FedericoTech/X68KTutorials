@@ -2,9 +2,15 @@ import unittest
 import tempfile
 import os
 import filecmp
+from abc import ABC, abstractmethod
 from io import StringIO
 import sys
 from unittest.mock import patch
+
+# Add the project directory to the sys.path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../x68assetscomp')))
+
+
 from x68assetscomp import main  # Import your main CLI module
 
 

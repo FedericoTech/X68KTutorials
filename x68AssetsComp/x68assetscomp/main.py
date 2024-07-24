@@ -4,6 +4,7 @@ import argparse
 import os
 from utils import my_warning
 from x68assetscomp import convert_tmx, convert_image, convert_audio
+from x68assetscomp.image_converter import merge_images
 
 
 def main():
@@ -27,8 +28,19 @@ def main():
                             help='Color format to convert to')
     img_parser.add_argument('--output-name', '-n',  help='Custom name for the output file')
     img_parser.add_argument('--no-warn', '-w',      action='store_true', help='Disable warnings')
-    img_parser.add_argument('--magic-pink', type=str, default=False,
-                            help='Magic pink color in R,G,B format.')
+    img_parser.add_argument('--magic-pink',         type=str, default=False,
+                            help='Magic pink color in 0xRRGGBB format.')
+
+    # Image merge
+    merge_parser = subparsers.add_parser('merge-images',    help='Convert image to custom color format')
+    merge_parser.add_argument('--input',            required=True, nargs='+', help="Input image files to merge.")
+    merge_parser.add_argument('--format',           required=True, choices=['4bits', '8bits'],
+                            help="Bit depth of the images.")
+    merge_parser.add_argument('--output-dir',       required=True, help="Output file name for the merged image.")
+    merge_parser.add_argument('--output-name', '-n', help='Custom name for the output file')
+    merge_parser.add_argument('--no-warn', '-w', action='store_true', help='Disable warnings')
+    merge_parser.add_argument('--magic-pink', type=str, default=False,
+                            help='Magic pink color in 0xRRGGBB format.')
 
     # Audio conversion
     audio_parser = subparsers.add_parser('convert-audio',   help='Convert audio to custom PCM format')
@@ -42,7 +54,7 @@ def main():
     args = parser.parse_args()
 
     if not args.output_name:
-        output_name, ext = os.path.splitext(os.path.basename(args.input))
+        output_name, ext = os.path.splitext(os.path.basename(args.input if args.command != 'merge-images' else args.input[0]))
     else:
         output_name = args.output_name
 
@@ -56,6 +68,8 @@ def main():
             convert_tmx(args.input, output_dir, output_name, args.magic_pink)
         case 'convert-image':
             convert_image(args.input, output_dir, output_name, args.format, args.magic_pink)
+        case 'merge-images':
+            merge_images(args.input, output_dir, output_name, args.format, args.magic_pink)
         case 'convert-audio':
             convert_audio(args.input, output_dir, output_name, args.sample)
         case _:
