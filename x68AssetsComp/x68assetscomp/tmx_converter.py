@@ -112,7 +112,7 @@ def save_tiles(tiles, palettes, output_dir, output_name, magic_pink):
                 binary_file.write(struct.pack('B', byte))
 
 
-def process_image(filename, tile_size, output_dir, output_name, magic_pink):
+def process_image(filename, tile_size):
     image = Image.open(filename).convert('RGB')
 
     width, height = image.size
@@ -122,8 +122,9 @@ def process_image(filename, tile_size, output_dir, output_name, magic_pink):
     assert height % tile_size == 0, "Image height is not a multiple of tile size"
 
     tile_post = []
-    # Loop through the image and extract 8x8 tiles
+    # Loop through the image rows
     for y in range(0, height, tile_size):
+        # Loop through the image cols
         for x in range(0, width, tile_size):
 
             # if tile size is 8x8...
@@ -195,10 +196,7 @@ def convert_tmx(file_path, output_directory, output_name, magic_pink):
 
     tile_post = process_image(
         tileset_file,
-        tile_width,
-        output_directory,
-        output_name,
-        magic_pink
+        tile_width
     )
 
     palette_indices = extract_palete(tile_post, output_directory, output_name, magic_pink)
@@ -209,9 +207,7 @@ def convert_tmx(file_path, output_directory, output_name, magic_pink):
     for layer in root.findall('xhtml:layer', namespace):
         layer_data = []
 
-        tilemap_file = os.path.join(output_directory, f"{output_name}.tm")
-
-        with open(tilemap_file, 'wb') as binary_file:
+        with open(os.path.join(output_directory, f"{output_name}.tm"), 'wb') as binary_file:
             # we traverse the
             for tile in layer.find('xhtml:data', namespace).findall('xhtml:tile', namespace):
                 gid = int(tile.get('gid'))
