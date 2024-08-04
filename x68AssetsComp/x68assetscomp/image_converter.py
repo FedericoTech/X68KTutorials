@@ -162,18 +162,24 @@ def convert_image(file_path, output_dir, output_name, format, magic_pink):
     save_image(encoded_pixels, output_dir, output_name)
 
 
-
-def compact_images(images, output_dir, output_name, format, magic_pink):
-
+def compact_images(images, output_dir, output_name, format, same_palette, magic_pink):
     images_pixels = []
 
     for index, image in enumerate(images):
         encoded_pixels, encoded_palette = process_image(image, format, magic_pink)
 
-        print(image.filename)
+        # print(image.filename)
         print([f"{num:04x}" for num in encoded_palette])
 
-        save_palette(encoded_palette, output_dir, f"{output_name}_{index + 1}")
+        # if each image is to have its own palette...
+        if not same_palette:
+            save_palette(encoded_palette, output_dir, f"{output_name}_{index + 1}")
+        # if all share the same palette...
+        else:
+            # on the first image...
+            if index == 0:
+                # we save the palette
+                save_palette(encoded_palette, output_dir, f"{output_name}")
 
         images_pixels.append(encoded_pixels)
 
@@ -198,6 +204,9 @@ def compact_images(images, output_dir, output_name, format, magic_pink):
             )
     # if the image is 4bits...
     else:
+        # we revers the order because of the way the planes are ordered in the X68000
+        images_pixels.reverse()
+
         for index in range(0, len(images_pixels[0])):
             # pixel 0 of the 4 images
             ello.append(
@@ -239,7 +248,8 @@ def compact_images(images, output_dir, output_name, format, magic_pink):
 
     save_image(ello, output_dir, output_name)
 
-def merge_images(file_paths, output_dir, output_name, format, magic_pink):
+
+def merge_images(file_paths, output_dir, output_name, format, same_palette, magic_pink):
     assert format == '4bits' or len(file_paths) == 2, "at 8bits there has to be 2 images."
     assert format == '8bits' or len(file_paths) == 4, "at 4bits there has to be 4 images max."
 
@@ -260,4 +270,57 @@ def merge_images(file_paths, output_dir, output_name, format, magic_pink):
         assert img.size == reference_size, "images need to have the same dimensions"
         images.append(img)
 
-    compact_images(images, output_dir, output_name, format, magic_pink)
+    compact_images(images, output_dir, output_name, format, same_palette, magic_pink)
+
+
+def quad_merge(file_path, output_dir, output_name, format, same_palette, magic_pink):
+    image = Image.open(file_path)
+
+    width, height = image.size
+
+    assert format == '8bits' or (width == 1024 and height == 1024), "at 8bits there has to be 2 images."
+    assert format == '4bits' or (
+        (width == 1024 and height == 512)
+        or (width == 512 and height == 1024)
+    ), "at 4bits there has to be 4 images max."
+
+    if same_palette:
+        if format == '4bits':
+            # if the image doesn't have a palette...
+            if image.mode != 'P':
+                # we turn the image into 4 bits
+                image = image.convert('P', palette=Image.ADAPTIVE, colors=16)
+                # image = image.quantize(colors=16, method=Image.MEDIANCUT)
+            # if the image has a palette
+            else:
+                # if the palette has more than 16 colors...
+                if len(image.getpalette()) // 3 > 16:
+                    # we reprocess the image to make it have 16 colours
+                    image = image.convert('RGB').convert('P', palette=Image.ADAPTIVE, colors=16)
+        else:
+            # if the image doesn't have a palette...
+            if image.mode != 'P':
+                # we turn the image into 8 bits
+                image = image.convert('P', palette=Image.ADAPTIVE, colors=256)
+            # if the image has a palette...
+            else:
+                # if the image is of 4bits
+                if len(image.getpalette()) // 3 <= 16:
+                    # turn into 8 bits
+                    image = image.convert('RGB').convert('P', palette=Image.ADAPTIVE, colors=256)
+
+    images = []
+
+    if format == '4bits':
+        images.append(image.crop((0, 0, 512, 512)))
+        images.append(image.crop((512, 0, 1024, 512)))
+        images.append(image.crop((0, 512, 512, 1024)))
+        images.append(image.crop((512, 512, 1024, 1024)))
+    else:
+        images.append(image.crop((0, 0, 512, 512)))
+        if width == 1024 and height == 512:
+            images.append(image.crop((512, 0, 1024, 512)))
+        else:
+            images.append(image.crop((0, 512, 512, 1024)))
+
+    compact_images(images, output_dir, output_name, format, same_palette, magic_pink)

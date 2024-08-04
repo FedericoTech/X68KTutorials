@@ -18,7 +18,7 @@ def extract_palete(tiles, output_dir, output_name, magic_pink):
 
     # for tile_index, tile in enumerate(sorted(tiles, key=lambda tile: (len(tile), sorted(tile)))):
     for tile_index, tile in enumerate(tiles):
-
+        # print(len(tile), tile)
         # we capture the current matrix
         new_palette = set(tile)
         # new_palette.add(0)  # we add the transparent colour
@@ -57,11 +57,7 @@ def extract_palete(tiles, output_dir, output_name, magic_pink):
                 # we move to the next group
                 continue
 
-    lolo = os.path.join(output_dir, f"{output_name}.pal")
-
-    # print(lolo)
-
-    with open(lolo, 'wb') as palette_out:
+    with open(os.path.join(output_dir, f"{output_name}.pal"), 'wb') as palette_out:
         # Write the encoded palette to the palette file
         for palette in palettes:
             palette = sorted(palette)
@@ -80,6 +76,8 @@ def extract_palete(tiles, output_dir, output_name, magic_pink):
                 palette.append(0)
 
             for colour in palette:
+                # print(f"Types - colour: {type(colour)}")
+                # print(f"Values - colour: {colour}")
                 palette_out.write(struct.pack('>H', colour))  # Pack as big-endian 16-bit value
 
     return Palettes(palettes, indices)
@@ -87,11 +85,7 @@ def extract_palete(tiles, output_dir, output_name, magic_pink):
 
 def save_tiles(tiles, palettes, output_dir, output_name, magic_pink):
 
-    lolo = os.path.join(output_dir, f"{output_name}.ts")
-
-    # print(lolo)
-
-    with (open(lolo, 'wb') as binary_file):
+    with (open(os.path.join(output_dir, f"{output_name}.ts"), 'wb') as binary_file):
         # Write the encoded palette to the palette file
 
         for index, tile in enumerate(tiles):
@@ -132,6 +126,7 @@ def process_image(filename, tile_size, output_dir, output_name, magic_pink):
     for y in range(0, height, tile_size):
         for x in range(0, width, tile_size):
 
+            # if tile size is 8x8...
             if tile_size == 8:
                 # Extract the tile
                 tile = image.crop((x, y, x + tile_size, y + tile_size))
@@ -143,13 +138,15 @@ def process_image(filename, tile_size, output_dir, output_name, magic_pink):
                 for (red, green, blue) in tile_data:
                     encoded_color.append(rgb_to_grb(red, green, blue))
 
-                tile_post.append(encoded_color)
+            # if tile size is 16x16...
             else:
                 tile16x16 = image.crop((x, y, x + tile_size, y + tile_size))
 
                 encoded_color = []
 
+                # inside the 16 x 16 block we go through 2 columns of 8 x 16 pixels
                 for j in range(0, 16, 8):
+                    # we crop the 8 x 16 column
                     tile = tile16x16.crop((j, 0, j + 8, 16))
                     # Get the tile data as a list of indices
                     tile_data = list(tile.getdata())
@@ -158,13 +155,9 @@ def process_image(filename, tile_size, output_dir, output_name, magic_pink):
                     for (red, green, blue) in tile_data:
                         encoded_color.append(rgb_to_grb(red, green, blue))
 
-                tile_post.append(encoded_color)
+            tile_post.append(encoded_color)
 
-    palettes = extract_palete(tile_post, output_dir, output_name, magic_pink)
-
-    save_tiles(tile_post, palettes, output_dir, output_name, magic_pink)
-
-    return palettes
+    return tile_post
 
 
 # tiled functions
@@ -200,13 +193,17 @@ def convert_tmx(file_path, output_directory, output_name, magic_pink):
 
     tileset_file = os.path.join(os.path.dirname(file_path), source_filename)
 
-    palette_indices = process_image(
+    tile_post = process_image(
         tileset_file,
         tile_width,
         output_directory,
         output_name,
         magic_pink
     )
+
+    palette_indices = extract_palete(tile_post, output_directory, output_name, magic_pink)
+
+    save_tiles(tile_post, palette_indices, output_directory, output_name, magic_pink)
 
     # Use namespace prefix in findall and find methods
     for layer in root.findall('xhtml:layer', namespace):

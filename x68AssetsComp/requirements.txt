@@ -1,0 +1,6 @@
+numpy~=2.0.0
+pillow~=10.3.0
+pip~=24.1.1
+x68assetscomp~=0.1.0
+pydub~=0.25.1
+scipy~=1.14.0
