@@ -1,6 +1,10 @@
 #include "utils.h"
 
-const char *getErrorMessage(int8_t code)
+#ifndef __MARIKO_CC__
+    #include <stdio.h>
+#endif // __MARIKO_CC__
+
+const char *Utils_getErrorMessage(int8_t code)
 {
     char *message;
 

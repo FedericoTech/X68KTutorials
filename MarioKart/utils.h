@@ -30,6 +30,6 @@ union FileConf {
 #define SEEK_MODE_CURRENT 1
 #define SEEK_MODE_END 2
 
-const char *getErrorMessage(int8_t code);
+const char *Utils_getErrorMessage(int8_t code);
 
 #endif
