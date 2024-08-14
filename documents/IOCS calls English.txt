@@ -195,13 +195,13 @@ $ c4 _SP_DEFCG Sprite pattern definition									int _iocs_sp_defcg (int code, i
 $ c5 _SP_GTPCG Sprite pattern loading
 $ c6 _SP_REGST Sprite register settings										int _iocs_sp_regst (int spno, int x, int y, int code, int prw)
 $ c7 _SP_REGGT Read sprite register											int _iocs_sp_reggt (int spno, int *x, int *y, int *code, int *prw)
-$ c8 _BGSCRLST Background scroll register setting
-$ c9 _BGSCRLGT Reading background scroll register
-$ ca _BGCTRLST Background control register settings
-$ cb _BGCTRLGT Read background control register
+$ c8 _BGSCRLST Background scroll register setting							int _iocs_bgscrlst (int mode, int_ x, int_ y)
+$ c9 _BGSCRLGT Reading background scroll register							int _iocs_bgscrlgt (int mode, int *x, int *y)
+$ ca _BGCTRLST Background control register settings							int _iocs_bgctrlst (int mode, int page, int onoff)
+$ cb _BGCTRLGT Read background control register								int _iocs_bgctrlgt (int mode)
 $ cc _BGTEXTCL Clear background text										int _iocs_bgtextcl (int page, int code)
-$ cd _BGTEXTST Background text setting
-$ ce _BGTEXTGT Reading background text
+$ cd _BGTEXTST Background text setting										int _iocs_bgtextst (int page, int x, int y, int code)
+$ ce _BGTEXTGT Reading background text										int _iocs_bgtextgt (int page, int x, int y)
 $ cf _SPALET Sprite palette settings
 $ d3 _TXXLINE Horizontal line on the text screen
 $ d4 _TXYLINE Vertical line on the text screen
@@ -286,7 +286,7 @@ Return key data
 
 ================================================= ============================
 
-$ 01 _B_KEY SNS key input inspection
+$ 01 _B_KEYSNS key input inspection
 
 Return value d0.l = 0 No key input
 		There is $ 1_ ???? 〃 ($ ???? is the key data)
