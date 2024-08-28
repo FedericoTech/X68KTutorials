@@ -4,6 +4,8 @@
 	<Project>
 		<Option title="MarioKart" />
 		<Option makefile="makefile" />
+		<Option makefile_is_custom="1" />
+		<Option execution_dir="../MarioKart" />
 		<Option pch_mode="2" />
 		<Option compiler="x68000_gcc_compiler" />
 		<Build>
@@ -34,6 +36,10 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="graphics.h" />
+		<Unit filename="input.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="input.h" />
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />
 			<Option weight="0" />
@@ -42,6 +48,9 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="resources.h" />
+		<Unit filename="stdafx.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="stdafx.h" />
 		<Unit filename="utils.c">
 			<Option compilerVar="CC" />

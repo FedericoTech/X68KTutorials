@@ -21,11 +21,9 @@
 static int16_t file_handler;
 static union FileConf fconf;
 
-static uint16_t* tilemap;
-
 const uint16_t* Res_getTilemap()
 {
-    return tilemap;
+    return res_tilemap;
 }
 
 static inline int Res_loadCircuitPalette();
@@ -81,7 +79,7 @@ int Res_unloadResources()
         _iocs_sp_cgclr(cont);
     }
 
-    _dos_mfree(tilemap);
+    _dos_mfree(res_tilemap);
 
     return 0;
 }
@@ -220,7 +218,7 @@ static inline int Res_loadCircuitTileset()
     }
 
     //we go through the 84 tiles of the tileset
-    for(cont = 0; cont < 71 /*84 */; cont++){
+    for(cont = 1; cont < 72 /*84 */; cont++){
         //we read current tile
         if((status = _dos_read(file_handler, (char*) tile, sizeof tile)) < 0){
             return status;
@@ -316,17 +314,35 @@ static inline int Res_loadCircuitTilemap()
     }
 
     //we make room for a 128x128-tile tilemap
-    tilemap = (uint16_t *) _dos_malloc(128 * 128 * sizeof(uint16_t));
+    res_tilemap = (uint16_t *) _dos_malloc(128 * 128 * sizeof(uint16_t));
 
-    if((status = _dos_read(file_handler, (char*) tilemap, 128 * 128 * sizeof(uint16_t))) < 0){
+    status = ((int)res_tilemap >> 24) & 0xFF;
+
+    //if not enough space...
+    if(status == 0x81){
+        //we retrieve how much space is left
+        printf("only this %d bytes are available\r\n", (uint16_t)res_tilemap & 0x00FFFFFF); //we retrieve the available amount
+        return status;
+    //if no room whatsoever
+    } else if(status == 0x82) {
+        printf("not size at all can be allocated. [%d]\r\n", (uint16_t)res_tilemap & 0x0000000F); //the last nibble is undefined
+       return status;
+    } else {
+        #ifdef DEBUG
+            printf("block successfully allocated [%x]\r\n", status);
+        #endif
+    }
+
+    //we load the entire tilemap
+    if((status = _dos_read(file_handler, (char*) res_tilemap, 128 * 128 * sizeof(uint16_t))) < 0){
         return status;
     }
 
-    //now we close the file
     status = _dos_close(file_handler);
 
-    //if any error...
+    //now we close the file
     if(status < 0){
+        //if any error...
         _dos_c_print("Can't close the file\r\n");
         return status;
     }

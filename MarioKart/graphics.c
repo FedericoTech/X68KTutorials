@@ -17,13 +17,36 @@
 #define SP_DEFCG_8X8_TILE 0
 #define SP_DEFCG_16X16_TILE 1
 
+#define BG_SHOW 1
+#define BG_HIDE 0
+
 #define BG_A 0
 #define BG_B 1
 
 #define BG_TM_A 0
 #define BG_TM_B 1
 
+#define TILEMAP_A 0xEBC000
+#define TILEMAP_B 0xEBE000
+
+#define DMA_DIR_A_TO_B 0
+#define DMA_DIR_B_TO_A 1
+
+#define DMA_FIXED 0
+#define DMA_PLUS_PLUS 1
+#define DMA_MINUS_3 2
+
+#define DMA_MODE(direction, MAC, DAC) (direction << 7 | (MAC << 2) | DAC)
+
+#define DMA_STATUS_IDLE 0x00
+#define DMA_STATUS_IN_DMAMOVE_OP 0x8A
+#define DMA_STATUS_IN_DMAMOV_A_OP 0x8B
+#define DMA_STATUS_IN_DMAMOV_L_OP 0x8C
+
 int frame = 0;
+
+extern uint16_t * res_tilemap;
+uint16_t (*tilemap)[128];
 
 static int8_t last_mode;
 
@@ -31,9 +54,7 @@ volatile uint16_t scr_x0 = 0;
 volatile uint16_t scr_y0 = 0;
 
 volatile uint16_t scr_x1 = 0;
-volatile uint16_t scr_y1 = 392; // h: 256 + 1/2 h: 128 + tile row: 8 = 392
-
-
+volatile uint16_t scr_y1 = 0; // h: 256 + 1/2 h: 128 + tile row: 8 = 392
 
 //this is to illustrate the format in which each cell of the tilemap is expressed
 union {
@@ -47,9 +68,13 @@ union {
     uint16_t code;
 } tr;
 
-void static interrupt crtcras();
+void static interrupt crtcras_1p();
 
-void static interrupt vsync_disp();
+void static interrupt crtcras_2p();
+
+void static interrupt vsync_disp_1p();
+
+void static interrupt vsync_disp_2p();
 
 static inline int Graph_settingUpScrolls();
 
@@ -64,7 +89,6 @@ int Graph_initializeGraphics()
     int status;
 
     PRINT_FUNCTION();
-
 
     if(status = Graph_settingUpScrolls()){
         return status;
@@ -122,18 +146,9 @@ static inline int Graph_settingUpScrolls()
      * setting scroll 0 with tilemap 0 for player 1
      */
     status = _iocs_bgctrlst (
-        BG_A,  //Background specification (0/1)
-        BG_TM_A,  //Specifying a text page (0/1)
-        1   //Show / Hide specification (0: Hide 1: Show)
-    );
-
-    /**
-     * setting scroll 1 with tilemap 1 for player 2
-     */
-    status = _iocs_bgctrlst (
-        BG_B,  //Background specification (0/1)
-        BG_TM_B,  //Specifying a text page (0/1)
-        1   //Show / Hide specification (0: Hide 1: Show)
+        BG_A,       //Background specification (0/1)
+        BG_TM_A,    //Specifying a text page (0/1)
+        BG_SHOW     //Show / Hide specification (0: Hide 1: Show)
     );
 
     //this is to illustrate how the union works
@@ -142,43 +157,90 @@ static inline int Graph_settingUpScrolls()
     tr.flags.palette = 1;    // palette number
     tr.flags.pcg = 0;        // pcg number
 
+    tilemap = (uint16_t(*)[128])res_tilemap;
+
+
     {
-        uint16_t i, j, cont;
-        const uint16_t * tilemap = Res_getTilemap();
+        //#define TILEMAP_DMA
 
-        //we traverse the height
-        for(j = 0, cont = 0; j < 64; j++){
-            //we traverse the width
-            for(i = 0; i < 64; i++, cont++){
+        #ifdef TILEMAP_DMA
+        //Populating the tilemap in video memory by DMA (much faster)
+        {
+            int count;
+            //each chain is a row of tiles
+            struct _chain viewport[64];
 
-                tr.code = tilemap[cont];
-
-                //we store the same data en both tilemaps
-                _iocs_bgtextst(
-                    BG_TM_A,
-                    i,
-                    j,
-                    tr.code
-                );
-
-                _iocs_bgtextst(
-                    BG_TM_B,
-                    i,
-                    j,
-                    tr.code
-                );
+            //we initialize the chains
+            for(count = 0; count < 64; count++){
+                //we set the beginning of each row
+                viewport[count].addr = (uint32_t *)((uint32_t) res_tilemap + (count * 128 * 2));
+                //and the length of each row
+                viewport[count].len = 64 * sizeof (uint16_t);
             }
-            //back to the row
 
-            //we skip the next 64 columns as the tilemap is only 64 x 64
-            cont += 64;
+            //we copy a square of 64 x 64 from the tilemap heap to the video memory
+            _iocs_dmamov_a(
+                viewport,               //  rows from the heap
+                (char *)TILEMAP_A,      // into memory
+                DMA_MODE(
+                    DMA_DIR_A_TO_B,    //from A to B
+                    DMA_PLUS_PLUS,     //move the pointer forward as it reads
+                    DMA_PLUS_PLUS      //move the pointer forward as it writes
+                ),
+                64  //64 rows
+            );
 
-            //if any error...
-            if(status < 0){
-                _dos_c_print("Can't open the file\r\n");
-                return status;
+            //now we simply copy the tilemap A into the tilemap B in video memory
+            _iocs_dmamove(
+                (char *)TILEMAP_A,          //buffer A, the source
+                (char *)TILEMAP_B,          //buffer B, the destination
+                DMA_MODE(
+                     DMA_DIR_A_TO_B,        //from A to B
+                     DMA_PLUS_PLUS,         //move the pointer forward as it reads
+                     DMA_PLUS_PLUS          //move the pointer forward as it writes
+                ),
+                64 * 64 * sizeof(uint16_t)  //size of the memory block we are moving
+            );
+        }
+        #else
+        //Populating the tilemap in video memory by _iocs_bgtextst and nested loops (slower)
+        {
+            uint16_t i, j, cont;
+            //we traverse the height
+            for(j = 0, cont = 0; j < 64; j++){
+                //we traverse the width
+                for(i = 0; i < 64; i++, cont++){
+
+                    tr.code = res_tilemap[cont];
+
+                    //we store the same data en both tilemaps
+                    _iocs_bgtextst(
+                        BG_TM_A,
+                        i,
+                        j,
+                        tr.code
+                    );
+
+                    _iocs_bgtextst(
+                        BG_TM_B,
+                        i,
+                        j,
+                        tr.code
+                    );
+                }
+                //back to the row
+
+                //we skip the next 64 columns as the tilemap is only 64 x 64
+                cont += 64;
+
+                //if any error...
+                if(status < 0){
+                    _dos_c_print("Can't open the file\r\n");
+                    return status;
+                }
             }
         }
+        #endif // TILEMAP_DMA
     }
 
     return 0;
@@ -216,7 +278,7 @@ static inline int Graph_settingUpInterruptions()
     int status;
 
     if(status = _iocs_vdispst(
-        vsync_disp,
+        vsync_disp_2p,
         0,//0: vertical blanking interval 1: vertical display period
         1
     )){
@@ -224,7 +286,7 @@ static inline int Graph_settingUpInterruptions()
     }
 
     if(status = _iocs_crtcras(
-        &crtcras,
+        crtcras_2p,
         280 // line
     )){
         return status;
@@ -261,110 +323,223 @@ static inline int Graph_tearDownScreen()
     _iocs_crtmod(last_mode);
 }
 
-void static interrupt crtcras()
+void static inline updateTilemap(char dir_x, char dir_y, volatile uint16_t *scr_x, volatile uint16_t *scr_y, char tm, char height)
 {
-    // we hide player 1's scroll
+
+    int i, j, aux_tm;
+    int tm_x = (*scr_x = (*scr_x + dir_x) & 1023) >> 3; // / 8; //px to tiles
+    int tm_y = (*scr_y = (*scr_y + dir_y) & 1023) >> 3; // / 8; //px to tiles
+
+    //if going to the right...
+    if(dir_x > 0){
+
+        aux_tm = (tm_x + 33) & 127; //33 columns ahead
+
+        //we draw a column of tiles on the right displaced 32 columns
+        for(j = tm_y; j < tm_y + height; j++){
+
+            tr.code = tilemap[j & 127][aux_tm];
+            //tr.flags.palette++;
+
+            _iocs_bgtextst(
+                tm,
+                tm_x + 33, //33 columns ahead
+                j,
+                tr.code
+            );
+        }
+    //if going to the left...
+    } else if(dir_x < 0){
+
+        aux_tm = tm_x & 127;
+
+        //we draw a column of tiles on the left
+        for(j = tm_y; j < tm_y + height; j++){
+
+            tr.code = tilemap[j & 127][aux_tm];
+            //tr.flags.palette++;
+
+            _iocs_bgtextst(
+                tm,
+                tm_x,
+                j,
+                tr.code
+            );
+        }
+    }
+
+    //if going down
+    if(dir_y > 0){
+
+        aux_tm = (tm_y + height) & 127;
+
+        for(i = tm_x; i < tm_x + 34; i++){  //from first column to the 34th
+
+            tr.code = tilemap[aux_tm][i & 127];
+            //tr.flags.palette++;
+
+            _iocs_bgtextst(
+                tm,
+                i,
+                tm_y + height,
+                tr.code
+            );
+        }
+
+    //if going up
+    } else if(dir_y < 0){
+
+        aux_tm = tm_y & 127;
+
+        for(i = tm_x; i < tm_x + 34; i++){ //from first column to the 34th
+            tr.code = tilemap[aux_tm][i & 127];
+            //tr.flags.palette++;
+
+            _iocs_bgtextst(
+                tm,
+                i,
+                tm_y,
+                tr.code
+            );
+        }
+    }
+}
+
+void static interrupt crtcras_1p()
+{
+
+}
+
+void static interrupt vsync_disp_1p()
+{
+    char dir_x = 0, dir_y = 0;
+
+    //we move scroll for player 1
+    _iocs_bgscrlst(
+        VERTICAL_BLANKING_DETECTION | BG_A, //(1 << 31) | 0, // and Background specification (0/1)
+        scr_x0, //x
+        scr_y0 //y
+    );
+
+    // //we set player 2's tilemap in scroll 0
     _iocs_bgctrlst (
         BG_A,  //Background specification (0/1)
         BG_TM_A,  //Specifying a text page (0/1)
-        0   //Show / Hide specification (0: Hide 1: Show)
+        BG_SHOW  //Show / Hide specification (0: Hide 1: Show)
     );
-}
 
-void static interrupt vsync_disp()
-{
     Game_handleInput();
-
-    //if up (↑) key pressed
-    if(input_player_1 & INPUT_UP){
-        scr_y0--;
-    }
-
-    //if down (↓) key pressed
-    if(input_player_1 & INPUT_DOWN){
-        scr_y0++;
-    }
 
     //if left (←) key pressed
     if(input_player_1 & INPUT_LEFT){
-        scr_x0--;
+        dir_x = -1;
     }
 
     //if right (→) key pressed
     if(input_player_1 & INPUT_RIGHT){
-        scr_x0++;
+        dir_x = 1;
     }
 
-    //we move player 1's scroll
+    //if up (↑) key pressed
+    if(input_player_1 & INPUT_UP){
+        dir_y = -1;
+    }
+
+    //if down (↓) key pressed
+    if(input_player_1 & INPUT_DOWN){
+        dir_y = 1;
+    }
+
+    if(dir_x || dir_y){
+        updateTilemap(dir_x, dir_y, &scr_x0, &scr_y0, BG_TM_A, 34);
+    }
+}
+
+void static interrupt crtcras_2p()
+{
+    // //we set player 2's tilemap in scroll 0
+    _iocs_bgctrlst (
+        BG_A,  //Background specification (0/1)
+        BG_TM_B,  //Specifying a text page (0/1)
+        BG_SHOW  //Show / Hide specification (0: Hide 1: Show)
+    );
+
+    //we move scroll for player 2
+    _iocs_bgscrlst(
+        VERTICAL_BLANKING_DETECTION | BG_A, //(1 << 31) | 0, // and Background specification (0/1)
+        scr_x1, //x
+        (scr_y1 - 128) & 1023//y
+    );
+}
+
+void static interrupt vsync_disp_2p()
+{
+    char dir_x = 0, dir_y = 0;
+
+    // //we set player 2's tilemap in scroll 0
+    _iocs_bgctrlst (
+        BG_A,  //Background specification (0/1)
+        BG_TM_A,  //Specifying a text page (0/1)
+        BG_SHOW  //Show / Hide specification (0: Hide 1: Show)
+    );
+
+    //we move scroll for player 1
     _iocs_bgscrlst(
         VERTICAL_BLANKING_DETECTION | BG_A, //(1 << 31) | 0, // and Background specification (0/1)
         scr_x0, //x
         scr_y0  //y
     );
 
-    //we show player 1's scroll
-    _iocs_bgctrlst (
-        BG_A,  //Background specification (0/1)
-        BG_TM_A,  //Specifying a text page (0/1)
-        1   //Show / Hide specification (0: Hide 1: Show)
-    );
+    Game_handleInput();
 
+    //if up (↑) key pressed
+    if(input_player_1 & INPUT_UP){
+        dir_y = -1;
+    }
+
+    //if down (↓) key pressed
+    if(input_player_1 & INPUT_DOWN){
+        dir_y = 1;
+    }
+
+    //if left (←) key pressed
+    if(input_player_1 & INPUT_LEFT){
+        dir_x = -1;
+    }
+
+    //if right (→) key pressed
+    if(input_player_1 & INPUT_RIGHT){
+        dir_x = 1;
+    }
+
+    if(dir_x || dir_y){
+        updateTilemap(dir_x, dir_y, &scr_x0, &scr_y0, BG_TM_A, 17);  //17
+    }
 
     //player 2
+    dir_x = dir_y = 0;
 
     //if up (W) key pressed
     if(input_player_2 & INPUT_UP){
-        scr_y1--;
+        dir_y = -1;
     }
 
     //if down (S) key pressed
     if(input_player_2 & INPUT_DOWN){
-        scr_y1++;
+        dir_y = 1;
     }
 
     //if left (A) key pressed
-     if(input_player_2 & INPUT_LEFT){
-        scr_x1--;
+    if(input_player_2 & INPUT_LEFT){
+        dir_x = -1;
     }
 
     //if right (D) key pressed
     if(input_player_2 & INPUT_RIGHT){
-        scr_x1++;
+        dir_x = 1;
     }
 
-    //we update player 2's scroll
-    _iocs_bgscrlst(
-        VERTICAL_BLANKING_DETECTION | BG_B, //(1 << 31) | 0, // and Background specification (0/1)
-        scr_x1, //x
-        scr_y1  //y
-    );
-
-    /*
-    if(x0 > 1023){
-        int cont;
-
-        for(cont = 0; cont < 63; cont++){
-            _iocs_bgtextst(
-                BG_TM_A,
-                x0 % 8,
-                cont,
-                49
-            );
-        }
+    if(dir_x || dir_y){
+        updateTilemap(dir_x, dir_y, &scr_x1, &scr_y1, BG_TM_B, 17);  //17
     }
-
-    if(x1 > 1023){
-        int cont;
-
-        for(cont = 0; cont < 63; cont++){
-            _iocs_bgtextst(
-                BG_TM_B,
-                x1 % 8,
-                cont,
-                49
-            );
-        }
-    }
-    */
-
 }

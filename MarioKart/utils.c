@@ -8,6 +8,10 @@ const char *Utils_getErrorMessage(int8_t code)
 {
     char *message;
 
+    if(code >= 0){
+        return "No error\r\n";
+    }
+
     switch(code)
     {
         case -1: message = "Executed invalid function code\r\n"; break;
@@ -44,7 +48,7 @@ const char *Utils_getErrorMessage(int8_t code)
         case -34: message = "Handler for specified drive is opened\r\n"; break;
         case -35: message = "Symbolic link nest exceeded 16 steps (lndrv)\r\n"; break;
         case -80: message = "File exists\r\n"; break;
-        default: message = "No error\r\n"; break;
+        default: message = "Unknown error\r\n"; break;
     }
 
     return message;

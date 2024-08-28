@@ -16,10 +16,10 @@
 
 #include "utils.h"
 
-//#define DEBUG
+#define DEBUG
 
-#ifdef DEBUG
-    #define PRINT_FUNCTION() printf("%s\n", __FUNCTION__)
+#if defined(DEBUG) && !defined(__MARIKO_CC__)
+    #define PRINT_FUNCTION() printf("%s\n", ___FUNCTION___)
 #else
     #define PRINT_FUNCTION() // Do nothing
 #endif
