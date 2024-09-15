@@ -156,6 +156,6 @@ def tile_image(file_path, output_dir, output_name, format, magic_pink):
             vertical_flip = 1 if flip == 'vertical' or flip == 'diagonal' else 0
             horizontal_flip = 1 if flip == 'horizontal' or flip == 'diagonal' else 0
 
-            gid = (vertical_flip << 15) | (horizontal_flip << 14) | (palette_id << 8) | tile_id
+            gid = (vertical_flip << 15) | (horizontal_flip << 14) | (palette_id << 8) | (tile_id + 1)
 
             binary_file.write(struct.pack('>H', gid))
