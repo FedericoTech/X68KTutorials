@@ -190,7 +190,7 @@ $fffa   _GET_PR         Get thread management info							int _dos_get_pr(int tid
 $fffb   _SUSPEND_PR     Force-sleep thread									int _dos_suspend_pr(int tid)
 $fffc   _SLEEP_PR       Sleep												int _dos_sleep_pr(long time)
 $fffd   _SEND_PR        Send thread commands/data							int _dos_send_pr(int my_id, int your_id, int command, char *buff, long length)
-$fffe   _TIME_PR        Get timer counter value
+$fffe   _TIME_PR        Get timer counter value								long _dos_time_pr()
 $ffff   _CHANGE_PR      Yield execution time								void _dos_change_pr()
 
 CAUTION: Calls listed as $ff50-$ff7f in Human68k version 2 were moved to
@@ -1078,11 +1078,9 @@ RETURN  Previous handling address of selected vector
         INTNO = $0100-$01ff IOCS calls
         INTNO = $ff00-$ffff	DOS calls
 
-        If the addresses of trap #10 to 14 and _EXITVC are changed, the work in the PSP will also be changed. 
-		In addition, _ERRJVC further changes sr and ssp at the time of abort to those at the moment 
-		this DOS call was executed. 
-		In the case of _CTRLVC, after changing the address of _CTRLVC and the work in PSP, 
-		perform the same processing as _ERRJVC.
+        If the addresses of trap #10-14 and _EXITVC are changed, the work in PSP is also changed. 
+		In addition, _ERRJVC further changes the sr and ssp at the time of abort to those at the moment this DOS call was executed. 
+		In the case of _CTRLVC, after changing the address of _CTRLVC and the work in PSP, it performs the same processing as _ERRJVC.
 
         head (JOBADR)
         move    INTNO,-(sp)
@@ -2719,48 +2717,48 @@ Pointer of the memory block (size I_LEN) at the beginning of the return value
 
 $ fff0 _EXITVC (execution address at the end of the program)
 
-	This is not a DOS call, but INTVCS is used to set the processing address for this vector.
-	By setting it, the address can be called at the end of the program.
+	This is not a DOS call, but by setting a processing address in this vector with INTVCS, 
+	you can call that address when the program terminates.
 
-    Usually immediately after the DOS _EXEC that the parent process ran to start the child process
-	A DOS call when the address is set and the child process exits with DOS _EXIT etc.
-	Referenced as the address returned from. What is called is the processing of a DOS call.
-	Since it is after all, the process that executed DOS _EXIT etc. has already been deleted.
-	Control has been transferred to the original parent process.
+	Normally, the address immediately after the DOS _EXEC executed by the parent process 
+	to start a child process is set, and when the child process ends with DOS _EXIT, etc., 
+	it is referenced as the address to return from the DOS call. 
+	Since it is called after all DOS call processing has been completed, 
+	the process that executed DOS _EXIT, etc. has already been deleted, 
+	and control has been transferred to the original parent process.
 
-	This vector is rewritten and copied to the PSP each time the process is started.
-	Since it is the value in the PSP that is referenced, the vector table for the DOS call directly
-	It is not reflected even if it is rewritten.
+	This vector is rewritten each time a process is started, and copied to the PSP. 
+	Since the value actually referenced is the value in the PSP, 
+	directly rewriting the vector table of the DOS call will not be reflected.
 
 ==============================================================================
 
 $ fff1 _CTRLVC (execution address when aborted by CTRL + C)
 
-	This is not a DOS call, but INTVCS is used to set the processing address for this vector.
-	By doing so, you can call that address when you abort on a break.
-	I can.
+	This is not a DOS call, but by setting a processing address in this vector with INTVCS, 
+	you can call that address when you abort with a break.
 
-	In the initial state, a routine that simply executes DOS _EXIT is set.
-	CTRL + C abort only occurs while executing a DOS call, but the configured ad
-	Les is called after killing a DOS call (already when called)
-	It is not executing a DOS call, and even if it is nested, it will be completely terminated at that point).
+	Initially, a routine that simply executes DOS _EXIT is set.
+	Aborts caused by CTRL+C only occur while a DOS call is being executed, 
+	but the address you set is called after the DOS call has been forcibly terminated (when it is called, 
+	the DOS call is not already in progress, and even if it is nested, 
+	it will be completely terminated at that point).
 
-	This vector does not change automatically, and if it does, all child processes will have that value.
-	Inherit.
+	This vector is not automatically changed, and if it is changed, 
+	all child processes will inherit the value.
 
 
 ==============================================================================
 
 $ fff2 _ERRJVC (execution address when aborted due to error)
 
-	This is not a DOS call, but INTVCS is used to set the processing address for this vector.
-	By doing so, it is possible to call the address when aborting due to an error.
-	come.
+	This is not a DOS call, but by setting a processing address in this vector 
+	with INTVCS, you can call that address when an error occurs and the process aborts.
 
-	In the initial state, a routine that simply executes DOS _EXIT is set.
+	Initially, a routine that simply executes DOS _EXIT is set.
 
-	This vector does not change automatically, and if it does, all child processes will have that value.
-	Inherit.
+	This vector is not automatically changed, and if it is changed, 
+	all child processes inherit the value.
 
 ==============================================================================
 

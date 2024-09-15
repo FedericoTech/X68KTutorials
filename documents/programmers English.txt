@@ -68,8 +68,8 @@ offset size
 offset 	size
 $0000 	 1.l 	Previous memory management pointer (if 0, start) 							┐
 $0004 	 1.l 	Process management pointer of parent process (if 0, there is no parent) 	│Memory management
-$0008 	 1.l 	Address of end of this memory block +1 									│ Pointer
-$000c 	 1.l 	Next memory management pointer (end if 0) 								┘
+$0008 	 1.l 	Address of end of this memory block +1 										│ Pointer
+$000c 	 1.l 	Next memory management pointer (end if 0) 									┘
 
 $0010 	 1.l 	Environment address (-1 not reserved)
 $0014 	 1.l 	Return address upon exit

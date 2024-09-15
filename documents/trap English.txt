@@ -1,0 +1,171 @@
+	- TRAP EXCEPTION MANAGER MANUAL -
+
+==============================================================================
+
+ÅETRAP Exception handling list
+
+trap	#0	User-defined
+trap	#1	ÅV(mpcm.x)
+trap	#2	ÅV(pcm8.x)
+trap	#3	ÅV(zmusic.xÅAzmsc3.xÅAmiddrv.r)
+trap	#4	ÅV(mxdrv.xÅAmadrv.xÅAmld.xÅAmcdrv.x)
+trap	#5	ÅV
+trap	#6	ÅV
+trap	#7	ÅV
+
+trap	#8	Breakpoints (ROM Debugger)
+trap	#9	ÅV		(db.xÅAscd.x)
+trap	#10	Reset/power off processing
+trap	#11	BREAK key processing
+trap	#12	COPY key processing
+trap	#13	CTRL+C action
+trap	#14	Error Handling
+trap	#15	IOCS Call
+
+==============================================================================
+
+ÅEtrap #10	Reset/power off processing
+
+argument d0.l =	$58363801('X68'<<8+1)	Front switch power off
+		$58363802('X68'<<8+2)	Power off by external switch
+		$58363803('X68'<<8+3)	Soft switch power off
+		Other than the above	Software Reset
+
+	This is called from within the power-off interrupt and keyboard processing, or from the user program, to turn off the power and perform software reset processing.
+	It is hooked when Human68k starts up, so that even if it is called while a DOS call is in progress, it is not executed immediately, but is called after the DOS call has finished.
+
+==============================================================================
+
+ÅEtrap #11	BREAK key processing
+
+argument	d0.b	Shift key status
+
+	This is called from the keyboard process when the BREAK key is pressed. However, it is ignored while disk-related IOCS from $40 to $4f are being executed.
+	It is hooked when Human68k starts up, so that even if it is called while a DOS call is in progress, it is not executed immediately, but is called after the DOS call has finished.
+	If you press the BREAK key without holding down SHIFT, trap #13 will also be executed after trap #11.
+	Since multiple calls are not made, there is no need for a reentrant structure.
+
+==============================================================================
+
+ÅEtrap #12	COPY key processing
+
+argument	d0.b	Shift key status
+
+	It is called from the keyboard processing when the COPY key is pressed, and performs a hard copy of the screen.
+	Since multiple calls are not made, there is no need for a reentrant structure.
+
+	Depending on the shift key state, the following actions will occur:
+
+	COPY		Reduced copy (1 color)
+	SHIFT + COPY	Enlarged copy (1 color)
+	CTRL  + COPY	Enlarged copy (4 colors)
+	OPT.1 + COPY	FF output.
+	OPT.2 + COPY	LF ÅV
+
+==============================================================================
+
+ÅEtrap #13	CTRL+C action
+
+	Called by the keyboard handler when CTRL+C and BREAK keys are typed.
+	Routines that normally do nothing are registered so that they can be used by the user.
+
+==============================================================================
+
+ÅEtrap #14	Error Handling
+
+argument	d7.w	Error number
+	a5.l	Address of the string (only if d7.w = $??00)
+
+	When booting up the ROM, it simply waits for keystrokes and restarts the system, but when booting up Human68k, it is hooked and replaced with a routine that displays a white bar and waits for the user's response.
+
+	If the system detects an error, the error number is set in d7.w and trap #14 is executed. This error handling routine outputs a message according to the type of error, then sets d7.w to 1 (retry) or 2 (ignore) depending on keyboard input and returns. If abort is specified, it will abort (do not return).
+
+ÅEError number
+
+	$00xx	CPU exception processing/unregistered interrupt (only abort) The lower byte is the vector number.
+	$0002	A bus error occurred.
+	$0003	An address error occurred
+	$0004	Strange orders were carried out
+	$0005	Divided by 0
+	$0006	CHK command was executed
+	$0007	TRAPV command was executed
+	$0008	A privileged instruction was executed
+	$001f	The interrupt switch was pressed
+
+	$01xx		Unregistered IOCS call The low byte is the IOCS call number.
+				It is also called when a call that can only be made to FD is made to SASI, or vice versa.
+	$02xxÅ`$0fxx		reservation
+	$10xxÅ`$1fxx		Error (Abort only)
+	$20xxÅ`$2fxx		Error (retry only)
+	$30xxÅ`$3fxx		Error (retry & abort)
+	
+	$301f	The interrupt switch was pressed
+
+	$40xxÅ`$4fxx		Error (just ignore)
+	$50xxÅ`$5fxx		Error (ignored & aborted)
+	$60xxÅ`$6fxx		Error (Ignore & Retry)
+	$70xxÅ`$7fxx		Error (Ignore & Retry & Abort)
+	$80xxÅ`$efxx		reservation
+	$f0xxÅ`$fdxx		F series interrupts other than DOS calls (Abort only)
+	$fexx			Floating-point arithmetic package not included (only discontinued)
+	$ffxx			Unregistered DOS Calls
+		In Human68k version 3.0x, unregistered DOS calls simply return -1, so no error handling is invoked.
+
+	When the interrupt switch is pressed, there are two error numbers, $001f and $003f, but the latter is usually used.
+
+	$1000Å`$7fff In the error code, bits 4, 5, and 6 of the upper byte correspond to abort, retry, and ignore, respectively. The contents of the lower byte in this case are as follows:
+
+$00	User-defined (put the address of the string in a5.l).
+$01	An invalid unit number was specified.
+$02	There is no disk inserted.
+$03	An invalid command was specified to the device driver.
+$04	CRC error.
+$05	The disk management area is corrupted.
+$06	Seek error.
+$07	Invalid media.
+$08	Sector not found.
+$09	The printer is not connected.
+$0a	Write error.
+$0b	Loading error.
+$0c	Other errors.
+$0d	Write-protected (remove the write protection and insert the same disc).
+$0e	Unable to write.
+$0f File sharing violation.
+
+	If the lower byte is 0, the user can specify the string to display.
+	The address of the string is passed in a5.l, and the string must have a display width of 52 characters or less.
+	However, if the lower byte (the third byte from the beginning of the request header) is 0, it is treated as a normal end, and it is not possible to pass the address of the string, so this function cannot be used.
+
+==============================================================================
+
+ÅEtrap #15	IOCS Processing
+
+argument	d0.b	IOCS Call Number
+
+	Execute IOCS. During execution, the IOCS call number is stored in one word starting from IOCS work $a0e (the upper byte is always 0).
+	Arguments and return values ??other than d0.b vary depending on the call number.
+
+	To speed up IOCS calls, you can execute shortcut calls in the following way. However, you must be in supervisor state.
+
+	movea.l (IOCS call number * 4 + $400), a0
+	jsr	(a0)
+
+	Each IOCS function is created as a subroutine that returns with rts.
+	It's ok to destroy a0.l (though from the user's point of view, there is no guarantee that it will be preserved when taking a shortcut), but do not destroy other registers that are not used to pass return values.
+
+How to support the Vector Base Register (vbr)
+
+	On the X68030 (ROM IOCS version 1.3) vbr can be enabled.
+	After confirming that the following vectors are standard vectors pointing to ROM, change them to the addresses set by subtracting 2 from each other. However, this does not support some IOCS calls that directly call routines in ROM.
+
+	trap #15 (IOCS processing address table is also changed to vbr+$400)
+	IOCS _FNTGET
+	IOCS _OPMINTST
+	IOCS _TIMERDST
+	IOCS _VDISPST
+	IOCS _CRTCRAS
+	IOCS _HSYNCST
+	IOCS _PRNINTST
+	IOCS _B_INTVCS
+
+==============================================================================
