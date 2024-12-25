@@ -20,6 +20,13 @@
        )
 
     #define interrupt __attribute__ ((interrupt_handler))
+
+    #ifdef __FIX__
+        #include "newlib_fixes.h"
+        #define _dos_files _fix_dos_files
+        #define _dos_nfiles _fix_dos_nfiles
+    #endif
+
 #endif
 
 #include "utils.h"
