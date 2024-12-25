@@ -16,8 +16,24 @@
 			</Target>
 			<Target title="lydux">
 				<Option output="lydux/Sonic" prefix_auto="1" extension_auto="0" />
+				<Option object_output=".lydux_objs" />
 				<Option type="1" />
 				<Option compiler="human68k_gcc" />
+				<Compiler>
+					<Add option="-D__FIX__" />
+				</Compiler>
+				<Linker>
+					<Add option="-Wl,-q,-Map=$(TARGET_OUTPUT_FILE).map,--cref" />
+				</Linker>
+				<ExtraCommands>
+					<Add after="human68k-objcopy.exe -O xfile $(TARGET_OUTPUT_FILE) $(TARGET_OUTPUT_FILE).X" />
+				</ExtraCommands>
+			</Target>
+			<Target title="lydux (Docker)">
+				<Option output="lydux_docker/Sonic" prefix_auto="1" extension_auto="0" />
+				<Option object_output=".lydux_docker_objs" />
+				<Option type="1" />
+				<Option compiler="human68k_gcc_docker" />
 				<Linker>
 					<Add option="-Wl,-q,-Map=$(TARGET_OUTPUT_FILE).map,--cref" />
 				</Linker>
@@ -26,6 +42,14 @@
 				</ExtraCommands>
 			</Target>
 		</Build>
+		<Unit filename="asm/files.S">
+			<Option weight="91" />
+			<Option target="lydux" />
+		</Unit>
+		<Unit filename="asm/nfiles.S">
+			<Option weight="90" />
+			<Option target="lydux" />
+		</Unit>
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />
 		</Unit>

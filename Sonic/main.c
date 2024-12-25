@@ -5,6 +5,7 @@
     #include <dos.h>
     #include <iocs.h>
     #include <stdio.h>
+
     #define interrupt __attribute__ ((interrupt_handler))
 
     #define _filbuf dos_filbuf
@@ -20,6 +21,13 @@
            code, \
            prw \
        )
+
+    #ifdef __FIX__
+        #include "newlib_fixes.h"
+        #define _dos_files _fix_dos_files
+        #define _dos_nfiles _fix_dos_nfiles
+    #endif
+
 #endif
 
 #include "utils.h"
@@ -134,22 +142,22 @@ int main(void)
 
         int cont = 0;
 
-        status = _dos_files(&sf, "/sonic_sp/s_run_?.spt", 0xff /*48*/);
+        status = _fix_dos_files(&sf, "/sonic_sp/s_run_?.spt", 0xff /*48*/);
 
         while(status == 0){
             char filename[23] = "/sonic_sp/";
             strcat(filename, sf.name);
             s_run[cont++] = loadData(NULL, filename, fconf.config);
-            status= _dos_nfiles(&sf);
+            status= _fix_dos_nfiles(&sf);
         }
 
         cont = 0;
-        status = _dos_files(&sf, "/sonic_sp/s_spin_?.spt", 48);
+        status = _fix_dos_files(&sf, "/sonic_sp/s_spin_?.spt", 48);
         while(status == 0){
             char filename[23] = "/sonic_sp/";
             strcat(filename, sf.name);
             s_spin[cont++] = loadData(NULL, filename, fconf.config);
-            status= _dos_nfiles(&sf);
+            status= _fix_dos_nfiles(&sf);
         }
 
         cont = 0;
@@ -158,7 +166,7 @@ int main(void)
             char filename[23] = "/sonic_sp/";
             strcat(filename, sf.name);
             s_walk[cont++] = loadData(NULL, filename, fconf.config);
-            status= _dos_nfiles(&sf);
+            status= _fix_dos_nfiles(&sf);
         }
     }
 
@@ -179,7 +187,7 @@ int main(void)
             char filename[23] = "/tails/";
             strcat(filename, sf.name);
             t_run[cont++] = loadData(NULL, filename, fconf.config);
-            status= _dos_nfiles(&sf);
+            status= _fix_dos_nfiles(&sf);
         }
 
         cont = 0;
@@ -188,7 +196,7 @@ int main(void)
             char filename[23] = "/tails/";
             strcat(filename, sf.name);
             t_walk[cont++] = loadData(NULL, filename, fconf.config);
-            status= _dos_nfiles(&sf);
+            status= _fix_dos_nfiles(&sf);
         }
 
         cont = 0;
@@ -197,7 +205,7 @@ int main(void)
             char filename[23] = "/tails/";
             strcat(filename, sf.name);
             t_still[cont++] = loadData(NULL, filename, fconf.config);
-            status= _dos_nfiles(&sf);
+            status= _fix_dos_nfiles(&sf);
         }
     }
 
